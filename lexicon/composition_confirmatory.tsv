@@ -1,0 +1,97 @@
+family_id	feature_axis	feature	base_axis	base	target	target_sense	source_uri	source_note
+function_resource_confirmatory	function	store	resource	data	memory	an electronic memory device	wordnet:memory.n.04	memory conventionally serves to store data.
+function_resource_confirmatory	function	store	resource	liquid	tank	a large (usually metallic) vessel for holding gases or liquids	wordnet:tank.n.02	tank conventionally serves to store liquid.
+function_resource_confirmatory	function	store	resource	cargo	warehouse	a storehouse for goods and merchandise	wordnet:warehouse.n.01	warehouse conventionally serves to store cargo.
+function_resource_confirmatory	function	store	resource	message	mailbox	a private box for delivery of mail	wordnet:mailbox.n.01	mailbox conventionally serves to store a message.
+function_resource_confirmatory	function	move	resource	data	network	an interconnected system of things or people	wordnet:network.n.01	network conventionally serves to move data.
+function_resource_confirmatory	function	move	resource	liquid	pipeline	a pipe used to transport liquids or gases	wordnet:pipeline.n.02	pipeline conventionally serves to move liquid.
+function_resource_confirmatory	function	move	resource	cargo	freight	transporting goods commercially at rates cheaper than express rates	wordnet:freight.n.02	freight conventionally serves to move cargo.
+function_resource_confirmatory	function	move	resource	message	courier	a person who carries a message	wordnet:messenger.n.01	courier conventionally serves to move a message.
+flexibility_object_confirmatory	flexibility	flexible	object	support	rope	a strong line	wordnet:rope.n.01	rope is a conventional flexible support.
+flexibility_object_confirmatory	flexibility	flexible	object	covering	blanket	anything that covers	wordnet:blanket.n.02	blanket is a conventional flexible covering.
+flexibility_object_confirmatory	flexibility	flexible	object	holder	sack	a bag made of paper or plastic for holding customer's purchases	wordnet:sack.n.01	sack is a conventional flexible holder.
+flexibility_object_confirmatory	flexibility	flexible	object	barrier	net	an open fabric of string or rope or wire woven together at regular intervals	wordnet:net.n.06	net is a conventional flexible barrier.
+flexibility_object_confirmatory	flexibility	rigid	object	support	post	an upright consisting of a piece of timber or metal fixed firmly in an upright position	wordnet:post.n.04	post is a conventional rigid support.
+flexibility_object_confirmatory	flexibility	rigid	object	covering	panel	sheet that forms a distinct (usually flat and rectangular) section or component of something	wordnet:panel.n.01	panel is a conventional rigid covering.
+flexibility_object_confirmatory	flexibility	rigid	object	holder	crate	a rugged box (usually made of wood); used for shipping	wordnet:crate.n.01	crate is a conventional rigid holder.
+flexibility_object_confirmatory	flexibility	rigid	object	barrier	railing	a barrier consisting of a horizontal bar and supports	wordnet:railing.n.01	railing is a conventional rigid barrier.
+hardness_use_confirmatory	hardness	hard	use	seat	stool	a simple seat without a back or arms	wordnet:stool.n.01	stool is a conventional hard form of seat.
+hardness_use_confirmatory	hardness	hard	use	flooring	tile	a flat thin rectangular slab (as of fired clay or rubber or linoleum) used to cover surfaces	wordnet:tile.n.01	tile is a conventional hard form of flooring.
+hardness_use_confirmatory	hardness	hard	use	luggage	trunk	luggage consisting of a large strong case used when traveling or for storage	wordnet:trunk.n.02	trunk is a conventional hard form of luggage.
+hardness_use_confirmatory	hardness	hard	use	storage	cabinet	a piece of furniture resembling a cupboard with doors and shelves and drawers; for storage or display	wordnet:cabinet.n.01	cabinet is a conventional hard form of storage.
+hardness_use_confirmatory	hardness	soft	use	seat	cushion	a soft bag filled with air or a mass of padding such as feathers or foam rubber etc.	wordnet:cushion.n.03	cushion is a conventional soft form of seat.
+hardness_use_confirmatory	hardness	soft	use	flooring	carpet	floor covering consisting of a piece of thick heavy fabric (usually with nap or pile)	wordnet:rug.n.01	carpet is a conventional soft form of flooring.
+hardness_use_confirmatory	hardness	soft	use	luggage	bag	a flexible container with a single opening	wordnet:bag.n.01	bag is a conventional soft form of luggage.
+hardness_use_confirmatory	hardness	soft	use	storage	pouch	a small or medium size container for holding or carrying things	wordnet:pouch.n.01	pouch is a conventional soft form of storage.
+motion_medium_confirmatory	motion	moving	medium	water	current	a steady flow of a fluid (usually from natural causes)	wordnet:current.n.02	current conventionally represents moving water.
+motion_medium_confirmatory	motion	moving	medium	air	draft	a current of air (usually coming into a chimney or room or vehicle)	wordnet:draft.n.02	draft conventionally represents moving air.
+motion_medium_confirmatory	motion	moving	medium	image	video	broadcasting visual images of stationary or moving objects; ;  - Ernie Kovacs	wordnet:television.n.01	video conventionally represents moving image.
+motion_medium_confirmatory	motion	moving	medium	crowd	parade	a ceremonial procession including people marching	wordnet:parade.n.01	parade conventionally represents moving crowd.
+motion_medium_confirmatory	motion	still	medium	water	pond	a small lake	wordnet:pond.n.01	pond conventionally represents still water.
+motion_medium_confirmatory	motion	still	medium	air	calm	wind moving at less than 1 knot; 0 on the Beaufort scale	wordnet:calm_air.n.01	calm conventionally represents still air.
+motion_medium_confirmatory	motion	still	medium	image	snapshot	an informal photograph; usually made with a small hand-held camera	wordnet:snapshot.n.01	snapshot conventionally represents still image.
+motion_medium_confirmatory	motion	still	medium	crowd	audience	a gathering of spectators or listeners at a (usually public) performance	wordnet:audience.n.01	audience conventionally represents still crowd.
+intensity_phenomenon_confirmatory	intensity	mild	phenomenon	wind	breeze	a slight wind (usually refreshing)	wordnet:breeze.n.01	breeze denotes mild wind.
+intensity_phenomenon_confirmatory	intensity	mild	phenomenon	rain	shower	a brief period of precipitation	wordnet:shower.n.03	shower denotes mild rain.
+intensity_phenomenon_confirmatory	intensity	mild	phenomenon	flow	drip	flowing in drops; the formation and falling of drops of liquid	wordnet:drip.n.01	drip denotes mild flow.
+intensity_phenomenon_confirmatory	intensity	mild	phenomenon	noise	hum	a humming noise	wordnet:hum.n.03	hum denotes mild noise.
+intensity_phenomenon_confirmatory	intensity	strong	phenomenon	wind	gale	a strong wind moving 45-90 knots; force 7 to 10 on Beaufort scale	wordnet:gale.n.01	gale denotes strong wind.
+intensity_phenomenon_confirmatory	intensity	strong	phenomenon	rain	storm	a violent weather condition with winds 64-72 knots (11 on the Beaufort scale) and precipitation and thunder and lightning	wordnet:storm.n.01	storm denotes strong rain.
+intensity_phenomenon_confirmatory	intensity	strong	phenomenon	flow	flood	a large flow	wordnet:flood.n.04	flood denotes strong flow.
+intensity_phenomenon_confirmatory	intensity	strong	phenomenon	noise	roar	a deep prolonged loud noise	wordnet:boom.n.01	roar denotes strong noise.
+number_performer_confirmatory	number	pair	performer	singer	duet	two performers or singers who perform together	wordnet:duet.n.02	duet denotes a pair of singers.
+number_performer_confirmatory	number	pair	performer	dancer	couple	a pair who associate with one another	wordnet:couple.n.01	couple denotes a pair of dancers.
+number_performer_confirmatory	number	pair	performer	actor	duo	two performers or singers who perform together	wordnet:duet.n.02	duo denotes a pair of actors.
+number_performer_confirmatory	number	pair	performer	player	tandem	an arrangement of two or more objects or persons one behind another	wordnet:tandem.n.01	tandem denotes a pair of players.
+number_performer_confirmatory	number	group	performer	singer	choir	a chorus that sings as part of a religious ceremony	wordnet:choir.n.01	choir denotes a group of singers.
+number_performer_confirmatory	number	group	performer	dancer	troupe	organization of performers and associated personnel (especially theatrical)	wordnet:company.n.04	troupe denotes a group of dancers.
+number_performer_confirmatory	number	group	performer	actor	cast	the actors in a play	wordnet:cast.n.01	cast denotes a group of actors.
+number_performer_confirmatory	number	group	performer	player	team	a cooperative unit (especially in sports)	wordnet:team.n.01	team denotes a group of players.
+medium_content_confirmatory	medium	print	content	news	paper	a daily or weekly publication on folded sheets; contains news and articles and advertisements	wordnet:newspaper.n.01	paper is a conventional print form for news.
+medium_content_confirmatory	medium	print	content	fiction	paperback	a book with paper covers	wordnet:paperback_book.n.01	paperback is a conventional print form for fiction.
+medium_content_confirmatory	medium	print	content	promo	leaflet	a small book usually having a paper cover	wordnet:booklet.n.01	leaflet is a conventional print form for promo.
+medium_content_confirmatory	medium	print	content	lesson	textbook	a book prepared for use in schools or colleges	wordnet:textbook.n.01	textbook is a conventional print form for lesson.
+medium_content_confirmatory	medium	sound	content	news	radio	medium for communication	wordnet:radio.n.01	radio is a conventional sound form for news.
+medium_content_confirmatory	medium	sound	content	fiction	audiobook	a recording of a book being read aloud	https://www.merriam-webster.com/dictionary/audiobook	audiobook is a conventional sound form for fiction.
+medium_content_confirmatory	medium	sound	content	promo	commercial	a commercially sponsored ad on radio or television	wordnet:commercial.n.01	commercial is a conventional sound form for promo.
+medium_content_confirmatory	medium	sound	content	lesson	lecture	teaching by giving a discourse on some subject (typically to a class)	wordnet:lecture.n.03	lecture is a conventional sound form for lesson.
+direction_signal_confirmatory	direction	input	signal	sound	microphone	device for converting sound waves into electrical energy	wordnet:microphone.n.01	microphone conventionally handles sound as input.
+direction_signal_confirmatory	direction	input	signal	picture	camera	equipment for taking photographs (usually consisting of a lightproof box with a lens at one end and light-sensitive film at the other)	wordnet:camera.n.01	camera conventionally handles picture as input.
+direction_signal_confirmatory	direction	input	signal	text	keyboard	device consisting of a set of keys on a piano or organ or typewriter or typesetting machine or computer or the like	wordnet:keyboard.n.01	keyboard conventionally handles text as input.
+direction_signal_confirmatory	direction	input	signal	motion	sensor	any device that receives a signal or stimulus (as heat or pressure or light or motion etc.) and responds to it in a distinctive manner	wordnet:detector.n.01	sensor conventionally handles motion as input.
+direction_signal_confirmatory	direction	output	signal	sound	speaker	electro-acoustic transducer that converts electrical signals into sounds loud enough to be heard at a distance	wordnet:loudspeaker.n.01	speaker conventionally handles sound as output.
+direction_signal_confirmatory	direction	output	signal	picture	projector	an optical instrument that projects an enlarged image onto a screen	wordnet:projector.n.02	projector conventionally handles picture as output.
+direction_signal_confirmatory	direction	output	signal	text	printer	(computer science) an output device that prints the results of data processing	wordnet:printer.n.02	printer conventionally handles text as output.
+direction_signal_confirmatory	direction	output	signal	motion	motor	machine that converts other forms of energy into mechanical energy and so imparts motion	wordnet:motor.n.01	motor conventionally handles motion as output.
+format_information_confirmatory	format	text	information	guide	manual	a small handbook	wordnet:manual.n.01	manual is a conventional text form of guide information.
+format_information_confirmatory	format	text	information	report	article	nonfictional prose forming an independent part of a publication	wordnet:article.n.01	article is a conventional text form of report information.
+format_information_confirmatory	format	text	information	advert	copy	matter to be printed; exclusive of graphical materials	wordnet:copy.n.03	copy is a conventional text form of advert information.
+format_information_confirmatory	format	text	information	identity	signature	your name written in your own handwriting	wordnet:signature.n.01	signature is a conventional text form of identity information.
+format_information_confirmatory	format	image	information	guide	diagram	a drawing intended to explain how something works; a drawing showing the relation between the parts	wordnet:diagram.n.01	diagram is a conventional image form of guide information.
+format_information_confirmatory	format	image	information	report	photo	a representation of a person or scene in the form of a print or transparent slide; recorded by a camera on light-sensitive material	wordnet:photograph.n.01	photo is a conventional image form of report information.
+format_information_confirmatory	format	image	information	advert	graphic	an image that is generated by a computer	wordnet:graphic.n.01	graphic is a conventional image form of advert information.
+format_information_confirmatory	format	image	information	identity	logo	a company emblem or device	wordnet:logo.n.01	logo is a conventional image form of identity information.
+decision_case_confirmatory	decision	accept	case	offer	agree	consent or assent to a condition, or agree to do something	wordnet:agree.v.02	agree expresses a decision to accept a offer.
+decision_case_confirmatory	decision	accept	case	request	grant	let have	wordnet:allow.v.03	grant expresses a decision to accept a request.
+decision_case_confirmatory	decision	accept	case	claim	confirm	establish or strengthen as with new evidence or facts	wordnet:confirm.v.01	confirm expresses a decision to accept a claim.
+decision_case_confirmatory	decision	accept	case	entry	admit	allow to enter; grant entry to	wordnet:admit.v.02	admit expresses a decision to accept a entry.
+decision_case_confirmatory	decision	reject	case	offer	refuse	refuse to accept	wordnet:refuse.v.02	refuse expresses a decision to reject a offer.
+decision_case_confirmatory	decision	reject	case	request	deny	refuse to grant, as of a petition or request	wordnet:deny.v.03	deny expresses a decision to reject a request.
+decision_case_confirmatory	decision	reject	case	claim	dispute	take exception to	wordnet:challenge.v.01	dispute expresses a decision to reject a claim.
+decision_case_confirmatory	decision	reject	case	entry	exclude	prevent from entering; shut out	wordnet:exclude.v.02	exclude expresses a decision to reject a entry.
+temperature_food_confirmatory	temperature	hot	food	beverage	coffee	a beverage consisting of an infusion of ground coffee beans	wordnet:coffee.n.01	coffee is conventionally served as a hot beverage.
+temperature_food_confirmatory	temperature	hot	food	meal	stew	food prepared by stewing especially meat or fish with vegetables	wordnet:stew.n.02	stew is conventionally served as a hot meal.
+temperature_food_confirmatory	temperature	hot	food	dessert	pudding	any of various soft sweet desserts thickened usually with flour and baked or boiled or steamed	wordnet:pudding.n.03	pudding is conventionally served as a hot dessert.
+temperature_food_confirmatory	temperature	hot	food	breakfast	oatmeal	porridge made of rolled oats	wordnet:oatmeal.n.01	oatmeal is conventionally served as a hot breakfast.
+temperature_food_confirmatory	temperature	cold	food	beverage	lemonade	sweetened beverage of diluted lemon juice	wordnet:lemonade.n.01	lemonade is conventionally served as a cold beverage.
+temperature_food_confirmatory	temperature	cold	food	meal	salad	food mixtures either arranged on a plate or tossed and served with a moist dressing; usually consisting of or including greens	wordnet:salad.n.01	salad is conventionally served as a cold meal.
+temperature_food_confirmatory	temperature	cold	food	dessert	jelly	an edible jelly (sweet or pungent) made with gelatin and used as a dessert or salad base or a coating for foods	wordnet:gelatin.n.02	jelly is conventionally served as a cold dessert.
+temperature_food_confirmatory	temperature	cold	food	breakfast	cereal	a breakfast food prepared from grain	wordnet:cereal.n.03	cereal is conventionally served as a cold breakfast.
+force_action_confirmatory	force	gentle	action	touch	pat	a light touch or stroke	wordnet:tap.n.08	pat denotes a gentle touch.
+force_action_confirmatory	force	gentle	action	move	glide	move smoothly and effortlessly	wordnet:glide.v.01	glide denotes a gentle move.
+force_action_confirmatory	force	gentle	action	cut	trim	cutting down to the desired size or shape	wordnet:trim.n.04	trim denotes a gentle cut.
+force_action_confirmatory	force	gentle	action	knock	tap	a gentle blow	wordnet:rap.n.02	tap denotes a gentle knock.
+force_action_confirmatory	force	forceful	action	touch	press	the act of pressing; the exertion of pressure	wordnet:press.n.09	press denotes a forceful touch.
+force_action_confirmatory	force	forceful	action	move	stomp	walk heavily	wordnet:stomp.v.01	stomp denotes a forceful move.
+force_action_confirmatory	force	forceful	action	cut	chop	cut into pieces	wordnet:chop.v.01	chop denotes a forceful cut.
+force_action_confirmatory	force	forceful	action	knock	bang	a vigorous blow	wordnet:knock.n.03	bang denotes a forceful knock.

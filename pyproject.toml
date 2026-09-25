@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vit-semantic"
+version = "0.1.0"
+description = "Rendered words in images: do vision transformers group them by meaning or by spelling"
+requires-python = ">=3.11"
+license = "MIT"
+dependencies = [
+    "numpy", "pandas", "pyarrow", "pillow", "matplotlib", "fonttools",
+    "scipy", "tqdm", "threadpoolctl",
+    "nltk", "wordfreq", "easyocr",
+    "torch", "torchvision", "transformers", "webdataset", "phonemizer",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "jupyter"]
+
+[tool.setuptools]
+packages = ["src", "src.utils", "src.finetune"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+filterwarnings = ["ignore::DeprecationWarning"]

@@ -1,0 +1,115 @@
+"""Paths and project-wide constants.
+
+Everything the pipeline generates or downloads lives under :data:`DATA_ROOT`,
+which is ``data/`` in the repository root unless the ``VIT_SEMANTIC_DATA``
+environment variable names another directory.
+"""
+from __future__ import annotations
+
+import os
+from pathlib import Path, PurePosixPath
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+
+#: The committed word lists: the eight lexical blocks, the class names and the
+#: two-clue items.
+WORD_LISTS = REPO_ROOT / "lexicon"
+
+DATA_ROOT = Path(os.environ.get("VIT_SEMANTIC_DATA", REPO_ROOT / "data"))
+
+BACKGROUNDS = DATA_ROOT / "backgrounds"
+LEXICON = DATA_ROOT / "lexicon"
+RENDERS = DATA_ROOT / "renders"
+EMBEDDINGS = DATA_ROOT / "embeddings"
+RESULTS = DATA_ROOT / "results"
+FIGURES = DATA_ROOT / "figures"
+TABLES = DATA_ROOT / "tables"
+
+#: Finetuned backbone weights, one directory per finetuned model, each holding
+#: ``best.slim.pt`` and a ``provenance.json`` with the recipe and the step.
+CHECKPOINTS = DATA_ROOT / "checkpoints"
+
+#: Records of the SPEECH-COCO training corpus: its manifest, text scan, exclude
+#: list and provenance.
+CORPUS = DATA_ROOT / "corpus"
+
+#: Word vectors from the frozen text encoders, one cache per encoder.
+WORD_TEXT = DATA_ROOT / "word_text"
+
+#: Word vectors from the frozen speech encoder, averaged over spoken renditions.
+WORD_SPEECH = DATA_ROOT / "word_speech"
+
+#: Caption target vectors from the frozen towers, one cache per tower.
+CAPTIONS = DATA_ROOT / "captions"
+
+#: The class-name experiment: the manifest of its rendered words (the images
+#: live under :data:`RENDERS`) and the ImageNet validation photographs.
+CONCEPTS = DATA_ROOT / "concepts"
+
+#: The two-clue experiment: its layout, manifest, renders and embedding caches.
+COMPOSITION = DATA_ROOT / "composition"
+
+_ALL_DIRS = (BACKGROUNDS, LEXICON, RENDERS, EMBEDDINGS, RESULTS, FIGURES,
+             TABLES, CHECKPOINTS, CORPUS, CAPTIONS, CONCEPTS, COMPOSITION,
+             WORD_TEXT, WORD_SPEECH)
+
+
+#: The directory names that sit directly under a data root, where
+#: :func:`data_relative` splits a recorded path.
+_DATA_SUBDIRS = frozenset({
+    "backgrounds", "lexicon", "renders", "embeddings", "results", "figures",
+    "checkpoints", "corpus", "captions", "composition", "concepts",
+    "word_text", "word_speech",
+})
+
+
+def data_relative(recorded: str | Path) -> PurePosixPath:
+    """The part of a recorded image path below its data root, such as ``renders/zynga/094.png``.
+
+    Recorded paths may carry the absolute prefix of the machine that rendered
+    them, and that prefix is part of the manifest fingerprint, so it is split
+    off rather than rewritten. The split is at the leftmost data subdirectory,
+    so a word directory named like a subdirectory is kept.
+    """
+    parts = PurePosixPath(str(recorded)).parts
+    for i, part in enumerate(parts):
+        if part in _DATA_SUBDIRS:
+            return PurePosixPath(*parts[i:])
+    raise ValueError(f"recorded path is below no known data directory: {recorded}")
+
+
+def local_path(recorded: str | Path) -> Path:
+    """Where a recorded manifest ``image_path`` is on this machine."""
+    return DATA_ROOT / data_relative(recorded)
+
+
+def manifest_path(local: str | Path) -> str:
+    """The path to record for an image written under the data root, relative to it."""
+    pure = Path(local).resolve()
+    root = DATA_ROOT.resolve()
+    if not pure.is_relative_to(root):
+        raise ValueError(f"not under the data root: {local}")
+    return str(PurePosixPath(pure.relative_to(root)))
+
+
+def ensure_dirs() -> None:
+    """Create every output directory. Safe to call repeatedly."""
+    for d in _ALL_DIRS:
+        d.mkdir(parents=True, exist_ok=True)
+
+
+# --- the image canvas ------------------------------------------------------
+# Side of the square backgrounds and renders, in pixels.
+IMAGE_SIZE = 256
+
+# Fraction of the shortest edge that survives every backbone's preprocessing.
+# Text is always placed inside this window. 0.875 is the DINOv2 crop of 224
+# from 256; the other processors resize the whole canvas.
+CROP_SAFE_FRAC = 0.875
+
+# Longest word rendered. Longer words at the largest size band would not fit
+# the crop-safe window.
+MAX_WORD_LENGTH = 10
+
+# Global seed. Every stochastic step derives its own generator from this.
+SEED = 20260821

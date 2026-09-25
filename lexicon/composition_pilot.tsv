@@ -1,0 +1,49 @@
+family_id	feature_axis	feature	base_axis	base	target	target_sense	source_uri	source_note
+sex_kinship_pilot	sex	male	kinship	parent	father	a male parent (also used as a term of address to your father)	wordnet:father.n.01	father denotes a male parent.
+sex_kinship_pilot	sex	male	kinship	sibling	brother	a male with the same parents as someone else	wordnet:brother.n.01	brother denotes a male sibling.
+sex_kinship_pilot	sex	male	kinship	child	son	a male human offspring	wordnet:son.n.01	son denotes a male child.
+sex_kinship_pilot	sex	male	kinship	spouse	husband	a married man; a woman's partner in marriage	wordnet:husband.n.01	husband denotes a male spouse.
+sex_kinship_pilot	sex	female	kinship	parent	mother	a woman who has given birth to a child (also used as a term of address to your mother)	wordnet:mother.n.01	mother denotes a female parent.
+sex_kinship_pilot	sex	female	kinship	sibling	sister	a female person who has the same parents as another person	wordnet:sister.n.01	sister denotes a female sibling.
+sex_kinship_pilot	sex	female	kinship	child	daughter	a female human offspring	wordnet:daughter.n.01	daughter denotes a female child.
+sex_kinship_pilot	sex	female	kinship	spouse	wife	a married woman; a man's partner in marriage	wordnet:wife.n.01	wife denotes a female spouse.
+vertical_object_pilot	position	top	object	room	ceiling	the overhead upper surface of a covered space	wordnet:ceiling.n.01	ceiling denotes the top part of a room.
+vertical_object_pilot	position	top	object	house	roof	a protective covering that covers or forms the top of a building	wordnet:roof.n.01	roof denotes the top part of a house.
+vertical_object_pilot	position	top	object	mountain	summit	the top or extreme point of something (usually a mountain or hill)	wordnet:peak.n.04	summit denotes the top part of a mountain.
+vertical_object_pilot	position	top	object	tree	crown	the upper branches and leaves of a tree or other plant	wordnet:crown.n.07	crown denotes the top part of a tree.
+vertical_object_pilot	position	bottom	object	room	floor	the inside lower horizontal surface (as of a room, hallway, tent, or other structure)	wordnet:floor.n.01	floor denotes the bottom part of a room.
+vertical_object_pilot	position	bottom	object	house	foundation	lowest support of a structure	wordnet:foundation.n.03	foundation denotes the bottom part of a house.
+vertical_object_pilot	position	bottom	object	mountain	foot	the lower part of anything	wordnet:foot.n.03	foot denotes the bottom part of a mountain.
+vertical_object_pilot	position	bottom	object	tree	root	(botany) the usually underground organ that lacks buds or leaves or nodes; absorbs water and mineral salts; usually it anchors the plant to the ground	wordnet:root.n.01	root denotes the bottom part of a tree.
+vertical_body_pilot	position	upper	bodypart	arm	biceps	any skeletal muscle having two origins (but especially the muscle that flexes the forearm)	wordnet:biceps.n.01	biceps denotes a part of the upper arm.
+vertical_body_pilot	position	upper	bodypart	leg	thigh	the part of the leg between the hip and the knee	wordnet:thigh.n.01	thigh denotes a part of the upper leg.
+vertical_body_pilot	position	upper	bodypart	face	brow	the part of the face above the eyes	wordnet:brow.n.01	brow denotes a part of the upper face.
+vertical_body_pilot	position	upper	bodypart	torso	chest	the part of the human torso between the neck and the diaphragm or the corresponding part in other vertebrates	wordnet:thorax.n.02	chest denotes a part of the upper torso.
+vertical_body_pilot	position	lower	bodypart	arm	wrist	a joint between the distal end of the radius and the proximal row of carpal bones	wordnet:wrist.n.01	wrist denotes a part of the lower arm.
+vertical_body_pilot	position	lower	bodypart	leg	ankle	a gliding joint between the distal ends of the tibia and fibula and the proximal end of the talus	wordnet:ankle.n.01	ankle denotes a part of the lower leg.
+vertical_body_pilot	position	lower	bodypart	face	chin	the protruding part of the lower jaw	wordnet:chin.n.01	chin denotes a part of the lower face.
+vertical_body_pilot	position	lower	bodypart	torso	waist	the narrowing of the body between the ribs and hips	wordnet:waist.n.01	waist denotes a part of the lower torso.
+sequence_structure_pilot	sequence	start	structure	book	preface	a short introductory essay preceding the text of a book	wordnet:foreword.n.01	preface denotes the start of a book.
+sequence_structure_pilot	sequence	start	structure	speech	opening	a vacant or unobstructed space that is man-made	wordnet:opening.n.10	opening denotes the start of a speech.
+sequence_structure_pilot	sequence	start	structure	race	launch	get going; give impetus to	wordnet:launch.v.05	launch denotes the start of a race.
+sequence_structure_pilot	sequence	start	structure	day	dawn	the first light of day	wordnet:dawn.n.01	dawn denotes the start of a day.
+sequence_structure_pilot	sequence	end	structure	book	epilogue	a short passage added at the end of a literary work	wordnet:epilogue.n.02	epilogue denotes the end of a book.
+sequence_structure_pilot	sequence	end	structure	speech	close	the last section of a communication	wordnet:conclusion.n.08	close denotes the end of a speech.
+sequence_structure_pilot	sequence	end	structure	race	finish	designated event that concludes a contest (especially a race)	wordnet:finish.n.05	finish denotes the end of a race.
+sequence_structure_pilot	sequence	end	structure	day	dusk	the time of day immediately following sunset	wordnet:twilight.n.01	dusk denotes the end of a day.
+state_substance_pilot	state	solid	substance	dairy	cheese	a solid food prepared from the pressed curd of milk	wordnet:cheese.n.01	cheese is a conventional solid dairy.
+state_substance_pilot	state	solid	substance	additive	sugar	a white crystalline carbohydrate used as a sweetener and preservative	wordnet:sugar.n.01	sugar is a conventional solid additive.
+state_substance_pilot	state	solid	substance	fuel	coal	fossil fuel consisting of carbonized vegetable matter deposited in the Carboniferous period	wordnet:coal.n.01	coal is a conventional solid fuel.
+state_substance_pilot	state	solid	substance	medicine	tablet	a dose of medicine in the form of a small pellet	wordnet:pill.n.02	tablet is a conventional solid medicine.
+state_substance_pilot	state	liquid	substance	dairy	milk	a white nutritious liquid secreted by mammals and used as food by human beings	wordnet:milk.n.01	milk is a conventional liquid dairy.
+state_substance_pilot	state	liquid	substance	additive	syrup	a thick sweet sticky liquid	wordnet:syrup.n.01	syrup is a conventional liquid additive.
+state_substance_pilot	state	liquid	substance	fuel	gasoline	a volatile flammable mixture of hydrocarbons (hexane and heptane and octane etc.) derived from petroleum; used mainly as a fuel in internal-combustion engines	wordnet:gasoline.n.01	gasoline is a conventional liquid fuel.
+state_substance_pilot	state	liquid	substance	medicine	tonic	a medicine that strengthens and invigorates	wordnet:tonic.n.04	tonic is a conventional liquid medicine.
+origin_material_pilot	origin	natural	material	fiber	cashmere	the wool of the Kashmir goat	wordnet:cashmere.n.02	cashmere is a conventional natural fiber.
+origin_material_pilot	origin	natural	material	rubber	latex	a milky exudate from certain plants that coagulates on exposure to air	wordnet:latex.n.01	latex is a conventional natural rubber.
+origin_material_pilot	origin	natural	material	fabric	linen	a fabric woven with fibers from the flax plant	wordnet:linen.n.01	linen is a conventional natural fabric.
+origin_material_pilot	origin	natural	material	adhesive	resin	any of a class of solid or semisolid viscous substances obtained either as exudations from certain plants or prepared by polymerization of simple molecules	wordnet:resin.n.01	resin is a conventional natural adhesive.
+origin_material_pilot	origin	synthetic	material	fiber	nylon	a thermoplastic polyamide; a family of strong resilient synthetic fibers	wordnet:nylon.n.01	nylon is a conventional synthetic fiber.
+origin_material_pilot	origin	synthetic	material	rubber	silicone	any of a large class of siloxanes that are unusually stable over a wide range of temperatures; used in lubricants and adhesives and coatings and synthetic rubber and electrical insulation	wordnet:silicone.n.01	silicone is a conventional synthetic rubber.
+origin_material_pilot	origin	synthetic	material	fabric	polyester	any of a large class of synthetic fabrics	wordnet:polyester.n.03	polyester is a conventional synthetic fabric.
+origin_material_pilot	origin	synthetic	material	adhesive	epoxy	a thermosetting resin; used chiefly in strong adhesives and coatings and laminates	wordnet:epoxy.n.01	epoxy is a conventional synthetic adhesive.

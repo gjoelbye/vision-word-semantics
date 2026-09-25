@@ -1,0 +1,199 @@
+"""Difference vectors, margins and tests for the two-clue items.
+
+The unit of inference is the clue grid of eight items. Embedding differences
+are averaged over the 96 slots before any cosine is taken.
+"""
+from __future__ import annotations
+
+import functools
+import itertools
+from collections.abc import Mapping
+
+import numpy as np
+import pandas as pd
+
+from .composition_stimuli import CONDITIONS
+
+#: The difference vectors that are scored against the targets.
+READOUTS = ("joint", "feature", "base", "interaction")
+
+BLOCK_FIELDS = (
+    "equation_id", "slot", "appearance", "replicate", "background_index",
+    "font", "size", "color", "placement", "box", "feature_position",
+    "target_position", "upper_x", "upper_y", "lower_x", "lower_y",
+)
+
+
+def validate_dense_blocks(manifest: pd.DataFrame, *, n_equations: int,
+                          n_slots: int) -> None:
+    """Prove that dense ``(equation, slot, condition)`` reshaping is valid."""
+    required = set((*BLOCK_FIELDS, "condition"))
+    if missing := required - set(manifest):
+        raise ValueError(f"manifest lacks dense-layout fields {sorted(missing)}")
+    n_conditions = len(CONDITIONS)
+    expected_rows = n_equations * n_slots * n_conditions
+    if len(manifest) != expected_rows:
+        raise ValueError(f"expected {expected_rows} rows, got {len(manifest)}")
+    conditions = np.asarray(manifest.condition, dtype=object).reshape(
+        -1, n_conditions)
+    expected = np.asarray(CONDITIONS, dtype=object)
+    if not np.all(conditions == expected):
+        raise ValueError("conditions are not canonical within every dense block")
+    for field in BLOCK_FIELDS:
+        values = np.asarray(manifest[field], dtype=object).reshape(
+            -1, n_conditions)
+        if not np.all(values == values[:, :1]):
+            raise ValueError(f"{field} changes within an equation-slot block")
+    equation_slots = manifest.iloc[::n_conditions].groupby(
+        "equation_id", sort=False).slot.agg(["count", "nunique", "min", "max"])
+    valid = (
+        len(equation_slots) == n_equations
+        and equation_slots["count"].eq(n_slots).all()
+        and equation_slots["nunique"].eq(n_slots).all()
+        and equation_slots["min"].eq(0).all()
+        and equation_slots["max"].eq(n_slots - 1).all()
+    )
+    if not valid:
+        raise ValueError("each equation must contain every canonical slot once")
+
+
+def row_unit(values: np.ndarray) -> np.ndarray:
+    """Unit-normalize rows, leaving a row of zero length at zero.
+
+    A zero row scores a cosine of zero against every target and so a margin of
+    zero. A non-finite value raises.
+    """
+    values = np.asarray(values, dtype=np.float32)
+    norms = np.linalg.norm(values, axis=1, keepdims=True)
+    if not np.isfinite(values).all():
+        raise ValueError("cannot score a non-finite composition vector")
+    return np.divide(values, norms, out=np.zeros_like(values),
+                     where=norms > 1e-12)
+
+
+def condition_vectors(block: np.ndarray) -> dict[str, np.ndarray]:
+    """Reduce ``(slot, condition, dimension)`` embeddings to five directions.
+
+    Each difference is taken in float32 within a slot and then averaged over
+    slots.
+    """
+    block = np.asarray(block, dtype=np.float32)
+    if block.ndim != 3 or block.shape[1] != len(CONDITIONS):
+        raise ValueError(
+            f"expected (slot, {len(CONDITIONS)}, dimension), got "
+            f"{block.shape}")
+    both, feature_only, base_only, scrambled, target, target_scrambled = (
+        block[:, index] for index in range(len(CONDITIONS)))
+    feature = (feature_only - scrambled).mean(axis=0)
+    base = (base_only - scrambled).mean(axis=0)
+    joint = (both - scrambled).mean(axis=0)
+    target_direction = (target - target_scrambled).mean(axis=0)
+    return {
+        "joint": joint,
+        "feature": feature,
+        "base": base,
+        "target": target_direction,
+        "interaction": joint - feature - base,
+    }
+
+
+def target_metrics(items: pd.DataFrame,
+                   vectors: Mapping[str, np.ndarray]) -> pd.DataFrame:
+    """Margins of every readout against its item's target, and the axis gains.
+
+    From the cosine with the target, ``*_margin`` subtracts the mean cosine with
+    the other seven targets of the grid, ``*_feature_axis_margin`` the cosine
+    with the one target sharing the base, and ``*_base_axis_margin`` the mean
+    cosine with the three sharing the feature.
+    """
+    missing = set((*READOUTS, "target")) - set(vectors)
+    if missing:
+        raise ValueError(f"missing composition vectors: {sorted(missing)}")
+    n = len(items)
+    for name in (*READOUTS, "target"):
+        if np.asarray(vectors[name]).shape[0] != n:
+            raise ValueError(f"{name} has the wrong number of equations")
+
+    result = items.reset_index(drop=True).copy()
+    for readout in READOUTS:
+        result[f"{readout}_margin"] = np.nan
+        result[f"{readout}_feature_axis_margin"] = np.nan
+        result[f"{readout}_base_axis_margin"] = np.nan
+
+    groups = result.groupby("family_id", sort=False).indices
+    for _, raw_indices in groups.items():
+        indices = np.asarray(raw_indices, dtype=int)
+        family = result.iloc[indices]
+        if len(indices) != 8:
+            raise ValueError("target scoring requires eight equations per family")
+        targets = row_unit(np.asarray(vectors["target"])[indices])
+        for readout in READOUTS:
+            queries = row_unit(np.asarray(vectors[readout])[indices])
+            scores = queries @ targets.T
+            own = np.diag(scores)
+            margins = own - (scores.sum(axis=1) - own) / 7
+            feature_margins = np.empty(8, dtype=np.float32)
+            base_margins = np.empty(8, dtype=np.float32)
+            for local, row in enumerate(family.itertuples(index=False)):
+                same_base_other_feature = (
+                    family.base.eq(row.base) & ~family.feature.eq(row.feature)
+                ).to_numpy()
+                same_feature_other_base = (
+                    family.feature.eq(row.feature) & ~family.base.eq(row.base)
+                ).to_numpy()
+                if same_base_other_feature.sum() != 1:
+                    raise ValueError("family is not a complete two-feature grid")
+                if same_feature_other_base.sum() != 3:
+                    raise ValueError("family is not a complete four-base grid")
+                feature_margins[local] = (
+                    own[local] - scores[local, same_base_other_feature][0])
+                base_margins[local] = (
+                    own[local] - scores[local, same_feature_other_base].mean())
+            result.loc[indices, f"{readout}_margin"] = margins
+            result.loc[indices, f"{readout}_feature_axis_margin"] = feature_margins
+            result.loc[indices, f"{readout}_base_axis_margin"] = base_margins
+
+    result["feature_axis_gain_over_base"] = (
+        result.joint_feature_axis_margin - result.base_feature_axis_margin)
+    result["base_axis_gain_over_feature"] = (
+        result.joint_base_axis_margin - result.feature_base_axis_margin)
+    return result
+
+
+@functools.lru_cache(maxsize=8)
+def _sign_patterns(n: int) -> np.ndarray:
+    """Every sign vector of length ``n``."""
+    return np.asarray(list(itertools.product((-1.0, 1.0), repeat=n)))
+
+
+def exact_sign_flip_p(values: np.ndarray, alternative: str = "greater") -> float:
+    """Exact sign-flip p-value over every sign pattern of the grid means.
+
+    The null is symmetric about zero. ``alternative`` is ``greater`` or
+    ``two-sided``.
+    """
+    values = np.asarray(values, dtype=float)
+    if values.ndim != 1 or not len(values) or not np.isfinite(values).all():
+        raise ValueError("sign-flip values must be a finite nonempty vector")
+    if len(values) > 20:
+        raise ValueError("exact enumeration is limited to 20 units")
+    observed = float(values.mean())
+    null = _sign_patterns(len(values)) @ values / len(values)
+    tolerance = np.finfo(float).eps * max(1.0, abs(observed)) * 8
+    if alternative == "greater":
+        return float(np.mean(null >= observed - tolerance))
+    if alternative == "two-sided":
+        return float(np.mean(np.abs(null) >= abs(observed) - tolerance))
+    raise ValueError("alternative must be greater or two-sided")
+
+
+def bootstrap_mean_ci(values: np.ndarray, draws: np.ndarray,
+                      confidence: float = 0.95) -> tuple[float, float]:
+    """Percentile interval of the mean, one resample per row of ``draws``."""
+    values = np.asarray(values, dtype=float)
+    draws = np.asarray(draws, dtype=int)
+    if draws.ndim != 2 or draws.shape[1] != len(values):
+        raise ValueError("bootstrap draws do not match the family vector")
+    means = values[draws].mean(axis=1)
+    tail = (1 - confidence) / 2
+    return tuple(float(x) for x in np.quantile(means, [tail, 1 - tail]))
