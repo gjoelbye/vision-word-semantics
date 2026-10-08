@@ -37,7 +37,9 @@ and the fonts listed in the main README.
 
 ## What each stage writes
 
-Sizes are those of the recorded run.
+Sizes are those of the recorded run, counting only the files the current code
+writes. Together they come to about 420 GB, and with the downloads to about
+590 GB, inside the 750 GB of free disk the main README asks for.
 
 | Folder | Written by | Content | Size |
 |---|---|---|---|
@@ -46,8 +48,8 @@ Sizes are those of the recorded run.
 | `renders/` | `scripts/stimuli/render.py`, `class_images.py` | Each vocabulary word and class name on the 96 slots, and its scrambled control | 46 GB |
 | `concepts/` | `scripts/stimuli/class_images.py` | The class-name manifest, the ImageNet validation photographs cropped to 256 pixels, their list and their text scan | 6.1 GB |
 | `composition/` | `scripts/stimuli/two_clue_stimuli.py` | The two-clue layout, manifest and renders | 11 GB |
-| `embeddings/` | `scripts/features/embed.py` | Class-token caches of the 14 image models at ten depths for the vocabulary | 209 GB |
-| `embeddings/concepts/` | `scripts/features/embed.py --manifest concepts` | The same for the class-name renders and the class photographs | 62 GB |
+| `embeddings/` | `scripts/features/embed.py` | Class-token caches of the 14 image models at ten depths for the vocabulary | 104 GB |
+| `embeddings/concepts/` | `scripts/features/embed.py --manifest concepts` | The same for the class-name renders and the class photographs | 31 GB |
 | `composition/embeddings/` | `scripts/features/embed.py --manifest two_clue` | Final-layer caches of the two-clue renders | 2.9 GB |
 | `word_text/` | `scripts/features/word_text.py` | Word vectors of the three Qwen3 text encoders | 4.7 GB |
 | `word_speech/` | `scripts/features/word_speech.py` | Word vectors of w2v-BERT 2.0 from synthesized speech | 2.5 GB |
@@ -55,8 +57,8 @@ Sizes are those of the recorded run.
 | `spokencoco-wds-288/` | `scripts/finetune/speech_coco.py` | SPEECH-COCO as webdataset shards, short side 288 | 36 GB |
 | `corpus/` | `scripts/finetune/speech_coco.py` | The `speech-coco_` manifest, provenance, text scan and list of excluded photographs | 44 MB |
 | `captions/speech-coco/` | `scripts/finetune/caption_targets.py` | Frozen caption targets of Qwen3-0.6B and w2v-BERT 2.0 | 2.5 GB |
-| `checkpoints/` | `scripts/finetune/train.py` | The 20 finetunes, each with `best.slim.pt`, `latest.pt` and `provenance.json` | 158 GB, of which `latest.pt` is 118 GB |
-| `embeddings/<model>-scocoft*` | `scripts/features/embed.py --finetuned` | Vocabulary caches of the finetuned models | 264 GB |
+| `checkpoints/` | `scripts/finetune/train.py` | The 20 finetunes, each with `best.slim.pt` and `provenance.json`; `latest.pt` holds a run in progress and is deleted when it ends | 39 GB, plus up to 14 GB while a run is in progress |
+| `embeddings/<model>-scocoft*` | `scripts/features/embed.py --finetuned` | Vocabulary caches of the finetuned models | 132 GB |
 | `fonts/` | `src/utils/viz.py` | The bold face cut from Noto Sans for the figures, written by the first figure | 0.4 MB |
 | `notebooks/` | `scripts/run_analysis.sh` | The executed notebooks with their printed outputs | 2 MB |
 
