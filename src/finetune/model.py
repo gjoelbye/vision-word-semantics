@@ -1,20 +1,30 @@
-"""The image backbone joined to a cached caption tower.
+"""The image backbone joined to a cached caption tower, and the training objective.
 
 The backbone is built by :func:`src.models.load`, the loader the embeddings
 use, so the finetune differs from its twin in weights alone. Two
 parameters join the two sides: a projection into the tower's space and a
 learned temperature. Both are dropped when the checkpoint is read back.
+
+The objective is symmetric InfoNCE over a large batch, assembled by gradient
+caching. Each micro-batch is encoded once without gradients, the loss is taken
+over the whole batch of vectors, and the gradient at each image vector is then
+replayed through the backbone by re-encoding its micro-batch. The result is the
+full-batch gradient at the memory cost of one micro-batch.
 """
 from __future__ import annotations
 
 import math
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
 from ..models import has_class_token, hidden_size, load
-from .recipe import Recipe
+
+if TYPE_CHECKING:
+    from .training import Recipe
 
 #: Starting temperature as a log scale, CLIP's 1/0.07; the value is learned.
 INITIAL_LOGIT_SCALE = math.log(1 / 0.07)
@@ -88,10 +98,75 @@ class JointModel(nn.Module):
                  "lr": self.recipe.lr_backbone},
                 {"name": "head", "params": head, "lr": self.recipe.lr_head}]
 
-    def backbone_state(self) -> dict:
-        """The payload :mod:`src.finetune.checkpoint` reads back."""
-        state = {f"image_backbone.{k}": v.detach().cpu()
-                 for k, v in self.backbone.state_dict().items()}
-        state["image_proj.weight"] = self.image_proj.weight.detach().cpu()
-        state["logit_scale"] = self.logit_scale_raw.detach().cpu()
-        return state
+
+def infonce(image: torch.Tensor, text: torch.Tensor,
+            logit_scale: torch.Tensor) -> torch.Tensor:
+    """Mean of the image-to-caption and caption-to-image cross-entropies.
+
+    ``image`` and ``text`` are L2-normalized ``(batch, dim)``; row ``i`` of each
+    is a true pair.
+    """
+    logits = logit_scale * image @ text.t()
+    target = torch.arange(image.shape[0], device=image.device)
+    return 0.5 * (F.cross_entropy(logits, target)
+                  + F.cross_entropy(logits.t(), target))
+
+
+def in_batch_accuracy(image: torch.Tensor, text: torch.Tensor) -> tuple[float, float]:
+    """Top-1 retrieval within the batch, image to caption and caption to image."""
+    sim = image @ text.t()
+    target = torch.arange(sim.shape[0], device=sim.device)
+    return (float((sim.argmax(dim=1) == target).float().mean()),
+            float((sim.argmax(dim=0) == target).float().mean()))
+
+
+@dataclass(frozen=True)
+class StepResult:
+    loss: float
+    image_accuracy: float
+    text_accuracy: float
+    batch: int
+
+
+def cached_step(model, batches, *, autocast_dtype: torch.dtype | None = None
+                ) -> StepResult:
+    """One optimizer step's gradients over ``batches`` micro-batches.
+
+    The caption vectors come from a frozen cache and carry no gradient, so only
+    the image side is re-encoded. The temperature receives its gradient from
+    the full-batch loss alone.
+    """
+    if not batches:
+        raise ValueError("cached_step needs at least one micro-batch")
+
+    cached_image, cached_text = [], []
+    for images, captions in batches:
+        with torch.no_grad(), _autocast(autocast_dtype):
+            image = model.encode_image(images)
+            text = model.encode_text(captions)
+        cached_image.append(image.detach().float().requires_grad_(True))
+        cached_text.append(text.detach().float())
+
+    image = torch.cat(cached_image)
+    text = torch.cat(cached_text)
+    loss = infonce(image, text, model.logit_scale())
+    loss.backward()
+    accuracy = in_batch_accuracy(image.detach(), text.detach())
+
+    for i, (images, _) in enumerate(batches):
+        with _autocast(autocast_dtype):
+            surrogate = (model.encode_image(images).float()
+                         * cached_image[i].grad).sum()
+        surrogate.backward()
+
+    return StepResult(float(loss.detach()), accuracy[0], accuracy[1],
+                      image.shape[0])
+
+
+def _autocast(dtype: torch.dtype | None):
+    """Autocast on CUDA with the weight cache off, or nothing on the CPU."""
+    from contextlib import nullcontext
+
+    if dtype is None or not torch.cuda.is_available():
+        return nullcontext()
+    return torch.autocast(device_type="cuda", dtype=dtype, cache_enabled=False)

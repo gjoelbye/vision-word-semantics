@@ -25,11 +25,10 @@ import pyarrow.parquet as pq
 from PIL import Image
 from tqdm import tqdm
 
-from src.config import CORPUS, DATA_ROOT, ensure_dirs
-from src.finetune.corpus import PREFIX, SHARDS
-
-#: The downloaded parquet export, recorded relative to the data root.
-SOURCE = DATA_ROOT / "spokencoco_hf" / "data"
+from src.config import DATA_ROOT, ensure_dirs
+from src.finetune.data import (SHARDS, SOURCE, SPEECH_COCO_EXCLUDED,
+                               SPEECH_COCO_MANIFEST, SPEECH_COCO_PROVENANCE,
+                               SPEECH_COCO_SCAN, shards)
 
 #: Short side of the written images; training crops 224 from it.
 SHORT_SIDE = 288
@@ -126,7 +125,7 @@ def build_shards() -> None:
     frame = pd.DataFrame([row for r in collected for row in r["rows"]])
     if frame.key.duplicated().any():
         raise SystemExit("caption ids are not unique across shards")
-    frame.to_parquet(CORPUS / f"{PREFIX}manifest.parquet", index=False)
+    frame.to_parquet(SPEECH_COCO_MANIFEST, index=False)
 
     counts = frame.split.value_counts().to_dict()
     record = {
@@ -143,7 +142,7 @@ def build_shards() -> None:
         "scan_rows": int(len(frame)),
         "recorded": dt.date.today().isoformat(),
     }
-    (CORPUS / f"{PREFIX}provenance.json").write_text(
+    SPEECH_COCO_PROVENANCE.write_text(
         json.dumps(record, indent=2) + "\n")
     print(f"{len(frame):,} samples over {record['images']:,} photographs")
     print(f"  train {record['train_rows']:,}   val {record['val_rows']:,}")
@@ -156,7 +155,7 @@ def build_scan() -> None:
 
     from src.text_detector import is_excluded, reader, text_density
 
-    path = CORPUS / f"{PREFIX}manifest.parquet"
+    path = SPEECH_COCO_MANIFEST
     if not path.exists():
         raise SystemExit(f"no manifest at {path}; run with --shards")
     rows = pd.read_parquet(path)
@@ -164,14 +163,13 @@ def build_scan() -> None:
     wanted = dict(zip(first.key, first.image_id))
     detector = reader(torch.cuda.is_available())
 
-    shards = sorted(str(p) for p in SHARDS.glob("*.tar"))
-    # Select by key before decoding, so a photograph is decoded once.
-    dataset = (wds.WebDataset(shards, shardshuffle=False, empty_check=False,
+        # Select by key before decoding, so a photograph is decoded once.
+    dataset = (wds.WebDataset(shards(), shardshuffle=False, empty_check=False,
                               handler=wds.warn_and_continue)
                .select(lambda sample: sample.get("__key__") in wanted)
                .decode("pil", handler=wds.warn_and_continue)
                .to_tuple("__key__", "jpg", handler=wds.warn_and_continue))
-    out = CORPUS / f"{PREFIX}text_scan.jsonl"
+    out = SPEECH_COCO_SCAN
     seen = 0
     with open(out, "w") as fh:
         for key, image in tqdm(dataset, total=len(wanted), desc="scan",
@@ -191,12 +189,12 @@ def build_scan() -> None:
             if is_excluded(record):
                 dropped_images.add(int(record["image_id"]))
     excluded = rows[rows.image_id.isin(dropped_images)].key.tolist()
-    (CORPUS / f"{PREFIX}excluded_keys.txt").write_text(
+    SPEECH_COCO_EXCLUDED.write_text(
         "\n".join(sorted(excluded)) + "\n")
     print(f"{len(dropped_images):,} photographs carry text, "
           f"{len(excluded):,} of {len(rows):,} samples excluded")
 
-    record_path = CORPUS / f"{PREFIX}provenance.json"
+    record_path = SPEECH_COCO_PROVENANCE
     record = json.loads(record_path.read_text())
     record |= {"scanned_images": seen,
                "excluded_images": len(dropped_images),

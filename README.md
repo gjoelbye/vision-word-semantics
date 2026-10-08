@@ -146,7 +146,7 @@ then runs the notebooks, which write figures to `figures/` and LaTeX tables to
 - Training on other hardware or library versions can keep the checkpoint from
   a different step. Before embedding a retrained model, set its step in
   `_FINETUNES` in [src/models.py](src/models.py). A smaller GPU needs a smaller
-  micro-batch, set in [src/finetune/recipe.py](src/finetune/recipe.py), which
+  micro-batch, set in [src/finetune/training.py](src/finetune/training.py), which
   can also change the step kept.
 
 ## Repository layout

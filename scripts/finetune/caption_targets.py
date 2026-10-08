@@ -21,24 +21,21 @@ import pyarrow.parquet as pq
 import torch
 from tqdm import tqdm
 
-from src.config import CAPTIONS, CORPUS, DATA_ROOT, ensure_dirs
+from src.config import CAPTIONS, ensure_dirs
 from src.features.text import Qwen3Tower, tokenizer
-from src.finetune import corpus
+from src.finetune import data
 from src.models import ENCODERS
 
 TEXT_TOWER = "qwen3-0p6b-frozen"
 SPEECH_TOWER = "w2v-bert-2.0-frozen"
 
 #: Token context of the written captions.
-CONTEXT = 77
+CAPTION_CONTEXT = 77
 TEXT_BATCH = 256
 
 #: Recordings per forward pass, and their sampling rate.
 SPEECH_BATCH = 32
 SAMPLE_RATE = 16000
-
-#: The SPEECH-COCO parquet export, which holds the recordings.
-SOURCE = DATA_ROOT / "spokencoco_hf" / "data"
 
 
 def out_dir(tower: str) -> Path:
@@ -53,9 +50,9 @@ def written(device: str) -> None:
     out = out_dir(TEXT_TOWER)
     out.mkdir(parents=True, exist_ok=True)
     tower = Qwen3Tower(repo).to(device).eval()
-    tokenize = tokenizer(TEXT_TOWER, CONTEXT)
+    tokenize = tokenizer(TEXT_TOWER, CAPTION_CONTEXT)
 
-    shards = corpus.shards()
+    shards = data.shards()
     dataset = (wds.WebDataset(shards, shardshuffle=False,
                               handler=wds.warn_and_continue, empty_check=False)
                .decode(handler=wds.warn_and_continue)
@@ -92,9 +89,9 @@ def written(device: str) -> None:
     (out / "keys.txt").write_text("\n".join(keys))
     (out / "meta.json").write_text(json.dumps({
         "tower": TEXT_TOWER, "repo": repo, "dim": int(dim),
-        "captions": int(len(keys)), "context": CONTEXT,
+        "captions": int(len(keys)), "context": CAPTION_CONTEXT,
         "corpus": "speech-coco", "dtype": "float16",
-        "shard_fingerprint": corpus.fingerprint(), "n_shards": len(shards),
+        "shard_fingerprint": data.fingerprint(), "n_shards": len(shards),
         "recorded": dt.date.today().isoformat(),
     }, indent=2) + "\n")
     print(f"{len(keys):,} written captions -> captions/speech-coco/{TEXT_TOWER}")
@@ -126,11 +123,10 @@ def spoken(device: str) -> None:
     features = AutoFeatureExtractor.from_pretrained(repo)
     tower = AutoModel.from_pretrained(repo, dtype=torch.float32).to(device).eval()
 
-    sources = sorted(SOURCE.glob("*.parquet"))
+    sources = sorted(data.SOURCE.glob("*.parquet"))
     if not sources:
-        raise SystemExit(f"no parquet shards under {SOURCE}")
-    total = len(pd.read_parquet(CORPUS / f"{corpus.PREFIX}manifest.parquet",
-                                columns=["key"]))
+        raise SystemExit(f"no parquet shards under {data.SOURCE}")
+    total = len(pd.read_parquet(data.SPEECH_COCO_MANIFEST, columns=["key"]))
 
     # Resume at the first parquet shard not yet finished.
     cursor_path = out / "cursor.json"
@@ -217,7 +213,7 @@ def spoken(device: str) -> None:
         "corpus": "speech-coco", "captions": len(keys),
         "pooling": "mean over unpadded encoder frames",
         "sample_rate": SAMPLE_RATE, "dtype": "float16",
-        "shard_fingerprint": corpus.fingerprint(), "n_shards": len(sources),
+        "shard_fingerprint": data.fingerprint(), "n_shards": len(sources),
         "recorded": dt.date.today().isoformat(),
     }, indent=2) + "\n")
     cursor_path.unlink(missing_ok=True)

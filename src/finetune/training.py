@@ -1,11 +1,14 @@
-"""The training loop, with resume from a saved state.
+"""One finetuning run: its settings, its schedule and the training loop.
 
-``latest.pt`` holds the weights, optimizer moments and random generator states
-at a fixed cadence, so an interrupted run continues the same trajectory.
-``best.slim.pt`` holds the weights at the lowest validation loss and is the
-file :func:`src.models.load` reads for a finetuned model. Both are written
-through a temporary file and renamed. The learning rate warms up linearly and
-then decays on a cosine.
+A recipe holds everything that distinguishes one run from another and nothing
+about the machine. It is written into the checkpoint and its provenance.
+
+The loop resumes from a saved state. ``latest.pt`` holds the weights, optimizer
+moments and random generator states at a fixed cadence, so an interrupted run
+continues the same trajectory. ``best.slim.pt`` holds the weights at the lowest
+validation loss and is the file :func:`src.models.load` reads for a finetuned
+model. Both are written through a temporary file and renamed. The learning rate
+warms up linearly and then decays on a cosine.
 """
 from __future__ import annotations
 
@@ -14,12 +17,95 @@ import os
 import random
 import signal
 import time
+from dataclasses import asdict, dataclass
 from pathlib import Path
 
 import numpy as np
 import torch
 
-from .objective import cached_step
+from ..config import SEED
+from ..models import ENCODERS, finetune_key
+from .checkpoint import _backbone_keys, backbone_state
+from .model import cached_step
+
+#: Images per forward pass for each backbone, the largest that fit a 32 GB card.
+#: The gradient does not depend on it.
+MICRO_BATCH: dict[str, int] = {
+    "dinov3-b": 96, "dinov2-b": 96, "mae-b": 96,
+    "dinov3-l": 48, "dinov2-l": 48, "mae-l": 48,
+    "mae-h": 24, "dinov3-h": 16, "webssl-dino-1b": 12, "dinov2-g": 8,
+}
+
+#: Ceiling on optimizer steps, and on passes over the filtered corpus.
+STEP_CEILING = 10_000
+MAX_EPOCHS = 3.0
+
+#: Ceiling on the warmup length and on the validation and checkpoint intervals.
+CADENCE_CEILING = 500
+
+#: Validations without improvement before a run stops early.
+PATIENCE = 3
+
+#: Images per optimizer step.
+BATCH = 1056
+
+
+def schedule(kept: int, batch: int = BATCH) -> dict[str, int]:
+    """Steps, warmup, validation interval and checkpoint interval for a corpus of ``kept`` samples.
+
+    The run is ``MAX_EPOCHS`` passes, capped at ``STEP_CEILING`` steps; warmup
+    is a tenth of it, validation every twelfth and a checkpoint every sixth,
+    each at most ``CADENCE_CEILING`` and at least 10 steps.
+    """
+    steps = min(STEP_CEILING, max(1, int(MAX_EPOCHS * kept / batch)))
+    return {"steps": steps,
+            "warmup": min(CADENCE_CEILING, max(10, steps // 10)),
+            "validate_every": min(CADENCE_CEILING, max(10, steps // 12)),
+            "checkpoint_every": min(CADENCE_CEILING, max(10, steps // 6))}
+
+
+@dataclass(frozen=True)
+class Recipe:
+    backbone: str
+    tower: str
+    steps: int
+    warmup: int
+    micro_batch: int
+    batch: int = BATCH
+    lr_backbone: float = 5e-5
+    lr_head: float = 5e-4
+    weight_decay: float = 0.1
+    grad_clip: float = 1.0
+    image_size: int = 224
+    seed: int = SEED
+
+    def __post_init__(self) -> None:
+        if self.batch % self.micro_batch:
+            raise ValueError(
+                f"batch {self.batch} is not a whole number of micro-batches of "
+                f"{self.micro_batch}")
+        if self.warmup >= self.steps:
+            raise ValueError("warmup must be shorter than the run")
+        finetune_key(self.backbone, self.tower)
+
+    @property
+    def accumulation(self) -> int:
+        """Micro-batches per optimizer step."""
+        return self.batch // self.micro_batch
+
+    @property
+    def width(self) -> int:
+        """Dimension the image is projected into, the tower's output width."""
+        return ENCODERS[self.tower][1]
+
+    @property
+    def name(self) -> str:
+        """Registry key of the finetuned model."""
+        return finetune_key(self.backbone, self.tower)
+
+    def to_dict(self) -> dict:
+        return asdict(self) | {"accumulation": self.accumulation,
+                               "width": self.width, "name": self.name}
 
 
 def learning_rate_scale(step: int, warmup: int, total: int) -> float:
@@ -65,7 +151,7 @@ def _payload(model, optimizer, recipe, step: int, best_loss: float,
              best_step: int, *, slim: bool) -> dict:
     """The checkpoint: weights and the run record, plus optimizer and
     generator states unless ``slim``."""
-    payload = {"model": model.backbone_state(), "step": int(step),
+    payload = {"model": backbone_state(model), "step": int(step),
                "best_step": int(best_step), "best_val_loss": float(best_loss),
                "cfg": recipe.to_dict() | {"backbone_repo": model.spec.repo,
                                           "total_steps": recipe.steps}}
@@ -79,7 +165,7 @@ def validate(model, loader, *, batches: int, device: str,
              autocast_dtype) -> float:
     """Mean InfoNCE loss over the first ``batches`` validation micro-batches,
     each scored against its own negatives only."""
-    from .objective import infonce
+    from .model import infonce
 
     model.eval()
     total, seen = 0.0, 0
@@ -201,16 +287,3 @@ def run(model, recipe, train_loader, val_loader, *, out: Path,
     save(_payload(model, optimizer, recipe, recipe.steps, best_loss, best_step,
                   slim=False), latest)
     return out / "best.slim.pt", "completed the schedule"
-
-
-def _backbone_keys(state: dict) -> dict:
-    """Checkpoint keys back to module keys, the inverse of ``backbone_state``."""
-    out = {}
-    for key, value in state.items():
-        if key.startswith("image_backbone."):
-            out[f"backbone.{key[len('image_backbone.'):]}"] = value
-        elif key == "image_proj.weight":
-            out["image_proj.weight"] = value
-        elif key == "logit_scale":
-            out["logit_scale_raw"] = value
-    return out

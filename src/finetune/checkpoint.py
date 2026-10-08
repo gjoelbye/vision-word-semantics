@@ -1,9 +1,9 @@
-"""Load a finetuned backbone's weights into its pretrained architecture.
+"""The checkpoint format: written by training, read back on resume and for analysis.
 
 A checkpoint holds the backbone under an ``image_backbone.`` prefix beside the
-contrastive projection and temperature, which are dropped. A saved key the
-model does not have is an error, because its weights would otherwise be lost
-silently.
+contrastive projection and temperature. Loading a finetuned backbone into its
+pretrained architecture drops the last two. A saved key the model does not
+have is an error, because its weights would otherwise be lost silently.
 """
 from __future__ import annotations
 
@@ -14,6 +14,32 @@ import torch
 #: Weights belonging to the image backbone. Everything without this prefix
 #: (``image_proj.weight``, ``logit_scale``) is part of the contrastive head.
 _PREFIX = "image_backbone."
+
+#: The contrastive head: the projection into the tower's space and the learned
+#: temperature. Both are discarded, and a checkpoint with any other head is refused.
+_HEAD = {"image_proj.weight", "logit_scale"}
+
+
+def backbone_state(model) -> dict:
+    """The weights of a ``JointModel`` under their checkpoint keys."""
+    state = {f"{_PREFIX}{k}": v.detach().cpu()
+             for k, v in model.backbone.state_dict().items()}
+    state["image_proj.weight"] = model.image_proj.weight.detach().cpu()
+    state["logit_scale"] = model.logit_scale_raw.detach().cpu()
+    return state
+
+
+def _backbone_keys(state: dict) -> dict:
+    """Checkpoint keys back to ``JointModel`` keys, the inverse of ``backbone_state``."""
+    out = {}
+    for key, value in state.items():
+        if key.startswith(_PREFIX):
+            out[f"backbone.{key[len(_PREFIX):]}"] = value
+        elif key == "image_proj.weight":
+            out["image_proj.weight"] = value
+        elif key == "logit_scale":
+            out["logit_scale_raw"] = value
+    return out
 
 
 def _resolve(key: str, expected: set[str]) -> str:
@@ -33,11 +59,6 @@ def _resolve(key: str, expected: set[str]) -> str:
     return key
 
 
-#: The contrastive head: the projection into the tower's space and the learned
-#: temperature. Both are discarded, and a checkpoint with any other head is refused.
-_HEAD = {"image_proj.weight", "logit_scale"}
-
-
 def load_backbone_state(ckpt_path: str | Path, model, *,
                         expect_repo: str | None = None,
                         expect_step: int | None = None) -> dict:
@@ -50,7 +71,7 @@ def load_backbone_state(ckpt_path: str | Path, model, *,
     """
     # Memory-mapped, so each tensor is read once as it is copied into the model.
     ckpt_path = Path(ckpt_path)
-    payload = torch.load(ckpt_path, map_location="cpu", weights_only=False,
+    payload = torch.load(ckpt_path, map_location="cpu", weights_only=True,
                          mmap=True)
     if "model" not in payload:
         raise RuntimeError(f"{ckpt_path} has no 'model' entry")

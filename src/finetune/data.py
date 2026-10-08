@@ -15,12 +15,18 @@ import torch
 
 from ..config import CAPTIONS, CORPUS, DATA_ROOT
 
+#: The SPEECH-COCO parquet export, which holds the photographs, captions and recordings.
+SOURCE = DATA_ROOT / "spokencoco_hf" / "data"
+
 #: The webdataset shards. The directory and shard names are part of
 #: :func:`fingerprint`, which every checkpoint provenance records.
 SHARDS = DATA_ROOT / "spokencoco-wds-288"
 
-#: Prefix of the scan, exclude list, manifest and provenance under ``CORPUS``.
-PREFIX = "speech-coco_"
+#: The records the shard and scan stages write under ``CORPUS``.
+SPEECH_COCO_MANIFEST = CORPUS / "speech-coco_manifest.parquet"
+SPEECH_COCO_PROVENANCE = CORPUS / "speech-coco_provenance.json"
+SPEECH_COCO_SCAN = CORPUS / "speech-coco_text_scan.jsonl"
+SPEECH_COCO_EXCLUDED = CORPUS / "speech-coco_excluded_keys.txt"
 
 #: ImageNet channel statistics, which the processor of every finetuned backbone uses.
 MEAN = (0.485, 0.456, 0.406)
@@ -60,7 +66,7 @@ def fingerprint() -> str:
 
 def corpus_size() -> int:
     """Samples in the corpus, as the shard stage recorded them."""
-    record = CORPUS / f"{PREFIX}provenance.json"
+    record = SPEECH_COCO_PROVENANCE
     if not record.exists():
         raise SystemExit(f"no corpus provenance at {record}; run "
                          f"scripts/finetune/speech_coco.py --shards")
@@ -69,7 +75,7 @@ def corpus_size() -> int:
 
 def excluded_keys(path: Path | None = None) -> set[str]:
     """Sample keys whose photograph the text scan found writing in."""
-    path = path or CORPUS / f"{PREFIX}excluded_keys.txt"
+    path = path or SPEECH_COCO_EXCLUDED
     if not path.exists():
         raise SystemExit(f"no exclude list at {path}. Run "
                          f"scripts/finetune/speech_coco.py --scan.")

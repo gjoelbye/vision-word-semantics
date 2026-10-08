@@ -21,11 +21,10 @@ import sys
 import torch
 
 from src.config import CHECKPOINTS, ensure_dirs
-from src.finetune import corpus
-from src.finetune.loop import run
+from src.finetune import data
 from src.finetune.model import JointModel
-from src.finetune.recipe import (MAX_EPOCHS, MICRO_BATCH, PATIENCE, Recipe,
-                                 schedule)
+from src.finetune.training import (MAX_EPOCHS, MICRO_BATCH, PATIENCE, Recipe,
+                                   run, schedule)
 from src.models import FINETUNES, MODELS, PARAMS_M
 
 WORKERS = 8
@@ -43,7 +42,7 @@ def train(backbone: str, tower: str) -> None:
     """Run one finetune and write its best checkpoint and provenance."""
     if backbone not in MICRO_BATCH:
         raise SystemExit(f"{backbone} is not finetuned; have {sorted(MICRO_BATCH)}")
-    kept = corpus.kept_size()
+    kept = data.kept_size()
     plan = schedule(kept)
     recipe = Recipe(backbone=backbone, tower=tower, steps=plan["steps"],
                     warmup=plan["warmup"], micro_batch=MICRO_BATCH[backbone])
@@ -53,16 +52,16 @@ def train(backbone: str, tower: str) -> None:
           f"{plan['validate_every']}, checkpoint every {plan['checkpoint_every']} | "
           f"{recipe.batch} images per step ({recipe.accumulation} x {recipe.micro_batch})")
 
-    cache = corpus.CaptionCache(tower)
-    exclude = corpus.excluded_keys()
+    cache = data.CaptionCache(tower)
+    exclude = data.excluded_keys()
     print(f"caption cache: {len(cache):,} vectors | text filter: "
           f"{len(exclude):,} samples excluded")
 
     model = JointModel(recipe)
-    train_loader = corpus.pipeline(recipe, train=True, cache=cache,
-                                   exclude=exclude, workers=WORKERS)
-    val_loader = corpus.pipeline(recipe, train=False, cache=cache,
+    train_loader = data.pipeline(recipe, train=True, cache=cache,
                                  exclude=exclude, workers=WORKERS)
+    val_loader = data.pipeline(recipe, train=False, cache=cache,
+                               exclude=exclude, workers=WORKERS)
 
     started = dt.datetime.now().isoformat(timespec="seconds")
     path, outcome = run(model, recipe, train_loader, val_loader, out=out,
@@ -76,7 +75,7 @@ def train(backbone: str, tower: str) -> None:
         "model": recipe.name,
         "base_model": backbone,
         "base_repo": MODELS[backbone].repo,
-        "corpus": corpus.described(),
+        "corpus": data.described(),
         "text_tower": tower,
         "train_step": int(payload["step"]),
         "best_step": int(payload["best_step"]),
@@ -90,7 +89,7 @@ def train(backbone: str, tower: str) -> None:
         "bytes": path.stat().st_size,
         "sha256": sha256(path),
         "recipe": recipe.to_dict(),
-        "shard_fingerprint": corpus.fingerprint(),
+        "shard_fingerprint": data.fingerprint(),
         "n_excluded": len(exclude),
         "caption_cache": True,
         "source": f"scripts/finetune/train.py --backbone {backbone} --tower {tower}",
