@@ -1,6 +1,6 @@
 """Clue gains, bootstrap intervals and sign-flip tests for the two-clue items.
 
-Reads the composition manifest of ``scripts/stimuli/two_clue.py`` and
+Reads the two-clue manifest of ``scripts/stimuli/two_clue.py`` and
 the final-layer class-token caches of the 14 image models written by
 ``scripts/features/embed.py --manifest two_clue``, and scores the 12
 confirmatory and the 6 pilot clue grids as separate analysis sets, with Holm
@@ -65,13 +65,13 @@ def validate_manifest(manifest: pd.DataFrame, manifest_sha: str) -> pd.DataFrame
         "slot", "replicate", "condition", "image_path",
     }
     if missing := required - set(manifest):
-        raise RuntimeError(f"composition manifest lacks {sorted(missing)}")
+        raise RuntimeError(f"two-clue manifest lacks {sorted(missing)}")
     validate_dense_blocks(manifest, n_equations=144, n_slots=96)
     meta = json.loads(MANIFEST_META_PATH.read_text())
     if (meta.get("manifest_sha") != manifest_sha
             or meta.get("render_complete") is not True
             or meta.get("rows") != len(manifest)):
-        raise RuntimeError("composition manifest metadata is stale or incomplete")
+        raise RuntimeError("two-clue manifest metadata is stale or incomplete")
     return (manifest.groupby("equation_id", sort=False).first().reset_index()[
         ["equation_id", "family_id", "split", "feature", "base", "target"]])
 
@@ -81,7 +81,7 @@ def load_cache(key: str, manifest_sha: str, n_rows: int) -> np.ndarray:
     path = EMBEDDINGS_ROOT / f"{key}.cls.npy"
     meta_path = EMBEDDINGS_ROOT / f"{key}.meta.json"
     if not path.exists() or not meta_path.exists():
-        raise FileNotFoundError(f"missing composition cache for {key}")
+        raise FileNotFoundError(f"missing two-clue cache for {key}")
     meta = json.loads(meta_path.read_text())
     checks = {
         "sha": meta.get("sha") == manifest_sha,

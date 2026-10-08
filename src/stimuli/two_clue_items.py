@@ -41,7 +41,7 @@ _IDENTIFIER = re.compile(r"^[a-z][a-z0-9_]*$")
 _SOURCE = re.compile(r"^(?:wordnet:[A-Za-z0-9_.-]+|https?://\S+)$")
 
 
-class CompositionValidationError(ValueError):
+class TwoClueValidationError(ValueError):
     """Raised when an item table fails its checks."""
 
 
@@ -55,7 +55,7 @@ def read_table(path: str | Path, split: str) -> pd.DataFrame:
     frame = pd.read_csv(path, sep="\t", dtype=str, keep_default_na=False)
     got = tuple(frame.columns)
     if got != COLUMNS:
-        raise CompositionValidationError(
+        raise TwoClueValidationError(
             f"{path} columns are {got}; expected exactly {COLUMNS}")
     frame = frame.copy()
     for column in COLUMNS:
@@ -294,7 +294,7 @@ def validate_datasets(pilot: pd.DataFrame, confirmatory: pd.DataFrame, *,
             frame.insert(0, "split", split)
         if set(COLUMNS) - set(frame.columns):
             missing = sorted(set(COLUMNS) - set(frame.columns))
-            raise CompositionValidationError(
+            raise TwoClueValidationError(
                 f"{split} table is missing columns {missing}")
         frames[split] = frame[["split", *COLUMNS]].copy()
         rows.extend(_validate_split(frames[split], split,
@@ -346,7 +346,7 @@ def require_valid(report: pd.DataFrame) -> None:
     if len(errors):
         names = ", ".join(
             f"{row.split}/{row.check}" for row in errors.head(8).itertuples())
-        raise CompositionValidationError(
+        raise TwoClueValidationError(
             f"{len(errors)} validation checks have errors: {names}")
 
 

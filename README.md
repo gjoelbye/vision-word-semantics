@@ -126,10 +126,10 @@ then runs the notebooks, which write figures to `figures/` and LaTeX tables to
 | `figure2_datasets` | Figure 2 |
 | `figure3_language_alignment` | Figure 3 |
 | `figure4_rendering` | Figure 4 |
-| `figure5_composition` | Figure 5, Tables 11 and 12 |
+| `figure5_two_clue` | Figure 5, Tables 11 and 12 |
 | `figure6_finetune` | Figure 6, Table 15 |
 | `table1_models` | Tables 1 and 4 to 7 |
-| `table2_concepts` | Tables 2 and 8 to 10 |
+| `table2_class_names` | Tables 2 and 8 to 10 |
 | `table3_wordlists` | Table 3 |
 | `table13_feature_models` | Tables 13 and 14 |
 

@@ -653,14 +653,14 @@ def _class_models(frame: pd.DataFrame) -> list[str]:
     return have
 
 
-def table2_concepts(concept_alignment: pd.DataFrame,
-                    concept_retrieval: pd.DataFrame) -> Table:
+def table2_class_names(class_alignment: pd.DataFrame,
+                       class_retrieval: pd.DataFrame) -> Table:
     """Matched cosine similarity and retrieval in both directions, on all photographs.
 
     A median rank has no standard error and no chance level, so it takes no
     underline, and bold marks its smallest value.
     """
-    align, retr = concept_alignment, concept_retrieval
+    align, retr = class_alignment, class_retrieval
     have = _class_models(align)
     full = align[align.subset.eq("all")].set_index("model")
     directions = ("word_to_class", "class_to_word")
@@ -697,8 +697,8 @@ def table2_concepts(concept_alignment: pd.DataFrame,
                                   se=se[j]))
         return cells
 
-    lines = [class_header("table2_concepts",
-                          ["concept_alignment", "concept_retrieval"],
+    lines = [class_header("table2_class_names",
+                          ["class_alignment", "class_retrieval"],
                           *_class_fingerprints(align, retr)),
              f"% Underlining marks a value above the untrained ViT-B by more "
              f"than {MARK_SIGMA} standard errors of the difference; bold marks "
@@ -726,15 +726,15 @@ def table2_concepts(concept_alignment: pd.DataFrame,
     lines += ["\\midrule",
               "Chance & " + " & ".join(chance_cells) + " \\\\",
               "\\bottomrule", "\\end{tabular*}"]
-    return _table("table2_concepts", lines, printed,
+    return _table("table2_class_names", lines, printed,
                   ["Matched cosine similarity", "Word to class top-10",
                    "Word to class median rank", "Class to word top-10",
                    "Class to word median rank"])
 
 
-def table8_concept_alignment(concept_alignment: pd.DataFrame) -> Table:
+def table8_class_alignment(class_alignment: pd.DataFrame) -> Table:
     """Matched cosine similarity with its standard error, null mean and p, and on text-free photographs."""
-    align = concept_alignment
+    align = class_alignment
     have = _class_models(align)
     full = align[align.subset.eq("all")].set_index("model")
     clean = align[align.subset.eq("text_free")].set_index("model")
@@ -757,7 +757,7 @@ def table8_concept_alignment(concept_alignment: pd.DataFrame) -> Table:
         return cells
 
     n_clean = int(clean.n_words.iloc[0])
-    lines = [class_header("table2_concepts", ["concept_alignment"],
+    lines = [class_header("table2_class_names", ["class_alignment"],
                           *_class_fingerprints(align)),
              "% One row per model. The small number after a value is its "
              "standard error over class names, the null mean is the mean matched cosine similarity "
@@ -782,13 +782,13 @@ def table8_concept_alignment(concept_alignment: pd.DataFrame) -> Table:
     lines += ["\\midrule",
               f"Chance & {chance_cells[0]} & & & {chance_cells[3]} \\\\",
               "\\bottomrule", "\\end{tabular*}"]
-    return _table("table8_concept_alignment", lines, printed,
+    return _table("table8_class_alignment", lines, printed,
                   ["All images", "Null mean", "p", "No detected text"])
 
 
-def table9_concept_retrieval(concept_retrieval: pd.DataFrame) -> Table:
+def table9_class_retrieval(class_retrieval: pd.DataFrame) -> Table:
     """Top-10 accuracy and median rank in both directions, and top-10 accuracy on text-free photographs."""
-    retr = concept_retrieval
+    retr = class_retrieval
     have = _class_models(retr)
     directions = ("word_to_class", "class_to_word")
     per = 3
@@ -830,7 +830,7 @@ def table9_concept_retrieval(concept_retrieval: pd.DataFrame) -> Table:
 
     heads = ("\\shortstack{Top-10\\\\accuracy} "
              "& \\shortstack{Median\\\\rank} & \\shortstack{No detected\\\\text}")
-    lines = [class_header("table2_concepts", ["concept_retrieval"],
+    lines = [class_header("table2_class_names", ["class_retrieval"],
                           *_class_fingerprints(retr)),
              "% One row per model, three columns per retrieval. Ties count for "
              "the correct candidate; the small number after a share is its "
@@ -854,19 +854,19 @@ def table9_concept_retrieval(concept_retrieval: pd.DataFrame) -> Table:
     lines += ["\\midrule",
               "Chance & " + " & ".join(chance_cells) + " \\\\",
               "\\bottomrule", "\\end{tabular*}"]
-    return _table("table9_concept_retrieval", lines, printed,
+    return _table("table9_class_retrieval", lines, printed,
                   [f"{d} {c}" for d in ("Word to class", "Class to word")
                    for c in ("top-10", "median rank", "top-10 no detected text")])
 
 
-def table10_concept_depth(concept_depth: pd.DataFrame) -> Table:
+def table10_class_depth(class_depth: pd.DataFrame) -> Table:
     """Matched cosine similarity and word-to-class top-10 accuracy at every cached depth after the input.
 
     Bold marks each model's largest value across depths. Nothing is
     underlined, because the depth profile carries no standard errors.
     """
     _check_groups()
-    depth, positions, labels, spread = _positions(concept_depth, ["alignment"])
+    depth, positions, labels, spread = _positions(class_depth, ["alignment"])
 
     def value(model: str, position: int, column: str) -> float:
         return float(_one(depth, model=model, layer_index=position)[column])
@@ -875,7 +875,7 @@ def table10_concept_depth(concept_depth: pd.DataFrame) -> Table:
               ("(b)", "Word-to-class top-10 accuracy.",
                "word_to_class_rate10",
                float(depth.word_to_class_chance10.iloc[0]), True))
-    lines = [class_header("table2_concepts", ["concept_depth"],
+    lines = [class_header("table2_class_names", ["class_depth"],
                           *_class_fingerprints(depth)),
              f"% Columns are the cached hidden states after the input layer, "
              f"labeled by the mean relative depth of each position; the widest "
@@ -914,5 +914,5 @@ def table10_concept_depth(concept_depth: pd.DataFrame) -> Table:
             lines += ["\\midrule",
                       "Chance & " + " & ".join(chance_cells) + " \\\\"]
         lines += ["\\bottomrule", "\\end{tabular*}"]
-    return _table("table10_concept_depth", lines, printed,
+    return _table("table10_class_depth", lines, printed,
                   [f"{d:.2f}" for d in labels], index_name="Block and model")

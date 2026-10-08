@@ -10,7 +10,7 @@ import pandas as pd
 
 from ..stats import (N_PERM, SUBSAMPLE_FRAC, binomial_se, permutation_p,
                      subsample_indices, subsample_summary)
-from .directions import CONCEPT_IMAGES, _rows, load_cache, manifest, retained
+from .directions import CLASS_IMAGES, _rows, load_cache, manifest, retained
 from .lexical import K
 
 
@@ -22,8 +22,8 @@ def class_coherence(key: str, layer: int = -1,
     length. For unit ``v_i`` the mean off-diagonal cosine is
     ``(||sum v_i||^2 - n) / (n (n - 1))``.
     """
-    x, _, _ = load_cache(key, ds=CONCEPT_IMAGES)
-    man = manifest(CONCEPT_IMAGES)
+    x, _, _ = load_cache(key, ds=CLASS_IMAGES)
+    man = manifest(CLASS_IMAGES)
     rows = _rows(subset)
     classes = retained(subset)
     index = {c: i for i, c in enumerate(classes)}
@@ -82,8 +82,8 @@ def word_class_rows(words: pd.Series, wnids: pd.Series,
         [index[w] for w in np.asarray(wnids)[keep]], int)
 
 
-def concept_alignment(T: np.ndarray, N: np.ndarray, rows: np.ndarray,
-                      target: np.ndarray, seed: int = 0) -> dict:
+def class_alignment(T: np.ndarray, N: np.ndarray, rows: np.ndarray,
+                    target: np.ndarray, seed: int = 0) -> dict:
     """Mean cosine between each word direction and its class direction.
 
     ``T`` and ``N`` are unit rows; ``rows`` picks the words and ``target`` their
@@ -107,8 +107,8 @@ def concept_alignment(T: np.ndarray, N: np.ndarray, rows: np.ndarray,
                 p=permutation_p(observed, null), n_permutations=N_PERM)
 
 
-def concept_retrieval(T: np.ndarray, N: np.ndarray, rows: np.ndarray,
-                      target: np.ndarray) -> list[dict]:
+def class_retrieval(T: np.ndarray, N: np.ndarray, rows: np.ndarray,
+                    target: np.ndarray) -> list[dict]:
     """Word-to-class and class-to-word retrieval, one row per direction.
 
     Each row carries the queries whose target ranks first (``hits``) and among

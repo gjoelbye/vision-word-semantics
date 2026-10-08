@@ -43,16 +43,16 @@ class Dataset:
 MAIN = Dataset("main", LEXICON / "manifest.parquet", EMBEDDINGS)
 
 #: The 200 class names, rendered on the same slots.
-CONCEPT_WORDS = Dataset("concept_words", RENDER_MANIFEST,
-                        EMBEDDINGS / "concepts" / "renders",
-                        produced_by="scripts/stimuli/class_images.py",
-                        rebuild="scripts/features/embed.py --manifest concepts")
+CLASS_NAMES = Dataset("class_names", RENDER_MANIFEST,
+                      EMBEDDINGS / "concepts" / "renders",
+                      produced_by="scripts/stimuli/class_images.py",
+                      rebuild="scripts/features/embed.py --manifest concepts")
 
 #: The ImageNet validation photographs of the classes.
-CONCEPT_IMAGES = Dataset("concept_images", IMAGE_MANIFEST,
-                         EMBEDDINGS / "concepts" / "images",
-                         produced_by="scripts/stimuli/class_images.py",
-                         rebuild="scripts/features/embed.py --manifest concepts")
+CLASS_IMAGES = Dataset("class_images", IMAGE_MANIFEST,
+                       EMBEDDINGS / "concepts" / "images",
+                       produced_by="scripts/stimuli/class_images.py",
+                       rebuild="scripts/features/embed.py --manifest concepts")
 
 
 class MissingCondition(FileNotFoundError):
@@ -222,7 +222,7 @@ SUBSETS = ("all", "text_free")
 
 
 def _rows(subset: str) -> pd.DataFrame:
-    man = manifest(CONCEPT_IMAGES)
+    man = manifest(CLASS_IMAGES)
     if subset == "all":
         return man
     if subset != "text_free":
@@ -247,8 +247,8 @@ def class_mean(key: str, layer: int = -1, subset: str = "all") -> np.ndarray:
     Each class is averaged over its photographs in ``subset``, and the mean over
     the retained classes is subtracted.
     """
-    x, _, _ = load_cache(key, ds=CONCEPT_IMAGES)
-    man = manifest(CONCEPT_IMAGES)
+    x, _, _ = load_cache(key, ds=CLASS_IMAGES)
+    man = manifest(CLASS_IMAGES)
     rows = _rows(subset)
     classes = retained(subset)
     index = {c: i for i, c in enumerate(classes)}

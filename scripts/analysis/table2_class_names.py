@@ -7,8 +7,8 @@ all photographs and on those with no detected text. It is also read for the
 change when a name's own background is left out, and for the coherence and
 nearest other class of each class. Across depth it is read for the matched
 cosine similarity and word-to-class top-10 accuracy. Writes the five
-``results/concept_*.parquet`` tables: alignment, retrieval, checks, classes and
-depth.
+``results/class_*.parquet`` tables: alignment, retrieval, checks, diagnostics
+and depth.
 """
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ import numpy as np
 import pandas as pd
 
 from src.analysis import word_class
-from src.analysis.directions import (CONCEPT_IMAGES, CONCEPT_WORDS, HEADLINE,
+from src.analysis.directions import (CLASS_IMAGES, CLASS_NAMES, HEADLINE,
                                      SUBSETS, DegenerateTau, class_mean,
                                      estimator, load_cache, manifest, retained,
                                      rownorm, word_order)
@@ -61,7 +61,7 @@ def referent_check(key: str, T_full: np.ndarray, words: pd.DataFrame,
     with_all, without, done = [], [], []
     for sl, members in sorted(by_slot.items()):
         other = tuple(x for x in every if x != sl)
-        T_less = rownorm(estimator(HEADLINE)(key, -1, other, ds=CONCEPT_WORDS))
+        T_less = rownorm(estimator(HEADLINE)(key, -1, other, ds=CLASS_NAMES))
         for i in members:
             with_all.append(float((T_full[r_all[i]] * N[target[i]]).sum()))
             without.append(float((T_less[r_all[i]] * N[target[i]]).sum()))
@@ -92,7 +92,7 @@ def depth_rows(key: str, words: pd.DataFrame,
     """Matched cosine and word-to-class top-10 accuracy at cached depths 1 to 9."""
     rows, target = word_class.word_class_rows(words.word, words.wnid, "all")
     rows = np.array([index[w] for w in words.word.iloc[rows]])
-    _, layers, n_layers = load_cache(key, ds=CONCEPT_WORDS)
+    _, layers, n_layers = load_cache(key, ds=CLASS_NAMES)
     out = []
     for i, layer in enumerate(layers):
         if i == 0:
@@ -101,7 +101,7 @@ def depth_rows(key: str, words: pd.DataFrame,
                       n_layers=int(n_layers),
                       relative_depth=round(float(layer) / n_layers, 4))
         try:
-            T = rownorm(estimator(HEADLINE)(key, i, ds=CONCEPT_WORDS))
+            T = rownorm(estimator(HEADLINE)(key, i, ds=CLASS_NAMES))
             N = rownorm(class_mean(key, i, "all"))
         except DegenerateTau:
             out.append(record | dict(alignment=np.nan,
@@ -120,43 +120,43 @@ def main() -> None:
     argparse.ArgumentParser(description=__doc__).parse_args()
     ensure_dirs()
     words = pd.read_parquet(LEXICON / "concepts.parquet")
-    vocab = list(word_order(CONCEPT_WORDS))
+    vocab = list(word_order(CLASS_NAMES))
     index = {w: i for i, w in enumerate(vocab)}
     words = words[words.word.isin(index)].reset_index(drop=True)
     own_slot = referent_slots(words)
     print(f"{len(vocab)} class names; {len(own_slot)} on their own background")
 
-    tables = {name: [] for name in ("concept_alignment", "concept_retrieval",
-                                    "concept_checks", "concept_classes",
-                                    "concept_depth")}
+    tables = {name: [] for name in ("class_alignment", "class_retrieval",
+                                    "class_checks", "class_diagnostics",
+                                    "class_depth")}
     for key in DEFAULT_SWEEP:
-        T_full = rownorm(estimator(HEADLINE)(key, -1, ds=CONCEPT_WORDS))
+        T_full = rownorm(estimator(HEADLINE)(key, -1, ds=CLASS_NAMES))
         for subset in SUBSETS:
             N = rownorm(class_mean(key, -1, subset))
             rows, target = word_class.word_class_rows(
                 words.word, words.wnid, subset)
             rows = np.array([index[w] for w in words.word.iloc[rows]])
-            tables["concept_alignment"].append(dict(
+            tables["class_alignment"].append(dict(
                 model=key, subset=subset, n_classes=len(N),
-                **word_class.concept_alignment(T_full, N, rows, target)))
-            for row in word_class.concept_retrieval(T_full, N, rows, target):
-                tables["concept_retrieval"].append(
+                **word_class.class_alignment(T_full, N, rows, target)))
+            for row in word_class.class_retrieval(T_full, N, rows, target):
+                tables["class_retrieval"].append(
                     dict(model=key, subset=subset, **row))
             del N
-        tables["concept_checks"].append(
+        tables["class_checks"].append(
             referent_check(key, T_full, words, index, own_slot))
-        tables["concept_classes"].append(class_rows(key, words))
+        tables["class_diagnostics"].append(class_rows(key, words))
         del T_full
-        tables["concept_depth"] += depth_rows(key, words, index)
+        tables["class_depth"] += depth_rows(key, words, index)
         load_cache.cache_clear()
         gc.collect()
         print(f"  {key}")
 
-    word_sha = fingerprint(manifest(CONCEPT_WORDS))
-    image_sha = fingerprint(manifest(CONCEPT_IMAGES))
+    word_sha = fingerprint(manifest(CLASS_NAMES))
+    image_sha = fingerprint(manifest(CLASS_IMAGES))
     for name, rows in tables.items():
-        frame = (pd.concat(rows, ignore_index=True) if name == "concept_classes"
-                 else pd.DataFrame(rows))
+        frame = (pd.concat(rows, ignore_index=True)
+                 if name == "class_diagnostics" else pd.DataFrame(rows))
         frame["word_manifest_sha"] = word_sha
         frame["image_manifest_sha"] = image_sha
         frame.to_parquet(RESULTS / f"{name}.parquet", index=False)

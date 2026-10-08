@@ -15,10 +15,10 @@ PY="${PYTHON:-python}"
 
 "$PY" scripts/analysis/figure1_neighbours.py
 "$PY" scripts/analysis/figure3_language_alignment.py
-"$PY" scripts/analysis/figure5_composition.py
+"$PY" scripts/analysis/figure5_two_clue.py
 "$PY" scripts/analysis/figure6_finetune.py
 "$PY" scripts/analysis/table1_models.py
-"$PY" scripts/analysis/table2_concepts.py
+"$PY" scripts/analysis/table2_class_names.py
 "$PY" -m jupyter nbconvert --to notebook --execute \
     --output-dir "${VIT_SEMANTIC_DATA:-data}/notebooks" \
     --ExecutePreprocessor.kernel_name=python3 notebooks/*.ipynb

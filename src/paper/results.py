@@ -14,11 +14,11 @@ from ..features import text
 from ..models import DEFAULT_SWEEP, PRETTY
 from ..stimuli.render import fingerprint
 from ..stimuli.two_clue_render import MANIFEST_PATH, load_curated_items, manifest_fingerprint
-from ..analysis.directions import CONCEPT_IMAGES, CONCEPT_WORDS, MAIN, manifest, word_order
+from ..analysis.directions import CLASS_IMAGES, CLASS_NAMES, MAIN, manifest, word_order
 
 #: The fingerprint columns a result table can carry, and the image set each names.
-_MANIFESTS = {"manifest_sha": MAIN, "word_manifest_sha": CONCEPT_WORDS,
-              "image_manifest_sha": CONCEPT_IMAGES}
+_MANIFESTS = {"manifest_sha": MAIN, "word_manifest_sha": CLASS_NAMES,
+              "image_manifest_sha": CLASS_IMAGES}
 
 
 def words() -> pd.DataFrame:

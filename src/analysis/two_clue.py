@@ -68,7 +68,7 @@ def row_unit(values: np.ndarray) -> np.ndarray:
     values = np.asarray(values, dtype=np.float32)
     norms = np.linalg.norm(values, axis=1, keepdims=True)
     if not np.isfinite(values).all():
-        raise ValueError("cannot score a non-finite composition vector")
+        raise ValueError("cannot score a non-finite two-clue vector")
     return np.divide(values, norms, out=np.zeros_like(values),
                      where=norms > 1e-12)
 
@@ -112,7 +112,7 @@ def target_metrics(items: pd.DataFrame,
     """
     missing = set((*READOUTS, "target")) - set(vectors)
     if missing:
-        raise ValueError(f"missing composition vectors: {sorted(missing)}")
+        raise ValueError(f"missing two-clue vectors: {sorted(missing)}")
     n = len(items)
     for name in (*READOUTS, "target"):
         if np.asarray(vectors[name]).shape[0] != n:
