@@ -17,8 +17,8 @@ from threadpoolctl import threadpool_limits
 from src import wordspeech, wordtext
 from src.config import LEXICON, RESULTS, SEED, SIMILARITY, ensure_dirs
 from src.models import DEFAULT_SWEEP
-from src.render import fingerprint
 from src.stats import benjamini_hochberg
+from src.stimuli.render import fingerprint
 from src.tau import manifest, word_order
 
 INDEX = SIMILARITY / "index.parquet"

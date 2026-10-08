@@ -4,7 +4,7 @@ text centers of the slots and the resolution of recorded paths are checked
 here too."""
 import pandas as pd
 
-from src.render import CLEAN, fingerprint
+from src.stimuli.render import CLEAN, fingerprint
 
 
 def _manifest(words, slots):
@@ -43,7 +43,7 @@ def test_fingerprint_is_stable():
 def test_the_centre_table_is_recorded_and_reused(tmp_path, monkeypatch):
     """The text centers depend on the widest word, so they are recorded once and
     a wider vocabulary that still fits reuses them."""
-    from src import render as R
+    from src.stimuli import render as R
 
     path = tmp_path / "centres.parquet"
     words = ("cat", "lemon", "structure")
@@ -58,7 +58,7 @@ def test_a_word_that_cannot_fit_the_recorded_centre_is_refused(tmp_path):
     existing renders."""
     import pytest
 
-    from src import render as R
+    from src.stimuli import render as R
 
     path = tmp_path / "centres.parquet"
     R.slot_centres(("cat", "lemon"), path=path)

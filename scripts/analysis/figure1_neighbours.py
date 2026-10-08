@@ -21,7 +21,7 @@ import pandas as pd
 from src import neighbors as NB
 from src.config import LEXICON, RESULTS, ensure_dirs
 from src.models import DEFAULT_SWEEP
-from src.render import fingerprint
+from src.stimuli.render import fingerprint
 from src.tau import HEADLINE, estimator, load_cache, manifest, rownorm, word_order
 
 #: Nearest words kept per query.

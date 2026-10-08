@@ -19,7 +19,7 @@ import pandas as pd
 from src import wordspeech, wordtext
 from src.config import SIMILARITY, ensure_dirs
 from src.models import DEFAULT_SWEEP
-from src.render import fingerprint
+from src.stimuli.render import fingerprint
 from src.tau import HEADLINE, estimator, manifest, rownorm, word_order
 
 #: Every matrix, in index order: the image models, the text encoders, the

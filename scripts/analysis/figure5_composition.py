@@ -1,6 +1,6 @@
 """Clue gains, bootstrap intervals and sign-flip tests for the two-clue items.
 
-Reads the composition manifest of ``scripts/stimuli/two_clue_stimuli.py`` and
+Reads the composition manifest of ``scripts/stimuli/two_clue.py`` and
 the final-layer class-token caches of the 14 image models written by
 ``scripts/features/embed.py --manifest two_clue``, and scores the 12
 confirmatory and the 6 pilot clue grids as separate analysis sets, with Holm
@@ -23,16 +23,16 @@ from src.composition_analysis import (
     target_metrics,
     validate_dense_blocks,
 )
-from src.composition_stimuli import (
+from src.config import RESULTS
+from src.models import DEFAULT_SWEEP
+from src.stats import holm
+from src.stimuli.two_clue_render import (
     EMBEDDINGS_ROOT,
     MANIFEST_META_PATH,
     MANIFEST_PATH,
     load_curated_items,
     manifest_fingerprint,
 )
-from src.config import RESULTS
-from src.models import DEFAULT_SWEEP
-from src.stats import holm
 
 BOOTSTRAP_SEED = 20260828
 N_BOOTSTRAP = 20_000

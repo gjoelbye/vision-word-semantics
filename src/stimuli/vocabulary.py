@@ -13,7 +13,7 @@ from functools import lru_cache
 import numpy as np
 import pandas as pd
 
-from .config import VOCABULARY_TSV
+from ..config import VOCABULARY_TSV
 from .typography import (FONT_FAMILIES, MONOSPACE_FAMILIES, crop_safe_window,
                          font_px, ink_mask, load_font)
 
@@ -260,7 +260,7 @@ def readme_markdown(vocabulary: pd.DataFrame, class_names: pd.DataFrame) -> str:
     pseudo = vocabulary.list == "pseudowords"
     out = [
         "_Generated from `vocabulary.tsv` and `class_names.tsv` by "
-        "`python scripts/stimuli/wordlists.py --readme`. Edit those files, "
+        "`python scripts/stimuli/vocabulary.py --readme`. Edit those files, "
         "not this page._",
         "",
         "# Word lists",
@@ -280,7 +280,7 @@ def readme_markdown(vocabulary: pd.DataFrame, class_names: pd.DataFrame) -> str:
         "## Reading the vocabulary",
         "",
         "```python",
-        "from src.lexicon import read_vocabulary",
+        "from src.stimuli.vocabulary import read_vocabulary",
         "",
         "vocabulary = read_vocabulary()",
         "# or, without the checks and renames:",
@@ -467,3 +467,136 @@ def orthographic_relatives(pairs: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(
         [dict(relation=row.relation, a=row.a, b=row.b) for row in bad],
         columns=["relation", "a", "b"])
+
+
+# --- letter overlap ----------------------------------------------------------
+
+def letter_overlap(pairs: list[tuple[str, str]], vocab: list[str],
+                   n_random: int = 2000, seed: int = 0) -> dict:
+    """Mean letter-set Jaccard within the pairs, against length-matched random word pairs.
+
+    Each random pair draws one word of the same length as each word of a real
+    pair, because letter-set overlap rises with word length.
+    """
+    def jaccard(a: str, b: str) -> float:
+        A, B = set(a), set(b)
+        return len(A & B) / len(A | B)
+
+    by_length: dict[int, list[str]] = {}
+    for w in vocab:
+        by_length.setdefault(len(w), []).append(w)
+
+    within = [jaccard(a, b) for a, b in pairs]
+    rng = np.random.default_rng(seed)
+    between = []
+    draws = max(1, n_random // max(1, len(pairs)))
+    for a, b in pairs:
+        for _ in range(draws):
+            x = rng.choice(by_length.get(len(a)) or vocab)
+            y = rng.choice(by_length.get(len(b)) or vocab)
+            if x != y:
+                between.append(jaccard(x, y))
+    return dict(n_pairs=len(within),
+                within=float(np.mean(within)) if within else float("nan"),
+                random=float(np.mean(between)) if between else float("nan"),
+                excess=float(np.mean(within) - np.mean(between))
+                if within and between else float("nan"))
+
+
+# --- the audit ---------------------------------------------------------------
+# Deterministic checks on the word set, run before it is rendered. A failed
+# blocking check stops rendering. The share of named entities is reported
+# rather than gated, because the geography pairs contain proper nouns by design.
+
+#: Largest allowed excess of letter overlap within a meaning relation over
+#: length-matched random word pairs.
+GATE_MAX_LETTER_EXCESS = 0.05
+
+#: Largest allowed Cramer's V between category and spelling cluster; the
+#: crossing makes it zero by construction.
+GATE_MAX_CRAMERS_V = 0.01
+
+
+def gate(name: str, detail: str, value, threshold, ok: bool,
+         blocking: bool = True) -> dict:
+    """One row of an audit report. A failed check is FAIL when blocking, else warn."""
+    return dict(gate=name, detail=detail, value=value, threshold=threshold,
+                status="pass" if ok else ("FAIL" if blocking else "warn"),
+                blocking=blocking)
+
+
+def audit_words(words: pd.DataFrame) -> list[dict]:
+    """One row counting the words wider than the crop-safe window at the largest size band."""
+    _, _, side = crop_safe_window()
+    over = words.loc[~words.fits, "word"].tolist() if "fits" in words else []
+    return [gate("render/fits",
+                 f"widest word {words.max_px.max():.0f}px against a {side}px "
+                 f"window" + (f", e.g. {', '.join(over[:5])}" if over else ""),
+                 int(len(over)), 0, len(over) == 0)]
+
+
+def audit_offensive(words: pd.DataFrame) -> list[dict]:
+    """One row counting the words on the blocklist or in an offensive WordNet usage domain."""
+    from nltk.corpus import wordnet as wn
+
+    bad = [w for w in words.word if is_blocked(w, wn.synsets(w))]
+    return [gate("words/offensive",
+                 "blocked strings in the rendered set"
+                 + (f": {', '.join(bad[:6])}" if bad else ""),
+                 len(bad), 0, not bad)]
+
+
+def audit_pairs_orthography(pairs: pd.DataFrame,
+                            vocab: list[str]) -> list[dict]:
+    """Rows checking that no meaning pair joins two forms of one word, and that no
+    meaning relation exceeds length-matched random pairs in letter overlap by
+    more than ``GATE_MAX_LETTER_EXCESS``."""
+    out = []
+    relatives = orthographic_relatives(pairs)
+    out.append(gate(
+        "pairs/orthography",
+        "meaning pairs whose two words are forms of each other"
+        + (f", e.g. {relatives.a.iloc[0]}/{relatives.b.iloc[0]}"
+           if len(relatives) else ""),
+        int(len(relatives)), 0, len(relatives) == 0))
+
+    for relation, group in pairs[pairs.kind == "meaning"].groupby("relation"):
+        ov = letter_overlap(list(zip(group.a, group.b)), vocab)
+        out.append(gate(
+            f"pairs/letters/{relation}",
+            f"letter overlap within the relation ({ov['within']:.3f}) against "
+            f"two random words ({ov['random']:.3f})",
+            round(ov["excess"], 4), GATE_MAX_LETTER_EXCESS,
+            ov["excess"] <= GATE_MAX_LETTER_EXCESS))
+    return out
+
+
+def audit_pairs_proper_nouns(pairs: pd.DataFrame) -> list[dict]:
+    """Share of each relation's words that WordNet knows only as a named entity; reported, never blocking."""
+    rows = []
+    for relation, group in pairs.groupby("relation"):
+        words = pd.concat([group.a, group.b])
+        share = float(np.mean([is_named_entity(w) for w in words]))
+        rows.append(gate(f"pairs/proper-nouns/{relation}",
+                         "share of the relation's words WordNet knows only as "
+                         "a named entity",
+                         round(share, 3), "reported, not gated",
+                         True, blocking=False))
+    return rows
+
+
+def report(rows: list[dict]) -> pd.DataFrame:
+    df = pd.DataFrame(rows)
+    # Thresholds mix numbers and strings, and a parquet column holds one type.
+    df["threshold"] = df["threshold"].astype(str)
+    order = {"FAIL": 0, "warn": 1, "pass": 2}
+    return df.sort_values("status", key=lambda s: s.map(order)).reset_index(drop=True)
+
+
+def summarise(df: pd.DataFrame) -> str:
+    failing = int(((df.status == "FAIL") & df.blocking).sum())
+    warn = int((df.status == "warn").sum())
+    verdict = ("READY TO RENDER" if failing == 0
+               else f"BLOCKED: {failing} gate(s) failing")
+    return (f"{verdict}   ({int((df.status == 'pass').sum())} pass, "
+            f"{warn} warn, {failing} fail)")

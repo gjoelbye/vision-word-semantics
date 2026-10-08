@@ -12,10 +12,10 @@ from functools import lru_cache
 import numpy as np
 import pandas as pd
 
-from .concepts import MIN_IMAGES
 from .neighbors import K, N_PERM, SUBSAMPLE_FRAC
 from .stats import (binomial_se, permutation_p, subsample_indices,
                     subsample_summary)
+from .stimuli.imagenet import MIN_IMAGES
 from .tau import CONCEPT_IMAGES, DegenerateTau, load_cache, manifest
 
 #: Photograph subsets a class direction can be built from: every photograph, or
@@ -38,7 +38,7 @@ def _rows(subset: str) -> pd.DataFrame:
 
 @lru_cache(maxsize=8)
 def retained(subset: str = "all") -> tuple[str, ...]:
-    """The classes with at least :data:`src.concepts.MIN_IMAGES` photographs in ``subset``, sorted by class id."""
+    """The classes with at least :data:`src.stimuli.imagenet.MIN_IMAGES` photographs in ``subset``, sorted by class id."""
     counts = _rows(subset).groupby("wnid").size()
     return tuple(sorted(counts.index[counts >= MIN_IMAGES]))
 

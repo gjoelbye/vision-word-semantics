@@ -10,10 +10,10 @@ from __future__ import annotations
 import pandas as pd
 
 from .. import wordtext
-from ..composition_stimuli import MANIFEST_PATH, load_curated_items, manifest_fingerprint
 from ..config import LEXICON, RESULTS
 from ..models import DEFAULT_SWEEP, PRETTY
-from ..render import fingerprint
+from ..stimuli.render import fingerprint
+from ..stimuli.two_clue_render import MANIFEST_PATH, load_curated_items, manifest_fingerprint
 from ..tau import CONCEPT_IMAGES, CONCEPT_WORDS, MAIN, manifest, word_order
 
 #: The fingerprint columns a result table can carry, and the image set each names.

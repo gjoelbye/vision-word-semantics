@@ -21,7 +21,7 @@ from tqdm import tqdm
 
 from .config import EMBEDDINGS, local_path
 from .models import free, has_class_token, hidden_size, load, select_layer_indices
-from .render import fingerprint
+from .stimuli.render import fingerprint
 
 N_LAYERS_SWEEP = 10
 

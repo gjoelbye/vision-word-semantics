@@ -15,10 +15,7 @@ from pathlib import Path
 import pandas as pd
 from PIL import Image
 
-from .config import BACKGROUNDS, CLASS_NAMES_TSV, CONCEPTS, DATA_ROOT
-
-#: The committed class-name list, one row per candidate with its decision.
-CONCEPT_LIST = CLASS_NAMES_TSV
+from ..config import BACKGROUNDS, CLASS_NAMES_TSV, CONCEPTS, DATA_ROOT
 
 IMAGES = CONCEPTS / "images"
 RENDER_MANIFEST = CONCEPTS / "manifest.parquet"
@@ -129,13 +126,13 @@ def image_path(wnid: str, key: str) -> Path:
     return IMAGES / wnid / f"{key}.png"
 
 
-def concept_words() -> pd.DataFrame:
+def kept_class_names() -> pd.DataFrame:
     """The kept rows of the committed class-name list, one per word."""
-    if not CONCEPT_LIST.exists():
+    if not CLASS_NAMES_TSV.exists():
         raise FileNotFoundError(
-            f"{CONCEPT_LIST} missing. It is the committed word list.")
-    table = pd.read_csv(CONCEPT_LIST, sep="\t")
+            f"{CLASS_NAMES_TSV} missing. It is the committed word list.")
+    table = pd.read_csv(CLASS_NAMES_TSV, sep="\t")
     kept = table[table.decision == "keep"].reset_index(drop=True)
     if kept.empty:
-        raise SystemExit(f"{CONCEPT_LIST} holds no kept rows")
+        raise SystemExit(f"{CLASS_NAMES_TSV} holds no kept rows")
     return kept

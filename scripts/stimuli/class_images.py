@@ -17,12 +17,12 @@ import torch
 from PIL import Image
 from tqdm import tqdm
 
-from src import concepts
-from src.audit import summarise
 from src.config import IMAGE_SIZE, LEXICON, ensure_dirs, local_path, manifest_path
-from src.render import CENTRES_PATH, build_manifest, fingerprint
-from src.slots import n_slots
-from src.textscan import reader, text_density
+from src.stimuli import imagenet
+from src.stimuli.render import CENTRES_PATH, build_manifest, fingerprint
+from src.stimuli.typography import n_slots
+from src.stimuli.vocabulary import summarise
+from src.text_detector import reader, text_density
 
 WORKERS = 12
 
@@ -37,37 +37,37 @@ def render() -> None:
     if ((audit.status == "FAIL") & audit.blocking).any():
         raise SystemExit("blocking gates are failing; fix lexicon/class_names.tsv")
 
-    words = sorted(concepts.concept_words().word)
+    words = sorted(imagenet.kept_class_names().word)
     print(f"{len(words):,} words x {n_slots()} slots x 2 conditions "
           f"+ {n_slots()} clean = {len(words) * n_slots() * 2 + n_slots():,} images")
     man = build_manifest(words, workers=WORKERS)
-    concepts.RENDER_MANIFEST.parent.mkdir(parents=True, exist_ok=True)
-    man.to_parquet(concepts.RENDER_MANIFEST)
+    imagenet.RENDER_MANIFEST.parent.mkdir(parents=True, exist_ok=True)
+    man.to_parquet(imagenet.RENDER_MANIFEST)
     print(f"wrote concepts/manifest.parquet: {len(man):,} rows")
     print(f"manifest fingerprint {fingerprint(man)[:16]}")
 
 
 def images() -> pd.DataFrame:
     """Write every validation photograph except the backgrounds; return their table in (class, key) order."""
-    skip = concepts.background_keys()
-    concepts.IMAGES.mkdir(parents=True, exist_ok=True)
+    skip = imagenet.background_keys()
+    imagenet.IMAGES.mkdir(parents=True, exist_ok=True)
     rows, n_skipped, n_failed = [], 0, 0
 
     def write_one(key: str, wnid: str, payload: bytes) -> str | None:
-        out = concepts.image_path(wnid, key)
+        out = imagenet.image_path(wnid, key)
         if out.exists():
             return manifest_path(out)
         out.parent.mkdir(parents=True, exist_ok=True)
         try:
-            concepts.square_resize(concepts.decode(payload), IMAGE_SIZE).save(out)
+            imagenet.square_resize(imagenet.decode(payload), IMAGE_SIZE).save(out)
         except Exception:                                     # noqa: BLE001
             return None
         return manifest_path(out)
 
     with ThreadPoolExecutor(max_workers=WORKERS) as pool:
-        for shard in tqdm(concepts.validation_shards(), desc="shards", unit="shard"):
+        for shard in tqdm(imagenet.validation_shards(), desc="shards", unit="shard"):
             batch = []
-            for key, wnid, payload in concepts.read_validation(shard):
+            for key, wnid, payload in imagenet.read_validation(shard):
                 if key in skip:
                     n_skipped += 1
                     continue
@@ -111,8 +111,8 @@ def scan(frame: pd.DataFrame) -> pd.DataFrame:
     per_class = merged.assign(clean=clean).groupby("wnid").clean.sum()
     print(f"\n{int(clean.sum()):,} of {len(merged):,} photographs carry no "
           f"detected text ({clean.mean():.1%})")
-    print(f"  classes with fewer than {concepts.MIN_IMAGES} text-free: "
-          f"{int((per_class < concepts.MIN_IMAGES).sum())}")
+    print(f"  classes with fewer than {imagenet.MIN_IMAGES} text-free: "
+          f"{int((per_class < imagenet.MIN_IMAGES).sum())}")
     return merged
 
 
@@ -121,7 +121,7 @@ def main() -> None:
     ensure_dirs()
     render()
     frame = scan(images())
-    frame.to_parquet(concepts.IMAGE_MANIFEST)
+    frame.to_parquet(imagenet.IMAGE_MANIFEST)
     print("wrote concepts/images.parquet")
     print(f"image manifest fingerprint {fingerprint(frame)[:16]}")
 

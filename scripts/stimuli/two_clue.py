@@ -11,7 +11,7 @@ from __future__ import annotations
 import argparse
 import json
 
-from src.composition_stimuli import (
+from src.stimuli.two_clue_render import (
     CONDITIONS,
     MANIFEST_META_PATH,
     build_manifest,
@@ -20,7 +20,7 @@ from src.composition_stimuli import (
     manifest_fingerprint,
     render_dataset,
 )
-from src.slots import n_slots
+from src.stimuli.typography import n_slots
 
 
 def main() -> None:

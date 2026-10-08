@@ -23,9 +23,8 @@ from src import neighbors as NB
 from src import tau
 from src.config import LEXICON, RESULTS, ensure_dirs
 from src.models import FINETUNES, TWIN_OF
-from src.render import fingerprint
-from src.slots import REPLICATES, slot_table, slots_for
-from src.typography import FACTORS
+from src.stimuli.render import fingerprint
+from src.stimuli.typography import FACTORS, REPLICATES, slot_table, slots_for
 
 #: The ten finetuned backbones, their finetunes, and CLIP-B for reference.
 MODELS = tuple(dict.fromkeys(TWIN_OF[k] for k in FINETUNES)) + FINETUNES + ("clip-b",)

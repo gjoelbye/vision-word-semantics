@@ -14,10 +14,10 @@ import pandas as pd
 from PIL import Image
 from tqdm import tqdm
 
-from .config import BACKGROUNDS, LEXICON, RENDERS, SEED, manifest_path
-from .slots import slot_table
+from ..config import BACKGROUNDS, LEXICON, RENDERS, SEED, manifest_path
 from .typography import (box_at_centre, crop_safe_window, legible_centre,
-                         render_overlay, render_scramble, text_extent)
+                         render_overlay, render_scramble, slot_table,
+                         text_extent)
 
 CLEAN = "__clean__"
 

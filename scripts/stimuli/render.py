@@ -12,10 +12,10 @@ import argparse
 
 import pandas as pd
 
-from src.audit import summarise
 from src.config import LEXICON, ensure_dirs
-from src.render import build_manifest, fingerprint
-from src.slots import n_slots
+from src.stimuli.render import build_manifest, fingerprint
+from src.stimuli.typography import n_slots
+from src.stimuli.vocabulary import summarise
 
 WORKERS = 12
 

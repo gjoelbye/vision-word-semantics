@@ -209,37 +209,3 @@ def purity_subsample(S: np.ndarray, labels: np.ndarray, k: int = K,
                                 for _ in range(n))])
     lo, hi, se = subsample_summary(point, draws, N, m)
     return dict(purity=float(point), ci_lo=lo, ci_hi=hi, se=se, n=N, m=m)
-
-
-# --- letter overlap ----------------------------------------------------------
-
-def letter_overlap(pairs: list[tuple[str, str]], vocab: list[str],
-                   n_random: int = 2000, seed: int = 0) -> dict:
-    """Mean letter-set Jaccard within the pairs, against length-matched random word pairs.
-
-    Each random pair draws one word of the same length as each word of a real
-    pair, because letter-set overlap rises with word length.
-    """
-    def jaccard(a: str, b: str) -> float:
-        A, B = set(a), set(b)
-        return len(A & B) / len(A | B)
-
-    by_length: dict[int, list[str]] = {}
-    for w in vocab:
-        by_length.setdefault(len(w), []).append(w)
-
-    within = [jaccard(a, b) for a, b in pairs]
-    rng = np.random.default_rng(seed)
-    between = []
-    draws = max(1, n_random // max(1, len(pairs)))
-    for a, b in pairs:
-        for _ in range(draws):
-            x = rng.choice(by_length.get(len(a)) or vocab)
-            y = rng.choice(by_length.get(len(b)) or vocab)
-            if x != y:
-                between.append(jaccard(x, y))
-    return dict(n_pairs=len(within),
-                within=float(np.mean(within)) if within else float("nan"),
-                random=float(np.mean(between)) if between else float("nan"),
-                excess=float(np.mean(within) - np.mean(between))
-                if within and between else float("nan"))

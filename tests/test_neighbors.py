@@ -3,6 +3,7 @@ import numpy as np
 import pytest
 
 from src import neighbors as NB
+from src.stimuli.vocabulary import letter_overlap
 
 
 def _blocked(n_per=25, n_class=4, d=32, seed=0, sep=3.0):
@@ -243,6 +244,6 @@ def test_retrieval_reports_each_direction_with_its_own_denominator():
 
 def test_letter_overlap_compares_against_random_pairs():
     vocab = ["france", "paris", "japan", "tokyo", "lemon", "shirt"]
-    same = NB.letter_overlap([("lemon", "lemon")], vocab, n_random=200)
+    same = letter_overlap([("lemon", "lemon")], vocab, n_random=200)
     assert same["within"] == pytest.approx(1.0)
     assert same["excess"] > 0

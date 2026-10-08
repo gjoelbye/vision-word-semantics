@@ -16,14 +16,13 @@ import pandas as pd
 from PIL import Image
 from tqdm import tqdm
 
-from .composition_items import (dataset_fingerprint, read_table,
-                                require_valid, validate_datasets)
-from .config import (BACKGROUNDS, COMPOSITION, TWO_CLUE_CONFIRMATORY_TSV,
-                     TWO_CLUE_PILOT_TSV, local_path, manifest_path)
-from .slots import slot_table
+from ..config import (BACKGROUNDS, COMPOSITION, TWO_CLUE_CONFIRMATORY_TSV,
+                      TWO_CLUE_PILOT_TSV, local_path, manifest_path)
+from .two_clue_items import (dataset_fingerprint, read_table,
+                             require_valid, validate_datasets)
 from .typography import (Box, box_at_centre, crop_safe_window,
                          legible_centre, render_overlay, render_scramble,
-                         text_extent)
+                         slot_table, text_extent)
 
 
 RENDERS_ROOT = COMPOSITION / "renders"

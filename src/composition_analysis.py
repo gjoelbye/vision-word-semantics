@@ -12,7 +12,7 @@ from collections.abc import Mapping
 import numpy as np
 import pandas as pd
 
-from .composition_stimuli import CONDITIONS
+from .stimuli.two_clue_render import CONDITIONS
 
 #: The difference vectors that are scored against the targets.
 READOUTS = ("joint", "feature", "base", "interaction")

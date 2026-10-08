@@ -6,7 +6,7 @@ import pandas as pd
 import pytest
 
 from src import tau as TAU
-from src.render import CLEAN
+from src.stimuli.render import CLEAN
 
 N_SLOTS, D = 4, 3
 WORDS = ["alpha", "beta"]

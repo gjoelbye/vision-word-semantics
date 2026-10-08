@@ -18,12 +18,13 @@ import gc
 import numpy as np
 import pandas as pd
 
-from src import concepts, nu
+from src import nu
 from src.config import BACKGROUNDS, LEXICON, RESULTS, ensure_dirs
 from src.models import DEFAULT_SWEEP
 from src.neighbors import K
-from src.render import fingerprint
-from src.slots import slot_table
+from src.stimuli import imagenet
+from src.stimuli.render import fingerprint
+from src.stimuli.typography import slot_table
 from src.tau import (CONCEPT_IMAGES, CONCEPT_WORDS, HEADLINE, DegenerateTau,
                      estimator, load_cache, manifest, rownorm, word_order)
 
@@ -31,7 +32,7 @@ from src.tau import (CONCEPT_IMAGES, CONCEPT_WORDS, HEADLINE, DegenerateTau,
 def referent_slots(words: pd.DataFrame) -> dict[str, list[int]]:
     """The slots whose background photograph shows the class a word names."""
     backgrounds = pd.read_parquet(BACKGROUNDS / "backgrounds.parquet")
-    bg_wnid = {int(r.background_index): concepts.wnids()[int(r.imagenet_label)]
+    bg_wnid = {int(r.background_index): imagenet.wnids()[int(r.imagenet_label)]
                for r in backgrounds.itertuples()}
     slot_of = {int(r.slot): bg_wnid.get(int(r.background_index))
                for r in slot_table().itertuples()}

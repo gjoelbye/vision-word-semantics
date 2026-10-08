@@ -17,11 +17,11 @@ import json
 
 import pandas as pd
 
-from src import composition_stimuli as two_clue
-from src import concepts
 from src.config import EMBEDDINGS, LEXICON, ensure_dirs
 from src.embed import embed_manifest
 from src.models import DEFAULT_SWEEP, FINETUNES
+from src.stimuli import imagenet
+from src.stimuli import two_clue_render as two_clue
 
 #: Images per forward pass, halved on an out-of-memory error.
 BATCH_SIZE = 128
@@ -29,7 +29,7 @@ BATCH_SIZE = 128
 #: The script that writes each manifest.
 PRODUCED_BY = {"main": "scripts/stimuli/render.py",
                "concepts": "scripts/stimuli/class_images.py",
-               "two_clue": "scripts/stimuli/two_clue_stimuli.py"}
+               "two_clue": "scripts/stimuli/two_clue.py"}
 
 
 def two_clue_manifest() -> tuple[pd.DataFrame, str]:
@@ -58,9 +58,9 @@ def main() -> None:
     if a.manifest == "main":
         jobs = [("vocabulary", LEXICON / "manifest.parquet", EMBEDDINGS)]
     elif a.manifest == "concepts":
-        jobs = [("class names", concepts.RENDER_MANIFEST,
+        jobs = [("class names", imagenet.RENDER_MANIFEST,
                  EMBEDDINGS / "concepts" / "renders"),
-                ("class photographs", concepts.IMAGE_MANIFEST,
+                ("class photographs", imagenet.IMAGE_MANIFEST,
                  EMBEDDINGS / "concepts" / "images")]
     else:
         jobs = [("two-clue items", two_clue.MANIFEST_PATH,

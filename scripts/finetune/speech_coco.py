@@ -154,7 +154,7 @@ def build_scan() -> None:
     import torch
     import webdataset as wds
 
-    from src.textscan import is_excluded, reader, text_density
+    from src.text_detector import is_excluded, reader, text_density
 
     path = CORPUS / f"{PREFIX}manifest.parquet"
     if not path.exists():

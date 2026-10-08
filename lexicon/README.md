@@ -1,4 +1,4 @@
-_Generated from `vocabulary.tsv` and `class_names.tsv` by `python scripts/stimuli/wordlists.py --readme`. Edit those files, not this page._
+_Generated from `vocabulary.tsv` and `class_names.tsv` by `python scripts/stimuli/vocabulary.py --readme`. Edit those files, not this page._
 
 # Word lists
 
@@ -9,7 +9,7 @@ No fingerprint covers the roles, pairs or categories in `vocabulary.tsv` and `cl
 ## Reading the vocabulary
 
 ```python
-from src.lexicon import read_vocabulary
+from src.stimuli.vocabulary import read_vocabulary
 
 vocabulary = read_vocabulary()
 # or, without the checks and renames:

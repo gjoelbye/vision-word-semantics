@@ -14,10 +14,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from .concepts import IMAGE_MANIFEST, RENDER_MANIFEST
 from .config import EMBEDDINGS, LEXICON
-from .render import CLEAN, fingerprint
-from .slots import split_halves
+from .stimuli.imagenet import IMAGE_MANIFEST, RENDER_MANIFEST
+from .stimuli.render import CLEAN, fingerprint
+from .stimuli.typography import split_halves
 
 
 @dataclass(frozen=True)

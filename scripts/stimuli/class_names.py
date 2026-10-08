@@ -15,12 +15,11 @@ import re
 import pandas as pd
 from wordfreq import zipf_frequency
 
-from src import audit, concepts
-from src.config import LEXICON, MAX_WORD_LENGTH, ensure_dirs
-from src.lexicon import is_blocked
-from src.render import CENTRES_PATH, slot_centres
-from src.slots import slot_table
-from src.typography import crop_safe_window
+from src.config import CLASS_NAMES_TSV, LEXICON, MAX_WORD_LENGTH, ensure_dirs
+from src.stimuli import imagenet, vocabulary
+from src.stimuli.render import CENTRES_PATH, slot_centres
+from src.stimuli.typography import crop_safe_window, slot_table
+from src.stimuli.vocabulary import is_blocked
 
 #: Zipf floor, the same as for the pair words of the vocabulary.
 ZIPF_FLOOR = 3.0
@@ -33,7 +32,7 @@ def gates(kept: pd.DataFrame) -> list[dict]:
     from nltk.corpus import wordnet as wn
 
     rows = []
-    g = audit.gate
+    g = vocabulary.gate
 
     bad_form = [w for w in kept.word if not WORD_PATTERN.fullmatch(str(w))]
     rows.append(g("concepts/form",
@@ -53,7 +52,7 @@ def gates(kept: pd.DataFrame) -> list[dict]:
                   + (f", e.g. {', '.join(dup_class[:5])}" if dup_class else ""),
                   len(dup_class), 0, not dup_class))
 
-    known = set(concepts.wnids())
+    known = set(imagenet.wnids())
     unknown = [w for w in kept.wnid if w not in known]
     rows.append(g("concepts/class_exists",
                   "every class id is one of the 1,000"
@@ -61,13 +60,13 @@ def gates(kept: pd.DataFrame) -> list[dict]:
                   len(unknown), 0, not unknown))
 
     mispaired = [f"{w}/{c}" for w, c in zip(kept.word, kept.wnid)
-                 if c not in concepts.classes_named(w)]
+                 if c not in imagenet.classes_named(w)]
     rows.append(g("concepts/word_names_its_class",
                   "every kept word is a name of the class it is paired with"
                   + (f": {', '.join(mispaired[:5])}" if mispaired else ""),
                   len(mispaired), 0, not mispaired))
 
-    ambiguous = [w for w in kept.word if len(concepts.classes_named(w)) > 1]
+    ambiguous = [w for w in kept.word if len(imagenet.classes_named(w)) > 1]
     rows.append(g("concepts/names_one_class",
                   "no kept word names two classes once case and the export's "
                   "disambiguating digits are normalised"
@@ -111,7 +110,7 @@ def gates(kept: pd.DataFrame) -> list[dict]:
 def composition(kept: pd.DataFrame, table: pd.DataFrame) -> list[dict]:
     """Non-blocking audit rows for the counts that describe the set."""
     rows = []
-    g = audit.gate
+    g = vocabulary.gate
     n = len(kept)
 
     def count(name, detail, value):
@@ -144,14 +143,14 @@ def main() -> None:
     argparse.ArgumentParser(description=__doc__).parse_args()
     ensure_dirs()
 
-    table = pd.read_csv(concepts.CONCEPT_LIST, sep="\t")
-    kept = concepts.concept_words()
-    print(f"{concepts.CONCEPT_LIST.name}: {len(table)} candidates, "
+    table = pd.read_csv(CLASS_NAMES_TSV, sep="\t")
+    kept = imagenet.kept_class_names()
+    print(f"{CLASS_NAMES_TSV.name}: {len(table)} candidates, "
           f"{len(kept)} kept")
 
     rows = gates(kept) + composition(kept, table)
-    report = audit.report(rows)
-    verdict = audit.summarise(report)
+    report = vocabulary.report(rows)
+    verdict = vocabulary.summarise(report)
     shown = report[report.gate.str.startswith("concepts/")]
     print(shown[["gate", "detail", "value", "threshold", "status"]]
           .to_string(index=False))
@@ -166,7 +165,7 @@ def main() -> None:
 
     words = kept.copy()
     words["zipf"] = [zipf_frequency(w, "en") for w in words.word]
-    words["class_name"] = words.wnid.map(concepts.class_names())
+    words["class_name"] = words.wnid.map(imagenet.class_names())
     words["n_slots"] = len(slot_table())
     words.to_parquet(LEXICON / "concepts.parquet")
     report.to_parquet(LEXICON / "concepts_audit.parquet")

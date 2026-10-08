@@ -1,6 +1,6 @@
 """The matched-appearance split behind the split-half cosine varies the background and nothing else."""
-from src import slots as S
-from src.typography import FACTORS, build_appearance_design
+from src.stimuli import typography as S
+from src.stimuli.typography import FACTORS, build_appearance_design
 
 #: Appearance tuples for the subset case, as a measurement on fewer images draws them.
 SUBSET = (0, 5, 11, 17)

@@ -25,9 +25,10 @@ import pandas as pd
 from PIL import Image
 from tqdm import tqdm
 
-from src.concepts import IMAGENET, image_key, square_resize
 from src.config import BACKGROUNDS, IMAGE_SIZE, SEED, ensure_dirs, manifest_path
-from src.slots import n_slots
+from src.stimuli.imagenet import IMAGENET, image_key, square_resize
+from src.stimuli.typography import n_slots
+from src.text_detector import LINK_THRESHOLD, LOW_TEXT, TEXT_THRESHOLD
 
 CLIP_REPO = "openai/clip-vit-base-patch16"
 
@@ -156,8 +157,8 @@ def ocr_confidence(paths: list[str], gpu: bool) -> list[float]:
                 rots = [None] if name == "plain" else [None, [30, -30]]
                 for rot in rots:
                     for _, txt, c in reader.readtext(
-                            arr, text_threshold=0.25, low_text=0.15,
-                            link_threshold=0.15, rotation_info=rot):
+                            arr, text_threshold=TEXT_THRESHOLD, low_text=LOW_TEXT,
+                            link_threshold=LINK_THRESHOLD, rotation_info=rot):
                         t = str(txt).strip()
                         # Rules out single-glyph hits on foliage and rock texture.
                         if len(t) >= 3 and any(ch.isalpha() for ch in t):

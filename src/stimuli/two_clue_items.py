@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from .config import SEED
+from ..config import SEED
 
 
 COLUMNS = (
@@ -209,9 +209,8 @@ def _lexical_checks(frame: pd.DataFrame, split: str) -> list[dict]:
     from nltk.corpus import wordnet as wn
     from wordfreq import zipf_frequency
 
-    from .lexicon import (fits_everywhere, is_blocked, is_named_entity,
-                          is_orthographic_relative)
-    from .neighbors import letter_overlap
+    from .vocabulary import (fits_everywhere, is_blocked, is_named_entity,
+                             is_orthographic_relative, letter_overlap)
 
     rows: list[dict] = []
     words = sorted(set(frame.feature) | set(frame.base) | set(frame.target))

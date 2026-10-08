@@ -1,7 +1,7 @@
 """Read the word set from ``lexicon/vocabulary.tsv`` and write the word, pair and audit tables.
 
 Writes ``lexicon/words.parquet`` (one row per word with its role, frequency and
-form metrics), ``lexicon/pairs.parquet`` (the pairs of ``src.lexicon.PAIRS``)
+form metrics), ``lexicon/pairs.parquet`` (the pairs of ``src.stimuli.vocabulary.PAIRS``)
 and ``lexicon/audit.parquet`` (the checks on the word set). Stops if a word
 does not fit the crop-safe window or a blocking gate fails. With ``--readme``
 it only writes the committed ``lexicon/README.md`` from the committed lists.
@@ -13,12 +13,12 @@ import argparse
 import pandas as pd
 from wordfreq import zipf_frequency
 
-from src import audit
-from src.concepts import concept_words
 from src.config import LEXICON, VOCABULARY_TSV, ensure_dirs
-from src.lexicon import (LISTS, PAIRS, add_form_metrics, crossing_passes,
-                         crossing_report, pair_table, read_vocabulary,
-                         readme_markdown)
+from src.stimuli import vocabulary as audit
+from src.stimuli.imagenet import kept_class_names
+from src.stimuli.vocabulary import (LISTS, PAIRS, add_form_metrics, crossing_passes,
+                                    crossing_report, pair_table, read_vocabulary,
+                                    readme_markdown)
 
 README = VOCABULARY_TSV.parent / "README.md"
 
@@ -39,7 +39,7 @@ def main() -> None:
                         help="write lexicon/README.md and stop")
     args = parser.parse_args()
     vocabulary = read_vocabulary()
-    readme = readme_markdown(vocabulary, concept_words())
+    readme = readme_markdown(vocabulary, kept_class_names())
     if args.readme:
         README.write_text(readme)
         print("wrote lexicon/README.md")

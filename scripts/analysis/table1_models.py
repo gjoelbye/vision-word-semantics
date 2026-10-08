@@ -26,8 +26,8 @@ from src import wordspeech, wordtext
 from src.config import LEXICON, RESULTS, SIMILARITY, ensure_dirs
 from src.items import build_items, sign_test, vocabulary_spread
 from src.models import DEFAULT_SWEEP
-from src.render import fingerprint
 from src.stats import binomial_se, holm
+from src.stimuli.render import fingerprint
 from src.tau import (HEADLINE, DegenerateTau, estimator, load_cache, manifest,
                      rownorm, shared_mean_share, word_order)
 
