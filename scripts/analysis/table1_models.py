@@ -1,12 +1,14 @@
 """Lexical readouts behind Tables 1, 4, 5, 6 and 7.
 
-For the 14 models it computes, at the final layer, partner retrieval, neighbour
-purity on the noun and brand lists, purity within spelling clusters, the
-centering share, the comparisons within an item and nearest-centroid accuracy
-on the held-out half; across depth, noun purity and capital retrieval; and for
-the 4 encoders, the final-layer readouts from their similarity matrices. Writes
-results/{retrieval,purity,letter_cluster,centering,items,latent_categories,
-depth,encoder_lexical}.parquet.
+Each of the 14 models is read at the final layer for partner retrieval,
+neighbor purity on the noun and brand lists, purity within spelling clusters,
+the centering share, the comparisons within an item and nearest-centroid
+accuracy on the held-out half. Across depth it is read for noun purity and
+capital retrieval. The 4 encoders are read for partner retrieval, neighbor
+purity, the comparisons within an item and nearest-centroid accuracy, from
+their similarity matrices and word vectors. Writes
+``results/{retrieval,purity,letter_cluster,centering,items,latent_categories,
+depth,encoder_lexical}.parquet``.
 """
 from __future__ import annotations
 
@@ -21,7 +23,7 @@ from scipy.stats import fisher_exact
 from src import categories as CAT
 from src import neighbors as NB
 from src import wordspeech, wordtext
-from src.config import LEXICON, RESULTS, ensure_dirs
+from src.config import LEXICON, RESULTS, SIMILARITY, ensure_dirs
 from src.items import build_items, sign_test, vocabulary_spread
 from src.models import DEFAULT_SWEEP
 from src.render import fingerprint
@@ -31,7 +33,7 @@ from src.tau import (HEADLINE, DegenerateTau, estimator, load_cache, manifest,
 
 #: The encoders in table order: the three text encoders, then the speech encoder.
 ENCODERS = wordtext.TEXT_MODELS + wordspeech.SPEECH_MODELS
-#: The estimator each kind of encoder is indexed under in ``similarity.parquet``.
+#: The estimator each kind of encoder is indexed under in ``similarity/index.parquet``.
 ESTIMATOR_OF = {"text": "carrier_mean_96", "speech": "rendition_mean_96"}
 #: Table 1's plural-or-base column pools these relations over their summed pairs.
 POOLED = ("negation_base", "singular_plural")
@@ -161,8 +163,8 @@ def final_layer(key: str, lex: SimpleNamespace) -> dict[str, list[dict]]:
                          f"not the final layer {n_layers}")
     out = {name: [] for name in ("retrieval", "purity", "letter_cluster",
                                  "centering", "items", "latent_categories")}
-    # The centering share is read on the uncentred directions, then they are
-    # centred as the headline estimator does.
+    # The centering share is computed on the uncentered word directions, which
+    # are then centered as ``estimator(HEADLINE)`` centers them.
     base = estimator("residual")(key, -1)
     out["centering"].append(dict(model=key,
                                  shared_mean_share=shared_mean_share(base)))
@@ -229,12 +231,12 @@ def depth_rows(key: str, lex: SimpleNamespace) -> list[dict]:
 
 def encoder_rows(key: str, index_row: pd.Series,
                  lex: SimpleNamespace) -> list[dict]:
-    """The final-layer readouts of one encoder, from its similarity matrix."""
+    """The final-layer readouts of one encoder, from its similarity matrix and word vectors."""
     vocab, index = lex.vocab, lex.index
     kind = str(index_row.kind)
     if index_row.estimator != ESTIMATOR_OF.get(kind):
         raise SystemExit(f"{key} is indexed as {kind} {index_row.estimator}")
-    cosine = np.load(RESULTS / "similarity" / f"{key}.npy")
+    cosine = np.load(SIMILARITY / f"{key}.npy")
     if cosine.shape != (len(vocab), len(vocab)):
         raise SystemExit(f"the {key} matrix is {cosine.shape}, not "
                          f"{len(vocab)} square")
@@ -309,7 +311,7 @@ def encoder_rows(key: str, index_row: pd.Series,
             n=int(take.sum()), m=np.nan, hits10=pd.NA, chance=np.nan,
             method="count"))
 
-    # Nearest-centroid accuracy needs the centred, unit-length vectors the
+    # Nearest-centroid accuracy needs the centered, unit-length vectors the
     # matrix was built from.
     loader = wordspeech if kind == "speech" else wordtext
     vectors = loader.load(key, vocab)
@@ -358,7 +360,7 @@ def main() -> None:
     tables["items"] = items
 
     word_sha = wordtext.fingerprint(lex.vocab)
-    index = pd.read_parquet(RESULTS / "similarity.parquet").set_index("model")
+    index = pd.read_parquet(SIMILARITY / "index.parquet").set_index("model")
     encoders = []
     for key in ENCODERS:
         if key not in index.index or index.loc[key, "word_sha"] != word_sha:

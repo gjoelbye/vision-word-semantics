@@ -1,7 +1,7 @@
-"""The word set spoken by a synthesiser and heard by a frozen speech encoder.
+"""The word set spoken by a synthesizer and heard by a frozen speech encoder.
 
 Each word is spoken in 96 renditions, eight voices by three speaking rates by
-four carrier sentences, with the synthesiser's noise scales at zero. The
+four carrier sentences, with the synthesizer's noise scales at zero. The
 encoder's frames that cover the target word are pooled into four relative
 bins, and the 96 vectors are averaged.
 """
@@ -15,7 +15,7 @@ import numpy as np
 from .config import WORD_SPEECH
 from .models import ENCODERS
 
-#: The multi-speaker synthesiser. Its output is resampled to ``SAMPLE_RATE``.
+#: The multi-speaker synthesizer. Its output is resampled to ``SAMPLE_RATE``.
 TTS_REPO = "kakao-enterprise/vits-vctk"
 
 SAMPLE_RATE = 16000
@@ -55,7 +55,7 @@ def cache_dir(key: str) -> Path:
 def token_span(tokenizer, carrier: str, word: str) -> tuple[int, int]:
     """The token indices covering ``word`` inside ``carrier.format(w=word)``.
 
-    The tokenizer phonemises and then interleaves a blank between every phoneme,
+    The tokenizer phonemizes and then interleaves a blank between every phoneme,
     so token ``2i + 1`` carries phoneme character ``i``. The target is located
     as the run of its own phonemes inside the carrier's phonemes.
     """
@@ -125,7 +125,7 @@ def synthesise(model, tokenizer, text: str, speaker: int, rate: float,
 
 def pool_span(hidden: np.ndarray, wave_length: int,
               span: tuple[int, int]) -> np.ndarray:
-    """The target's frames, resampled into ``BINS`` bins and concatenated."""
+    """The target's frames, averaged within ``BINS`` consecutive bins and concatenated."""
     frames = len(hidden)
     lo = int(round(frames * span[0] / wave_length))
     hi = int(round(frames * span[1] / wave_length))
@@ -158,7 +158,7 @@ def alignment_score(tokenizer, tts, features, tower, probe, device) -> float:
     """Share of probe words whose two cut-outs identify each other.
 
     Each word is cut out of two different carriers, and a cut identifies its
-    word when, after centring, it is nearest the other cut of the same word.
+    word when, after centering, it is nearest the other cut of the same word.
     """
     first, second = [], []
     for word in probe:
@@ -182,7 +182,7 @@ def build(words, *, device: str = "cuda", verify: bool = True,
           probe: int = 24) -> np.ndarray:
     """Vectors of every rendition, shaped ``(words, 96, BINS * width)``.
 
-    The caller averages over axis 1.
+    The mean over axis 1 is the word's vector.
     """
     from transformers import AutoFeatureExtractor, AutoModel, AutoTokenizer, VitsModel
 

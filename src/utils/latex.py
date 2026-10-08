@@ -41,7 +41,7 @@ def above_baseline(value: float, se: float, base: float, base_se: float) -> bool
     return value - base > MARK_SIGMA * (se ** 2 + base_se ** 2) ** 0.5
 
 
-#: The colour name and gray level of a banded row group.
+#: The color name and gray level of a banded row group.
 BAND = ("tabband", 0.94)
 
 #: The sentence every table file adds to its note about the bands.
@@ -55,7 +55,7 @@ def band(index: int) -> str:
 
 
 def band_colour() -> str:
-    """The line that defines the band colour."""
+    """The line that defines the band color."""
     return f"\\definecolor{{{BAND[0]}}}{{gray}}{{{BAND[1]}}}"
 
 
@@ -163,7 +163,7 @@ def zero(value: float, digits: int = 3) -> str:
 
 
 def _sources(sources: list[str]) -> str:
-    return ", ".join(f"data/results/{s}.parquet" for s in sources)
+    return ", ".join(f"results/{s}.parquet" for s in sources)
 
 
 def header(notebook: str, sources: list[str], manifest_sha: str) -> str:

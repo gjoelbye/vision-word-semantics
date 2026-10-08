@@ -16,7 +16,7 @@ import torch.nn as nn
 from .config import WORD_TEXT
 from .models import ENCODERS
 
-#: Context the carriers are tokenised into. :func:`embed` checks on every batch
+#: Token length every carrier is padded to. :func:`embed` checks on every batch
 #: that a pad token survives, so no carrier is truncated.
 CONTEXT = 48
 
@@ -148,8 +148,8 @@ def embed(key: str, words, *, device: str = "auto", batch_size: int = 64
           ) -> tuple[np.ndarray, str]:
     """``(per-carrier vectors, device used)``, shaped ``(words, 96, width)``.
 
-    The caller averages over axis 1. ``device`` of ``auto`` uses the GPU and
-    falls back to the processor when the weights do not fit.
+    The mean over axis 1 is the word's vector. ``device`` of ``auto`` uses the
+    GPU and falls back to the CPU when the weights do not fit.
     """
     words = list(words)
     tokenize = tokenizer(key, CONTEXT)
@@ -196,9 +196,9 @@ def embed(key: str, words, *, device: str = "auto", batch_size: int = 64
 def crossing_gap(per_carrier: np.ndarray) -> tuple[float, float]:
     """``(within-frame, between-frame)`` mean similarity of carrier signatures.
 
-    A carrier's signature is the mean of its word vectors, centred over
-    carriers. The variants of a frame should be more alike than variants of
-    different frames.
+    A carrier's signature is the mean of its word vectors, centered over
+    carriers. Variants of one frame are expected to be more alike than variants
+    of different frames.
     """
     signature = per_carrier.mean(0)
     signature = signature - signature.mean(0, keepdims=True)

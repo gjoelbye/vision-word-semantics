@@ -1,9 +1,9 @@
 """How much writing the CRAFT text detector finds in a photograph.
 
 Only detection runs, no recognition. A scan records the box count and the share
-of the frame the boxes cover, and :func:`is_excluded` turns a record into a
-verdict. The class photographs and the SPEECH-COCO photographs are scanned this
-way.
+of the frame the boxes cover, and :func:`is_excluded` decides from that record
+whether a photograph is excluded. The class photographs and the SPEECH-COCO
+photographs are scanned this way.
 """
 from __future__ import annotations
 

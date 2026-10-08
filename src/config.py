@@ -1,8 +1,10 @@
 """Paths and project-wide constants.
 
-Everything the pipeline generates or downloads lives under :data:`DATA_ROOT`,
-which is ``data/`` in the repository root unless the ``VIT_SEMANTIC_DATA``
-environment variable names another directory.
+Everything the pipeline downloads, and every cache it generates, lives under
+`DATA_ROOT`, which is `data/` in the repository root unless the
+`VIT_SEMANTIC_DATA` environment variable names another directory. The analysis
+outputs the paper reads, `RESULTS`, `FIGURES` and `TABLES`, are small and
+committed, so they sit in the repository root.
 """
 from __future__ import annotations
 
@@ -21,9 +23,16 @@ BACKGROUNDS = DATA_ROOT / "backgrounds"
 LEXICON = DATA_ROOT / "lexicon"
 RENDERS = DATA_ROOT / "renders"
 EMBEDDINGS = DATA_ROOT / "embeddings"
-RESULTS = DATA_ROOT / "results"
-FIGURES = DATA_ROOT / "figures"
-TABLES = DATA_ROOT / "tables"
+
+#: Word-by-word cosine matrices, one per model and encoder, and their index.
+SIMILARITY = DATA_ROOT / "similarity"
+
+#: The bold face cut from the installed variable sans for the figures.
+FONTS = DATA_ROOT / "fonts"
+
+RESULTS = REPO_ROOT / "results"
+FIGURES = REPO_ROOT / "figures"
+TABLES = REPO_ROOT / "tables"
 
 #: Finetuned backbone weights, one directory per finetuned model, each holding
 #: ``best.slim.pt`` and a ``provenance.json`` with the recipe and the step.
@@ -49,9 +58,9 @@ CONCEPTS = DATA_ROOT / "concepts"
 #: The two-clue experiment: its layout, manifest, renders and embedding caches.
 COMPOSITION = DATA_ROOT / "composition"
 
-_ALL_DIRS = (BACKGROUNDS, LEXICON, RENDERS, EMBEDDINGS, RESULTS, FIGURES,
-             TABLES, CHECKPOINTS, CORPUS, CAPTIONS, CONCEPTS, COMPOSITION,
-             WORD_TEXT, WORD_SPEECH)
+_ALL_DIRS = (BACKGROUNDS, LEXICON, RENDERS, EMBEDDINGS, SIMILARITY, RESULTS,
+             FIGURES, TABLES, CHECKPOINTS, CORPUS, CAPTIONS, CONCEPTS,
+             COMPOSITION, WORD_TEXT, WORD_SPEECH)
 
 
 #: The directory names that sit directly under a data root, where
@@ -111,5 +120,6 @@ CROP_SAFE_FRAC = 0.875
 # the crop-safe window.
 MAX_WORD_LENGTH = 10
 
-# Global seed. Every stochastic step derives its own generator from this.
+# Global seed. Stimulus construction, the untrained ViT-B and the finetuning
+# runs derive their generators from it.
 SEED = 20260821

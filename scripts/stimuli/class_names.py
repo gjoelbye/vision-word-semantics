@@ -1,10 +1,11 @@
-"""Read the class names from ``lexicon/concepts.tsv``, check them, and write the tables.
+"""Check the class names of ``lexicon/concepts.tsv`` and write the class-name tables.
 
-Recomputes every rule that is arithmetic (form, uniqueness, the class the word
-names, frequency, blocked words, fit at the recorded centres) and counts the
-recorded judgments. Writes ``lexicon/concepts.parquet`` and
-``lexicon/concepts_audit.parquet``, and stops if a blocking gate fails. Runs
-after ``scripts/stimuli/render.py``, whose centres the names must fit.
+Every rule that can be recomputed from the table is checked again: form,
+uniqueness, the class each word names, frequency, blocked words and fit at the
+recorded text centers. The recorded decisions are counted, not checked. Writes
+``lexicon/concepts.parquet`` and ``lexicon/concepts_audit.parquet``, and stops
+if a blocking gate fails. Run it after ``scripts/stimuli/render.py``, which
+records the text centers the names must fit.
 """
 from __future__ import annotations
 
@@ -21,14 +22,14 @@ from src.render import CENTRES_PATH, slot_centres
 from src.slots import slot_table
 from src.typography import crop_safe_window
 
-#: The frequency floor, the one the vocabulary's pair words meet.
+#: Zipf floor, the same as for the pair words of the vocabulary.
 ZIPF_FLOOR = 3.0
 
 WORD_PATTERN = re.compile(rf"^[a-z]{{3,{MAX_WORD_LENGTH}}}$")
 
 
 def gates(kept: pd.DataFrame) -> list[dict]:
-    """Every rule that can be recomputed, recomputed."""
+    """One audit row for each rule that can be recomputed from the table."""
     from nltk.corpus import wordnet as wn
 
     rows = []
@@ -88,7 +89,7 @@ def gates(kept: pd.DataFrame) -> list[dict]:
                   + (f": {', '.join(blocked[:6])}" if blocked else ""),
                   len(blocked), 0, not blocked))
 
-    # The names are drawn at the centres the vocabulary fixed.
+    # The names are drawn at the text centers recorded for the vocabulary.
     _, _, side = crop_safe_window()
     widest = int(kept.max_px.max()) if "max_px" in kept else 0
     fits = True
@@ -97,7 +98,7 @@ def gates(kept: pd.DataFrame) -> list[dict]:
         try:
             slot_centres(tuple(sorted(kept.word)))
             detail += ", and every word fits at every recorded centre"
-        except ValueError as exc:                            # noqa: BLE001
+        except ValueError as exc:
             fits = False
             detail = str(exc).replace("\n", " ")[:200]
     else:
@@ -108,7 +109,7 @@ def gates(kept: pd.DataFrame) -> list[dict]:
 
 
 def composition(kept: pd.DataFrame, table: pd.DataFrame) -> list[dict]:
-    """The counts that describe the set, recorded rather than gated."""
+    """Non-blocking audit rows for the counts that describe the set."""
     rows = []
     g = audit.gate
     n = len(kept)

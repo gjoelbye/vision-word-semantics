@@ -1,6 +1,6 @@
 """The three blocks of comparisons within an item, built from the word lists.
 
-Each item holds an anchor and two competitors, and the readout asks which
+Each item holds an anchor and two competitors, and is scored by which
 competitor is nearer to the anchor. The blocks depend on the lexicon alone, so
 vision models and encoders are scored on the same items.
 """
@@ -11,7 +11,8 @@ import pandas as pd
 
 BLOCKS = (
     # name, the relation giving the kept competitor, the relation giving the
-    # competitor it is measured against, and the two column names.
+    # competitor it is measured against, the two column names, and the number
+    # of items.
     ("synonym_vs_twin", "synonym", "spelling_twin", "synonym", "twin", 150),
     ("synonym_vs_antonym", "antonym_synonym", "antonym", "synonym", "antonym", 50),
     ("synonym_vs_base", "negation", "negation_base", "synonym", "base", 35),
@@ -19,11 +20,12 @@ BLOCKS = (
 
 
 def build_items(pairs: pd.DataFrame, words: pd.DataFrame) -> dict:
-    """The three blocks as frames with ``anchor``, ``kept``, ``other`` and the anchor's class.
+    """The three blocks as frames with ``anchor``, ``kept`` and ``other``.
 
-    Built from ``pairs.parquet`` by joining two relations on their shared
-    anchor; raises SystemExit if a block's size or the 75/75 class split of
-    block 1 changes.
+    ``class`` holds the anchor's picturability from the word table. Built from
+    ``pairs.parquet`` by joining two relations on their shared anchor. Raises
+    SystemExit unless every block has its number of items and block 1 holds 75
+    concrete and 75 abstract anchors.
     """
     picturability = dict(zip(words.word, words.picturability))
     chars = dict(zip(words.word, words.n_chars))

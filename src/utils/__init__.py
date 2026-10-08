@@ -3,7 +3,7 @@ from __future__ import annotations
 
 
 def _number(value: float) -> str:
-    """Four decimals, or three significant digits for a value too small to show at four."""
+    """Four decimals, or three significant digits for a nonzero value below 5e-5 in size."""
     return f"{value:.2e}" if 0 < abs(value) < 5e-5 else f"{value:.4f}"
 
 

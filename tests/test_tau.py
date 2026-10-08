@@ -1,6 +1,6 @@
-"""The paired difference has to subtract the right scrambled control from the
-right word image. The indexing is easy to get subtly wrong and impossible to
-notice afterwards, so it is checked against a case with a known answer."""
+"""The paired difference subtracts from each word image the scrambled control
+of the same word and slot. An indexing error leaves no trace in the result, so
+the difference is checked on synthetic features with a known answer."""
 import numpy as np
 import pandas as pd
 import pytest
@@ -10,9 +10,9 @@ from src.render import CLEAN
 
 N_SLOTS, D = 4, 3
 WORDS = ["alpha", "beta"]
-# A made-up truth: each background contributes its own vector, the word adds
-# its effect on top, and the scrambled word adds its own ink. The paired
-# difference must recover the word effect minus the ink exactly.
+# Synthetic features: each background contributes its own vector, the word
+# adds its effect on top, and the scrambled word adds its own ink. The paired
+# difference recovers the word effect minus the ink.
 BG = np.arange(N_SLOTS * D, dtype=np.float32).reshape(N_SLOTS, D)
 WORD_EFFECT = {"alpha": np.array([1.0, -2.0, 0.5], np.float32),
                "beta": np.array([-3.0, 0.25, 4.0], np.float32)}
@@ -97,11 +97,10 @@ def test_slot_subset_still_recovers_it(synthetic):
 
 
 def test_degenerate_layer_raises_instead_of_scoring_zero(monkeypatch):
-    """At hidden-state index 0 the CLS token has not seen the image: it is the
-    learned initial parameter, identical for a word and its scrambled control,
-    so the paired difference is exactly zero. Scored naively that comes out as
-    an accuracy of 0.000, which reads like a catastrophic result rather than an
-    undefined one."""
+    """At hidden-state index 0 the class token is the learned initial
+    parameter, identical for a word and its scrambled control, so the paired
+    difference is exactly zero. Scoring it would report an accuracy of 0.000
+    where the value is undefined."""
     rows = _rows()
     const = np.ones((len(rows), 1, D), np.float16)      # same vector everywhere
     _install(monkeypatch, pd.DataFrame(rows), const)
@@ -110,9 +109,10 @@ def test_degenerate_layer_raises_instead_of_scoring_zero(monkeypatch):
 
 
 def test_the_untrained_floor_is_reproducible():
-    """Unseeded, AutoModel.from_config builds a different network every call,
-    so the floor every negative result is read against moves between runs and
-    "re-embed that model" quietly means "measure a different network"."""
+    """The untrained ViT-B is built from a fixed seed, so two loads return the
+    same weights. Unseeded, ``AutoModel.from_config`` would build a different
+    network on every call, and the untrained baseline would change between
+    runs."""
     from src.models import load
 
     first = next(load("vit-random-b", "cpu")[0].parameters())

@@ -1,12 +1,14 @@
-"""Nearest words, held-out country-to-capital offsets, and the Figure 1b projection.
+"""Nearest words, held-out country-to-capital offsets and the Figure 1b projection.
 
-For the 14 models it computes the four nearest words of every word among the
-other 1,560, the capitals ranked first with and without the mean
-country-to-capital offset of the other folds, and the cosine of each held-out
-offset with that mean against a null that re-pairs countries and capitals; for
-DINOv3-H it projects six country-capital pairs onto the mean offset of the
-other 54 pairs and the leading component of the six midpoints. Writes
-results/{neighbours,relation_offsets,figure1b_projection}.parquet.
+Each of the 14 models is read at the final layer. For every word, the four
+nearest words among the other 1,560 are recorded. For the 60 country-capital
+pairs in five folds, the number of capitals ranked first is counted with the
+country as the query, with and without the mean country-to-capital offset of
+the other folds, and the mean cosine between each held-out offset and that mean
+is tested against a null that re-pairs countries and capitals. For DINOv3-H,
+the six displayed pairs are projected onto the mean offset of the other 54
+pairs and the leading component of their midpoints. Writes
+``results/{neighbours,relation_offsets,figure1b_projection}.parquet``.
 """
 from __future__ import annotations
 
@@ -133,7 +135,7 @@ def unit(vector: np.ndarray) -> np.ndarray:
 
 
 def leading_component(matrix: np.ndarray) -> np.ndarray:
-    """Leading right-singular vector of the centred rows, signed so the largest projection is positive."""
+    """Leading right-singular vector of the centered rows, signed so the largest projection is positive."""
     centred = np.asarray(matrix, dtype=float)
     centred = centred - centred.mean(axis=0, keepdims=True)
     _, _, vh = np.linalg.svd(centred, full_matrices=False)

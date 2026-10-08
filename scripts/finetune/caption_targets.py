@@ -5,7 +5,7 @@ token of a 77-token left-padded context. The spoken captions are embedded with
 w2v-BERT 2.0, averaged over the unpadded encoder frames of each recording. Each
 cache is written under ``captions/speech-coco/<tower>/`` as float16
 ``vectors.npy``, ``keys.txt`` (sample keys) and ``meta.json``. A finished cache
-is skipped, and the speech pass resumes at the last finished parquet shard.
+is skipped, and the speech pass resumes after the last finished parquet shard.
 """
 from __future__ import annotations
 
@@ -46,7 +46,7 @@ def out_dir(tower: str) -> Path:
 
 
 def written(device: str) -> None:
-    """Qwen3-0.6B vectors of every caption in the shards, in shard order."""
+    """Embed every written caption in the shards with Qwen3-0.6B, in shard order, and write the cache."""
     import webdataset as wds
 
     repo, dim, _ = ENCODERS[TEXT_TOWER]
@@ -101,7 +101,7 @@ def written(device: str) -> None:
 
 
 def audio_rows(source: Path):
-    """``(caption_id, waveform)`` for one parquet shard, at 16 kHz float32."""
+    """``(caption_id, waveform)`` for each decodable recording of one parquet shard, at 16 kHz in float32."""
     from scipy.io import wavfile
 
     frame = pq.read_table(source, columns=["id", "audio"]).to_pandas()
@@ -117,7 +117,7 @@ def audio_rows(source: Path):
 
 
 def spoken(device: str) -> None:
-    """w2v-BERT 2.0 vectors of every recording, the mean over unpadded frames."""
+    """Embed every recording with w2v-BERT 2.0, as the mean over unpadded frames, and write the cache."""
     from transformers import AutoFeatureExtractor, AutoModel
 
     repo, dim, _ = ENCODERS[SPEECH_TOWER]

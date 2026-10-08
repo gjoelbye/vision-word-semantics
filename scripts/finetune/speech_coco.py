@@ -6,8 +6,8 @@ images resized to a short side of 288, two percent of the photographs held out
 for validation. It also writes ``corpus/speech-coco_manifest.parquet`` and
 ``corpus/speech-coco_provenance.json``. ``--scan`` runs the CRAFT detector once
 per photograph and writes ``corpus/speech-coco_text_scan.jsonl`` and
-``corpus/speech-coco_excluded_keys.txt``, every sample of a photograph with any
-detected text. With no flag both stages run.
+``corpus/speech-coco_excluded_keys.txt``, which lists every sample of a
+photograph with any detected text. With no flag both stages run.
 """
 from __future__ import annotations
 
@@ -210,7 +210,7 @@ def main() -> None:
     ap.add_argument("--shards", action="store_true",
                     help="rewrite the parquet export as webdataset shards")
     ap.add_argument("--scan", action="store_true",
-                    help="detect photographed text and write the exclude list")
+                    help="detect text in the photographs and write the exclude list")
     a = ap.parse_args()
     ensure_dirs()
     both = not (a.shards or a.scan)

@@ -1,8 +1,8 @@
-"""The scoring bug that produced a wrong headline, pinned.
+"""Cosine similarity separates words only once word directions are centered.
 
-Cosine on uncentred word directions puts every word near every other when most
+Cosine on uncentered word directions puts every word near every other when most
 of the energy sits in the direction all words share, so the similarity reports
-that text is present rather than which word it is. Centring removes that
+that text is present rather than which word it is. Centering removes that
 direction.
 """
 import numpy as np
@@ -22,9 +22,10 @@ SPECIFIC = {"alpha": np.array([0, 0, 0, 1.0, 0, 0], np.float32),
 
 
 def _install(monkeypatch, control: str | None):
-    """Word rows carry the shared and the word-specific part. ``control`` says
-    what the scrambled rows carry on top of the background: ``"background"``
-    nothing, ``"shared"`` the shared part, ``None`` no scrambled rows at all."""
+    """Install a synthetic manifest and cache whose word rows carry the shared
+    and the word-specific part. ``control`` sets what the scrambled rows carry
+    on top of the background: ``"background"`` nothing, ``"shared"`` the shared
+    part, ``None`` no scrambled rows at all."""
     rows = [dict(word=CLEAN, slot=s, condition="clean", image_path=f"/bg/{s}")
             for s in range(N_SLOTS)]
     for w in WORDS:

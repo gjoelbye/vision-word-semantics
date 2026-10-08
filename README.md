@@ -98,20 +98,9 @@ download on first use.
 
 The ImageNet-1k validation images and SPEECH-COCO, which holds the COCO images
 with written and spoken captions, take about 166 GB together.
-
-```bash
-hf download ILSVRC/imagenet-1k --repo-type dataset \
-    --revision 49e2ee26f3810fb5a7536bbf732a7b07389a47b5 \
-    --include "data/validation-*" --include classes.py \
-    --local-dir data/imagenet-1k
-
-hf download mteb/SpeechCoco --repo-type dataset \
-    --revision ba337542de8f4ee66cfc285b5eeb69c326dc1576 \
-    --include "data/*" --local-dir data/spokencoco_hf
-```
-
-To keep the data somewhere else, set `VIT_SEMANTIC_DATA` and change the
-`--local-dir` paths to match.
+[data/README.md](data/README.md) gives the download commands and lists what
+each stage writes under `data/`. To keep the data somewhere else, set
+`VIT_SEMANTIC_DATA`.
 
 ## Reproducing the paper
 
@@ -125,9 +114,9 @@ The four stages run in order, each reading what the one before wrote.
 | Compute the results, figures and tables | `bash scripts/run_analysis.sh` | CPU | about an hour |
 
 Each `run_*.sh` script lists its inputs at the top and says which steps resume
-after an interruption. The analysis stage runs the notebooks and writes figures
-to `data/figures/`, LaTeX tables to `data/tables/` and result tables to
-`data/results/` and `data/composition/results/`.
+after an interruption. The analysis stage writes result tables to `results/`,
+then runs the notebooks, which write figures to `figures/` and LaTeX tables to
+`tables/`. All three folders are committed.
 
 ### Notebooks
 
@@ -168,6 +157,9 @@ to `data/figures/`, LaTeX tables to `data/tables/` and result tables to
 | `src/` | Rendering, model loading, measurements and statistics |
 | `scripts/` | The four stages, one folder each, with a `run_*.sh` script per stage |
 | `notebooks/` | One notebook per figure or table group of the paper |
+| `results/` | The result tables the notebooks read; see [results/README.md](results/README.md) |
+| `figures/`, `tables/` | The paper's generated figures and LaTeX tables |
+| `data/` | Downloads and caches, not tracked; see [data/README.md](data/README.md) |
 
 ## Citation
 

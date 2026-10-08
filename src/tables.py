@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from .config import DATA_ROOT, TABLES
+from .config import REPO_ROOT, TABLES
 from .models import DEFAULT_SWEEP, PRETTY
 from .stats import binomial_se
 from .utils.latex import (BAND_NOTE, BASELINE, GROUPS, MARK_SIGMA, above_baseline,
@@ -31,11 +31,11 @@ class Table:
     tex: str
 
     def write(self) -> Path:
-        """Write ``tables/<name>.tex`` under the data root and return its path."""
+        """Write ``tables/<name>.tex`` and return its path."""
         TABLES.mkdir(parents=True, exist_ok=True)
         path = TABLES / f"{self.name}.tex"
         path.write_text(self.tex)
-        print(f"wrote {path.relative_to(DATA_ROOT)}")
+        print(f"wrote {path.relative_to(REPO_ROOT)}")
         return path
 
 
@@ -154,7 +154,7 @@ TABLE1_COLUMNS = (("category",), ("brand",), ("country_capital",), ("synonym",),
 
 def table1_models(purity: pd.DataFrame, retrieval: pd.DataFrame,
                   encoder_lexical: pd.DataFrame) -> Table:
-    """Neighbour purity on both lists and forward top-10 accuracy, with the encoders below."""
+    """Neighbor purity on both lists and forward top-10 accuracy, with the encoders below."""
     _check_groups()
     forward = retrieval[retrieval.direction.eq("forward")]
 
@@ -323,8 +323,8 @@ def table5_items(items: pd.DataFrame, retrieval: pd.DataFrame,
     _check_groups()
     head = items[items.record_type.eq("head_to_head")]
     contrast = items[items.record_type.eq("class_contrast")]
-    # Chance of a class count: the anchors whose synonym would fall within ten
-    # in either direction by chance.
+    # Chance of a class count: how many of 75 anchors are expected to have their
+    # synonym in the top 10 in either direction.
     within = float(retrieval.chance10.iloc[0])
     class_chance = 75 * (1 - (1 - within) ** 2)
     blocks = (("synonym_vs_twin", 150), ("synonym_vs_antonym", 50),
@@ -435,7 +435,7 @@ def table5_items(items: pd.DataFrame, retrieval: pd.DataFrame,
 
 def table6_category(purity: pd.DataFrame, latent_categories: pd.DataFrame,
                     encoder_lexical: pd.DataFrame) -> Table:
-    """Neighbour purity and nearest-centroid accuracy on both lists, each with its p.
+    """Neighbor purity and nearest-centroid accuracy on both lists, each with its p.
 
     Every p comes from a null that shuffles categories within word-length
     terciles.

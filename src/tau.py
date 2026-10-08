@@ -1,9 +1,9 @@
 """Word directions: the mean over slots of a word's embedding minus its scrambled control's.
 
 For a word ``w``, the direction is the mean over slots ``s`` of
-``f(background_s + w) - f(background_s + scramble_s(w))``, and the headline
-estimator, ``residual_centred``, subtracts the mean over words. Caches are
-checked against the manifest they were built from before they are read.
+``f(background_s + w) - f(background_s + scramble_s(w))``. The estimator the
+results use, ``residual_centred``, also subtracts the mean over words. Caches
+are checked against the manifest they were built from before they are read.
 """
 from __future__ import annotations
 
@@ -179,7 +179,7 @@ def shared_mean_share(T: np.ndarray) -> float:
 
 
 def estimator(name: str):
-    """The estimator called ``name``: ``residual`` (uncentred) or ``residual_centred``."""
+    """The estimator called ``name``: ``residual`` (uncentered) or ``residual_centred``."""
     table = {
         "residual": lambda k, l=-1, s=None, *, ds=MAIN:
             residual_tau(k, l, s, center=False, ds=ds),
@@ -202,8 +202,9 @@ def rownorm(x: np.ndarray) -> np.ndarray:
 def split_half_cosine(key: str, appearances, layer: int = -1) -> float:
     """Mean over words of the cosine between the two matched-appearance halves.
 
-    Each half's word directions come from the headline estimator on that half's
-    slots, restricted to ``appearances`` (``None`` keeps every appearance tuple).
+    Each half's word directions come from the ``HEADLINE`` estimator on that
+    half's slots, restricted to ``appearances`` (``None`` keeps every appearance
+    tuple).
     """
     a, b = split_halves(appearances)
     ta = rownorm(estimator(HEADLINE)(key, layer, tuple(a)))

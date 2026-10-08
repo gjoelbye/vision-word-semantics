@@ -1,7 +1,7 @@
 """The class names and the ImageNet-1k validation photographs of their classes.
 
 Each class name names exactly one ImageNet-1k class. The names are drawn on the
-96 slots from the recorded centres, so a name that is also in the vocabulary is
+96 slots at the recorded centers, so a name that is also in the vocabulary is
 the same image file. The photographs are every validation image of every class,
 except the 96 used as backgrounds.
 """
@@ -27,12 +27,13 @@ IMAGE_MANIFEST = CONCEPTS / "images.parquet"
 #: The ImageNet-1k parquet export: ``data/validation-*.parquet`` and ``classes.py``.
 IMAGENET = DATA_ROOT / "imagenet-1k"
 
-#: Fewest text-free images a class needs to enter the text-free subset.
+#: Fewest photographs a class needs in a subset, all or text-free, to be
+#: retained in it.
 MIN_IMAGES = 32
 
 
 def square_resize(img: Image.Image, size: int) -> Image.Image:
-    """Centre-crop to a square and resize with Lanczos, as for the backgrounds."""
+    """Center-crop to a square and resize with Lanczos, as for the backgrounds."""
     w, h = img.size
     side = min(w, h)
     img = img.crop(((w - side) // 2, (h - side) // 2,
@@ -78,7 +79,7 @@ def _lemma_index() -> dict[str, frozenset[str]]:
 
 
 def classes_named(word: str) -> frozenset[str]:
-    """The classes a word is a name of, under the normalisation of :func:`_lemma_index`."""
+    """The classes a word is a name of, under the normalization of :func:`_lemma_index`."""
     return _lemma_index().get(word.strip().lower(), frozenset())
 
 

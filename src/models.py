@@ -1,4 +1,4 @@
-"""Registry of every network the project reads, and how each is loaded.
+"""Registry of the image backbones and frozen encoders, and how each backbone is loaded.
 
 The sweep holds fourteen pretrained image backbones: the DINOv3, DINOv2 and MAE
 ladders, Web-DINO-1B, CLIP-B and SigLIP2-B, and an untrained ViT-B. Each of ten
@@ -46,7 +46,7 @@ _SPECS = [
     ModelSpec("vit-random-b", "google/vit-base-patch16-224", "random", "Untrained", 86),
 ]
 
-#: The fourteen pretrained backbones, in reading order.
+#: The fourteen pretrained backbones, in the row order of the tables.
 DEFAULT_SWEEP = ("dinov3-b", "dinov3-l", "dinov3-h", "dinov3-7b",
                  "webssl-dino-1b",
                  "dinov2-b", "dinov2-l", "dinov2-g",

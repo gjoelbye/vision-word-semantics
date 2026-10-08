@@ -26,7 +26,11 @@ BLOCK_FIELDS = (
 
 def validate_dense_blocks(manifest: pd.DataFrame, *, n_equations: int,
                           n_slots: int) -> None:
-    """Prove that dense ``(equation, slot, condition)`` reshaping is valid."""
+    """Raise unless the rows reshape to ``(equation, slot, condition)`` blocks.
+
+    Within a block the conditions follow ``CONDITIONS`` and every field of
+    ``BLOCK_FIELDS`` is constant, and each equation holds every slot once.
+    """
     required = set((*BLOCK_FIELDS, "condition"))
     if missing := required - set(manifest):
         raise ValueError(f"manifest lacks dense-layout fields {sorted(missing)}")
@@ -74,8 +78,10 @@ def row_unit(values: np.ndarray) -> np.ndarray:
 def condition_vectors(block: np.ndarray) -> dict[str, np.ndarray]:
     """Reduce ``(slot, condition, dimension)`` embeddings to five directions.
 
-    Each difference is taken in float32 within a slot and then averaged over
-    slots.
+    Within a slot and in float32, ``joint``, ``feature`` and ``base`` subtract
+    the image with both clues scrambled, and ``target`` subtracts the scrambled
+    target. Each is then averaged over slots, and ``interaction`` is
+    ``joint - feature - base``.
     """
     block = np.asarray(block, dtype=np.float32)
     if block.ndim != 3 or block.shape[1] != len(CONDITIONS):

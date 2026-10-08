@@ -1,12 +1,14 @@
 """Select the 96 background photographs from the ImageNet-1k validation split.
 
-About 9,000 validation photographs are sampled, centre-cropped to 256 pixels
-and screened: the frame must be informative (luminance spread, colour, no flat
-tone), the centre neither blank nor too busy, and the photograph free of text
-under OCR at its original resolution, upscaled and high-passed at three scales
-and two rotations. The survivors are ranked by a CLIP score against prompts for
-good and for poor photographs, at most one per class, and the top 96 are
-written as ``backgrounds/bg_000.png`` to ``bg_095.png`` with
+About 9,000 validation photographs are sampled and center-cropped to 256
+pixels. A photograph is kept when the frame is informative (luminance spread,
+entropy and color, no dominant flat tone, little pure white or black) and its
+center is neither blank nor too busy. The kept photographs are ranked by a CLIP
+score against prompts for good and for poor photographs, and the best of each
+class, up to 200, are checked for text by OCR. OCR reads the full-size
+photograph upscaled to at least 1,200 pixels on the long edge, and three
+high-pass versions of it, each also rotated 30 degrees either way. The first 96
+with no text are written as ``backgrounds/bg_000.png`` to ``bg_095.png`` with
 ``backgrounds/backgrounds.parquet``. The candidate pools live in a temporary
 directory.
 """
@@ -53,6 +55,7 @@ AESTHETIC_NEGATIVE = [
 
 
 def describe(img: Image.Image) -> dict:
+    """Clutter, tone and color statistics of one square photograph."""
     rgb = np.asarray(img, dtype=np.float32) / 255.0
     grey = rgb.mean(2)
     lap = (-4 * grey
@@ -77,7 +80,7 @@ def describe(img: Image.Image) -> dict:
 
 
 def load_candidates(n_scan: int, pool: Path) -> pd.DataFrame:
-    """Sample validation photographs into ``pool``, square and at full size, and describe them."""
+    """Save sampled validation photographs into ``pool``, square and full size; return their statistics."""
     import pyarrow.parquet as pq
 
     shards = sorted((IMAGENET / "data").glob("validation-*.parquet"))
@@ -117,10 +120,10 @@ HP_RADII = (0.008, 0.02, 0.04)
 
 
 def _watermark_variants(path: str, upscale: int = 1200) -> dict[str, "np.ndarray"]:
-    """The picture upscaled, plus high-passes at the ``HP_RADII`` scales.
+    """The photograph upscaled, and its high-pass versions at the ``HP_RADII`` scales.
 
     Subtracting a heavy blur removes the scene's tones and leaves a faint
-    overlay such as a stock watermark on flat grey.
+    overlay, such as a stock watermark, on flat gray.
     """
     from PIL import ImageFilter, ImageOps
 
@@ -206,7 +209,7 @@ def main() -> None:
     gpu = torch.cuda.is_available()
     n = n_slots()
 
-    # About 4 GB of candidates, so the pool sits beside the output, not in /tmp.
+    # The candidates take about 4 GB, so the pool sits beside the output rather than in /tmp.
     with tempfile.TemporaryDirectory(dir=BACKGROUNDS, prefix="_pool_") as pool:
         df = load_candidates(N_SCAN, Path(pool))
         print(f"scanned {len(df)} ImageNet validation images "

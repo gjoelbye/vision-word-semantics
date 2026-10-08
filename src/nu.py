@@ -61,7 +61,7 @@ def class_mean(key: str, layer: int = -1, subset: str = "all") -> np.ndarray:
 
     out = np.zeros((len(classes), x.shape[2]), np.float32)
     count = np.zeros(len(classes))
-    # Read the memory-mapped cache in blocks, one layer at a time.
+    # Sum the memory-mapped rows of the one layer in blocks of 4096.
     for start in range(0, len(position), 4096):
         chunk = position[start:start + 4096]
         block = np.asarray(x[chunk, layer, :], np.float32)
@@ -84,7 +84,7 @@ def class_coherence(key: str, layer: int = -1,
                     subset: str = "all") -> np.ndarray:
     """Mean cosine between two photographs of a class, one number per retained class.
 
-    Photographs are centred on the mean over all photographs and scaled to unit
+    Photographs are centered on the mean over all photographs and scaled to unit
     length. For unit ``v_i`` the mean off-diagonal cosine is
     ``(||sum v_i||^2 - n) / (n (n - 1))``.
     """

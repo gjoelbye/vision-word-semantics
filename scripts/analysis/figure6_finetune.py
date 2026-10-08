@@ -4,12 +4,12 @@ The models are the ten finetuned backbones, their twenty SPEECH-COCO finetunes
 and CLIP-B. Word directions come from 4 images per word, the four backgrounds
 of one typography setting drawn at random five times, and from all 96. For each
 model and image count, ``results/finetune_effect.parquet`` holds the mean
-(``value``) and standard deviation (``spread``) over the draws of: noun purity
-among the 10 nearest nouns (``purity``, ``common_noun``); the share of
-country-capital and synonym pairs, queried in both directions, whose partner is
-among the 10 nearest words (``retrieval``); and the split-half cosine
-(``reliability``, ``tau``, k 0). ``results/finetune_draws.parquet`` lists the
-typography setting of every draw.
+(``value``) and standard deviation (``spread``) over the draws of three
+readouts: noun purity among the 10 nearest nouns (``purity``, ``common_noun``);
+top-10 accuracy for country-capital and for synonym pairs, each pair queried in
+both directions (``retrieval``, with the relation as task); and the split-half
+cosine (``reliability``, ``tau``, k 0). ``results/finetune_draws.parquet``
+lists the typography setting of every draw.
 """
 from __future__ import annotations
 
@@ -37,7 +37,7 @@ IMAGE_COUNTS = (4, 96)
 DRAWS = 5
 SEED = 0
 
-#: Neighbourhood size for retrieval and purity.
+#: Neighbors counted for retrieval and purity.
 K = 10
 
 #: The retrieval relations.

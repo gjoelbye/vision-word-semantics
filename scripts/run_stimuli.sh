@@ -8,7 +8,8 @@
 #   class_images.py use a GPU when one is present.
 # Time: a few hours.
 # Resumes: render.py, class_images.py and two_clue_stimuli.py keep the images
-#   already written. backgrounds.py, wordlists.py and class_names.py start over.
+#   already written, and class_images.py repeats its text scan. backgrounds.py,
+#   wordlists.py and class_names.py start over.
 # Before: nothing. It needs the ImageNet-1k parquet export under imagenet-1k/
 #   in the data root, the six font families of src/typography.py and NLTK
 #   WordNet.

@@ -17,7 +17,7 @@ def infonce(image: torch.Tensor, text: torch.Tensor,
             logit_scale: torch.Tensor) -> torch.Tensor:
     """Mean of the image-to-caption and caption-to-image cross-entropies.
 
-    ``image`` and ``text`` are L2-normalised ``(batch, dim)``; row ``i`` of each
+    ``image`` and ``text`` are L2-normalized ``(batch, dim)``; row ``i`` of each
     is a true pair.
     """
     logits = logit_scale * image @ text.t()

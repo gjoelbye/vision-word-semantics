@@ -1,8 +1,8 @@
 """Standard errors, subsampling intervals, permutation p-values and p-value corrections.
 
-Words are never resampled with replacement, because a duplicated word is its
-own nearest neighbour and inflates purity. Subsamples are drawn without
-replacement, and a share over pairs or items takes the binomial standard error.
+Words are subsampled without replacement, because a duplicated word is its own
+nearest neighbor and inflates purity. A share over pairs or items takes the
+binomial standard error.
 """
 from __future__ import annotations
 
@@ -23,7 +23,7 @@ def subsample_summary(point: float, draws: np.ndarray, n: int,
 
     Both rescale the spread of the draws by the finite-population factor
     ``sqrt(m (n - 1) / (n (n - m)))``: the interval rescales their percentiles
-    about their mean and centres them on ``point``, and the standard error
+    about their mean and centers them on ``point``, and the standard error
     rescales their standard deviation. The draws keep their own dtype.
     """
     draws = np.asarray(draws)

@@ -18,17 +18,17 @@ from .config import WORD_LISTS
 from .typography import (FONT_FAMILIES, MONOSPACE_FAMILIES, crop_safe_window,
                          font_px, ink_mask, load_font)
 
-REFERENCE_PX = 100          # metrics are measured here and scaled linearly
+REFERENCE_PX = 100          # font size at which advance widths are measured
 
-# Letters whose glyphs rise above or fall below the x-height. Word shape, the
-# outline a reader sees before resolving individual letters, is largely this.
+# Letters whose glyphs rise above or fall below the x-height, which set the
+# outline of a word.
 ASCENDERS = set("bdfhklt")
 DESCENDERS = set("gjpqy")
 
 
 @lru_cache(maxsize=None)
 def _char_metrics(family: str) -> tuple[dict[str, float], dict[str, float]]:
-    """Per-character advance width and ink area at ``REFERENCE_PX``."""
+    """Per-character advance width at ``REFERENCE_PX`` and ink area at the largest size band."""
     font = load_font(family, REFERENCE_PX)
     adv = {c: float(font.getlength(c)) for c in "abcdefghijklmnopqrstuvwxyz"}
     area = {c: float(ink_mask(family, _band_for_reference(), c).sum())
@@ -44,7 +44,7 @@ def _band_for_reference() -> str:
 
 @lru_cache(maxsize=None)
 def _ink_scale(family: str) -> float:
-    """Convert the reference band's ink area to ems squared."""
+    """Factor from square pixels at the largest size band to square ems."""
     return 1.0 / (font_px(_band_for_reference()) ** 2)
 
 
@@ -61,13 +61,13 @@ def rendered_ink_em2(word: str, family: str) -> float:
 
 
 def max_rendered_px(word: str, size_band: str) -> float:
-    """Widest this word gets, in pixels, over every font at this size band."""
+    """Largest advance width of ``word`` in pixels, over every font at ``size_band``."""
     return max(rendered_width_em(word, f) * font_px(size_band)
                for f in FONT_FAMILIES)
 
 
 def fits_everywhere(word: str) -> bool:
-    """Does the word stay inside the crop-safe window in every slot?"""
+    """Whether the word is no wider than the crop-safe window in every font at every size band."""
     from .typography import SIZE_BAND_NAMES
     _, _, side = crop_safe_window()
     return all(max_rendered_px(word, b) <= side for b in SIZE_BAND_NAMES)
@@ -79,7 +79,7 @@ def add_form_metrics(df: pd.DataFrame, word_col: str = "word") -> pd.DataFrame:
     words = out[word_col].tolist()
     prop_fonts = [f for f in FONT_FAMILIES if f not in MONOSPACE_FAMILIES]
 
-    # Width averaged over the slots that can express width variation at all.
+    # Averaged over the proportional fonts; a monospace font gives every letter one width.
     out["width_em"] = [float(np.mean([rendered_width_em(w, f) for f in prop_fonts]))
                        for w in words]
     out["ink_em2"] = [float(np.mean([rendered_ink_em2(w, f) for f in prop_fonts]))
@@ -104,7 +104,7 @@ def anagram_key(word: str) -> str:
 
 
 def edit_distance(a: str, b: str) -> int:
-    """Levenshtein distance. Small strings, so the simple table is fine."""
+    """Levenshtein distance, from the full dynamic-programming table."""
     if a == b:
         return 0
     prev = list(range(len(b) + 1))
@@ -218,7 +218,13 @@ def is_named_entity(word: str, synsets=None) -> bool:
 
 
 def is_orthographic_relative(a: str, b: str) -> bool:
-    """Whether two strings are inflectional or derivational forms."""
+    """Whether two strings are inflectional or derivational forms of one word.
+
+    Two strings are related when one contains the other, when they share a
+    prefix of at least four letters and their edit distance is at most half the
+    longer length, when the longer less a derivational ending is that close to
+    the shorter, or when WordNet lists them as derivationally related forms.
+    """
     from nltk.corpus import wordnet as wn
 
     if a == b:

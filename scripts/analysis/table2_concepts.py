@@ -1,12 +1,14 @@
 """Readouts between class names and class photographs behind Tables 2, 8, 9 and 10.
 
-For the 14 models it computes, at the final layer, the matched cosine
-similarity between each class name's word direction and its class direction
-with a permutation null, retrieval in both directions on all photographs and on
-those with no detected text, the change when a name's own background is left
-out, and per-class diagnostics; across depth, the matched cosine similarity and
-word-to-class top-10 accuracy. Writes the five results/concept_*.parquet
-tables: alignment, retrieval, checks, classes and depth.
+Each of the 14 models is read at the final layer for the matched cosine
+similarity between each class name's word direction and the visual direction
+of its class, with a permutation null, and for retrieval in both directions, on
+all photographs and on those with no detected text. It is also read for the
+change when a name's own background is left out, and for the coherence and
+nearest other class of each class. Across depth it is read for the matched
+cosine similarity and word-to-class top-10 accuracy. Writes the five
+``results/concept_*.parquet`` tables: alignment, retrieval, checks, classes and
+depth.
 """
 from __future__ import annotations
 
@@ -43,7 +45,7 @@ def referent_slots(words: pd.DataFrame) -> dict[str, list[int]]:
 
 def referent_check(key: str, T_full: np.ndarray, words: pd.DataFrame,
                    index: dict[str, int], own_slot: dict[str, list[int]]) -> dict:
-    """Mean matched cosine of the affected words with every slot and without their own."""
+    """Mean matched cosine of the names drawn on a background of their own class, with and without that slot."""
     N = rownorm(nu.class_mean(key, -1, "all"))
     rows, target = nu.word_class_rows(words.word, words.wnid, "all")
     words_kept = list(words.word.iloc[rows])

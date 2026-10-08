@@ -2,9 +2,10 @@
 
 ``latest.pt`` holds the weights, optimizer moments and random generator states
 at a fixed cadence, so an interrupted run continues the same trajectory.
-``best.slim.pt`` holds the weights at the lowest validation loss and is what
-the rest of the project reads. Both are written through a temporary file and
-renamed. The learning rate warms up linearly and then decays on a cosine.
+``best.slim.pt`` holds the weights at the lowest validation loss and is the
+file :func:`src.models.load` reads for a finetuned model. Both are written
+through a temporary file and renamed. The learning rate warms up linearly and
+then decays on a cosine.
 """
 from __future__ import annotations
 
@@ -194,7 +195,7 @@ def run(model, recipe, train_loader, val_loader, *, out: Path,
             return out / "best.slim.pt", f"interrupted at step {done}"
 
     if best_step == 0:
-        # No validation improved, so the final weights are the ones kept.
+        # No validation recorded a best, so the final weights are the ones kept.
         save(_payload(model, optimizer, recipe, recipe.steps, best_loss,
                       recipe.steps, slim=True), out / "best.slim.pt")
     save(_payload(model, optimizer, recipe, recipe.steps, best_loss, best_step,

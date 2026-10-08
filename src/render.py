@@ -35,18 +35,18 @@ def _background_path(index: int) -> Path:
     return BACKGROUNDS / f"bg_{index:03d}.png"
 
 
-#: The text centre of each slot, written by the first render and read by every
+#: The text center of each slot, written by the first render and read by every
 #: later one.
 CENTRES_PATH = LEXICON / "centres.parquet"
 
 
 def slot_centres(words: tuple[str, ...], path: Path | None = None
                  ) -> dict[int, tuple[int, int]]:
-    """One text centre per slot, shared by every word drawn in it.
+    """One text center per slot, shared by every word drawn in it.
 
-    The centres depend on the widest word of the vocabulary, so they are
+    The centers depend on the widest word of the vocabulary, so they are
     computed once from ``words`` and recorded at ``path``. A recorded table is
-    reused for any later vocabulary whose widest word still fits it.
+    reused for any vocabulary whose widest word fits at its centers.
     """
     path = CENTRES_PATH if path is None else path
     table = slot_table().to_dict("records")
@@ -72,13 +72,13 @@ def slot_centres(words: tuple[str, ...], path: Path | None = None
     return out
 
 
-#: Rounding slack: a box of odd width cannot be centred on an integer grid.
+#: Rounding slack: a box of odd width cannot be centered on an integer grid.
 _FIT_SLACK = 1
 
 
 def _check_fits(table: list[dict], words: tuple[str, ...],
                 centres: dict[int, tuple[int, int]]) -> None:
-    """Raise unless the widest word of each (font, size) fits at its recorded centre."""
+    """Raise unless the widest word of each (font, size) fits at its recorded center."""
     x0, y0, side = crop_safe_window()
     faces = {(s["font"], s["size"]) for s in table}
     widest = {f: max(words, key=lambda w: text_extent(*f, w)[0]) for f in faces}
@@ -159,8 +159,7 @@ def build_manifest(words: list[str], workers: int = 12) -> pd.DataFrame:
                                  condition="scramble", image_path=pp))
 
     man = pd.DataFrame(rows)
-    # Canonical order, whatever order the workers finish in: clean rows first by
-    # slot, then words alphabetically, then condition, then slot.
+    # Clean rows first by slot, then words alphabetically, then condition, then slot.
     man["_clean"] = (man.word == CLEAN).astype(int)
     man = (man.sort_values(["_clean", "word", "condition", "slot"],
                            ascending=[False, True, True, True], kind="mergesort")

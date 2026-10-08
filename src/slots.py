@@ -3,8 +3,8 @@
 A slot is one background paired with one typography setting. Every word is drawn
 on all of them, so background and typography cancel in any comparison between
 words. Each typography setting is used on ``REPLICATES`` different backgrounds,
-and the split below puts half of the replicates on each side, so the two halves
-carry the same typography and differ only in the photographs.
+and :func:`split_halves` puts half of the replicates on each side, so the two
+halves carry the same typography and differ only in the photographs.
 """
 from __future__ import annotations
 

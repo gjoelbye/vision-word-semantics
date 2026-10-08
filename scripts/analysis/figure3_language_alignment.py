@@ -15,16 +15,16 @@ import pandas as pd
 from threadpoolctl import threadpool_limits
 
 from src import wordspeech, wordtext
-from src.config import LEXICON, RESULTS, SEED, ensure_dirs
+from src.config import LEXICON, RESULTS, SEED, SIMILARITY, ensure_dirs
 from src.models import DEFAULT_SWEEP
 from src.render import fingerprint
 from src.stats import benjamini_hochberg
 from src.tau import manifest, word_order
 
-INDEX = RESULTS / "similarity.parquet"
+INDEX = SIMILARITY / "index.parquet"
 OUT = RESULTS / "language_alignment.parquet"
 
-#: Neighbours per word in mutual k-NN alignment.
+#: Neighbors per word in mutual k-NN alignment.
 K_NEAREST = 10
 
 #: Relabelings in the length-stratified null. The smallest attainable p is
@@ -74,7 +74,7 @@ def measure_cells(column_adjacency, column_kernels, row_neighbors, row_kernel
     """Mutual k-NN alignment and linear CKA of one row against every column.
 
     Mutual k-NN alignment is a gather from the column adjacency at the row's
-    neighbour indices. CKA is the inner product of unit-norm centred matrices.
+    neighbor indices. CKA is the inner product of unit-norm centered matrices.
     """
     n, k = row_neighbors.shape
     rows = np.arange(n)[:, None]
@@ -100,7 +100,7 @@ def measure(strata: np.ndarray) -> pd.DataFrame:
     """
     column_adjacency, column_kernels = [], []
     for model in COLUMNS:
-        matrix = np.load(RESULTS / "similarity" / f"{model}.npy")
+        matrix = np.load(SIMILARITY / f"{model}.npy")
         column_adjacency.append(adjacency(nearest(matrix)))
         column_kernels.append(centred(matrix))
         print(f"  read {model}", flush=True)
@@ -110,7 +110,7 @@ def measure(strata: np.ndarray) -> pd.DataFrame:
     mutual_chance = K_NEAREST / (len(strata) - 1)
     records = []
     for reference in ROWS:
-        matrix = np.load(RESULTS / "similarity" / f"{reference}.npy")
+        matrix = np.load(SIMILARITY / f"{reference}.npy")
         neighbors, kernel = nearest(matrix), centred(matrix)
         observed = measure_cells(column_adjacency, column_kernels, neighbors,
                                  kernel)

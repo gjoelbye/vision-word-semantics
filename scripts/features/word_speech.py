@@ -1,9 +1,9 @@
 """Speak every word and embed it with the frozen w2v-BERT 2.0 encoder.
 
-The pooled vectors of the 96 renditions of ``src.wordspeech`` are averaged and
-written to ``word_speech/<encoder>/vectors.npy`` and ``meta.json``; a cache
-that matches the current words and carriers is skipped. Needs ``phonemizer``
-and the ``espeak-ng`` binary.
+Each word is spoken in the 96 renditions of ``src.wordspeech``, and the pooled
+vectors are averaged and written to ``word_speech/<encoder>/vectors.npy`` and
+``meta.json``. A cache that matches the current words and carrier sentences is
+skipped. Needs ``phonemizer`` and the ``espeak-ng`` binary.
 """
 from __future__ import annotations
 

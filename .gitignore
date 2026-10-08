@@ -1,4 +1,6 @@
-data/
+/data/*
+!/data/.gitkeep
+!/data/README.md
 __pycache__/
 *.py[cod]
 .ipynb_checkpoints/

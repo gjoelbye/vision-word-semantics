@@ -1,4 +1,4 @@
-"""The figure style: page width, type sizes, colours, scales, the bold face and saving.
+"""The figure style: page width, type sizes, colors, scales, the bold face and saving.
 
 Figures are built at their final physical size and saved without a tight
 bounding box.
@@ -12,7 +12,7 @@ import numpy as np
 from matplotlib import patheffects
 from matplotlib.colors import LinearSegmentedColormap, LogNorm
 
-from ..config import DATA_ROOT, FIGURES
+from ..config import FIGURES, FONTS, REPO_ROOT
 
 PT_PER_INCH = 72.0
 TEXT_WIDTH_IN = 5.5
@@ -63,7 +63,7 @@ DASH = {"claim": "-", "control": (0, (3, 2)),
 
 
 def use_style() -> None:
-    """Apply the project's Matplotlib style."""
+    """Apply the figure style to Matplotlib's settings."""
     mpl.rcParams.update({
         "figure.dpi": 130,
         "savefig.dpi": 300,
@@ -122,7 +122,7 @@ CKA_HUE = (68.8, 0.133)
 
 
 def oklch_to_hex(lightness: float, chroma: float, hue: float) -> str:
-    """An OKLCH colour as sRGB hex, lowering chroma until it is in gamut."""
+    """An OKLCH color as sRGB hex, lowering chroma until it is in gamut."""
     for scale in np.linspace(1.0, 0.0, 41):
         a = chroma * scale * np.cos(np.radians(hue))
         b = chroma * scale * np.sin(np.radians(hue))
@@ -149,7 +149,7 @@ def oklch_ramp(hue: float, chroma: float) -> tuple[str, ...]:
 
 def _log_scale(name: str, hue: tuple[float, float], low: float, high: float
                ) -> tuple[LinearSegmentedColormap, LogNorm]:
-    """An OKLCH ramp on a logarithmic norm, so equal ratios take equal colour steps."""
+    """An OKLCH ramp on a logarithmic norm, so equal ratios take equal color steps."""
     return (LinearSegmentedColormap.from_list(name, list(oklch_ramp(*hue))),
             LogNorm(vmin=low, vmax=high, clip=True))
 
@@ -183,7 +183,7 @@ def halo_text(text, *, linewidth: float = 2.2) -> None:
 
 def emphasize_text(text, *, colour: str = SEMANTIC,
                    linewidth: float = 0.25) -> None:
-    """Emphasise small text with a hairline stroke in its own colour, since the
+    """Emphasize small text with a hairline stroke in its own color, since the
     variable Noto face renders medium and semibold requests at regular weight."""
     text.set_path_effects([
         patheffects.Stroke(linewidth=linewidth, foreground=colour),
@@ -191,21 +191,20 @@ def emphasize_text(text, *, colour: str = SEMANTIC,
     ])
 
 
-#: Where the cut bold face is cached. Matplotlib matches a face on the weight in
-#: its OS/2 table and does not instance the weight axis of a variable font, so a
-#: bold request on the installed variable sans gets the regular outline.
-FONT_DIR = DATA_ROOT / "fonts"
+# The cut bold face is cached in `FONTS`. Matplotlib matches a face on the
+# weight in its OS/2 table and does not instance the weight axis of a variable
+# font, so a bold request on the installed variable sans gets the regular outline.
 
 
 def cut_static_face(weight: int = 700) -> Path:
-    """The installed variable sans, instanced at ``weight`` and cached in :data:`FONT_DIR`."""
+    """The installed variable sans, instanced at ``weight`` and cached in `FONTS`."""
     from fontTools.ttLib import TTFont
     from fontTools.varLib.instancer import instantiateVariableFont
     from matplotlib import font_manager as fm
 
     family = mpl.rcParams["font.sans-serif"][0]
     source = Path(fm.findfont(fm.FontProperties(family=family)))
-    out = FONT_DIR / f"{source.stem.partition('[')[0]}-{weight}.ttf"
+    out = FONTS / f"{source.stem.partition('[')[0]}-{weight}.ttf"
     if out.exists():
         return out
     font = TTFont(source)
@@ -214,7 +213,7 @@ def cut_static_face(weight: int = 700) -> Path:
                            f"figure asked for {family} and got another face")
     instantiateVariableFont(font, {"wght": weight}, updateFontNames=True,
                             inplace=True)
-    FONT_DIR.mkdir(parents=True, exist_ok=True)
+    FONTS.mkdir(parents=True, exist_ok=True)
     # Written aside and moved, so an interrupted run leaves no partial face.
     part = out.with_suffix(".part")
     font.save(part)
@@ -223,7 +222,7 @@ def cut_static_face(weight: int = 700) -> Path:
 
 
 def use_real_bold(weight: int = 700) -> None:
-    """Register the cut face as the bold of the sans, and stop if bold does not resolve to it.
+    """Register the cut face as the bold of the sans, and raise if bold does not resolve to it.
 
     Call it after :func:`use_style` and before the first text is drawn. It
     changes what bold resolves to for every later figure in the process.
@@ -241,10 +240,10 @@ def use_real_bold(weight: int = 700) -> None:
 
 def save(fig, name: str, *, directory: Path | None = None,
          formats: tuple[str, ...] = ("pdf",), dpi: float | None = None) -> None:
-    """Save the figure at its exact size as ``<name>.pdf`` under ``data/figures``.
+    """Save the figure at its exact size as ``<name>.pdf`` under ``figures/``.
 
-    ``directory`` replaces ``data/figures``, ``formats`` may add ``png``, and
-    ``dpi`` replaces the style's ``savefig.dpi``.
+    ``directory`` overrides ``figures/``, ``formats`` can add ``png``, and
+    ``dpi`` overrides the style's ``savefig.dpi``.
     """
     if not formats or not set(formats) <= {"png", "pdf"}:
         raise ValueError("formats must contain png and/or pdf")
@@ -258,6 +257,6 @@ def save(fig, name: str, *, directory: Path | None = None,
         fig.savefig(path, bbox_inches=None, dpi=dpi,
                     metadata={"Creator": "ViT-Semantic",
                               "CreationDate": None, "ModDate": None})
-        shown = (path.relative_to(DATA_ROOT) if path.is_relative_to(DATA_ROOT)
+        shown = (path.relative_to(REPO_ROOT) if path.is_relative_to(REPO_ROOT)
                  else path.name)
         print(f"wrote {shown}")

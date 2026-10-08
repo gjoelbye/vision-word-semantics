@@ -1,15 +1,15 @@
-"""The matched-appearance split must vary the background and nothing else."""
+"""The matched-appearance split behind the split-half cosine varies the background and nothing else."""
 from src import slots as S
 from src.typography import FACTORS, build_appearance_design
 
-#: Appearance tuples for the subset case, as a degraded measurement draws them.
+#: Appearance tuples for the subset case, as a measurement on fewer images draws them.
 SUBSET = (0, 5, 11, 17)
 
 
 def test_slot_count_follows_the_appearance_design():
     """96 slots is 24 appearance tuples on 4 backgrounds each. The background
-    stage has no target of its own and reads this number, so the two cannot
-    drift apart."""
+    selection reads this number rather than a count of its own, so the two
+    agree."""
     assert S.REPLICATES % 2 == 0, "the split needs even replicates"
     assert S.n_slots() == len(build_appearance_design()) * S.REPLICATES
     assert S.n_slots() == 96
@@ -49,8 +49,10 @@ def test_each_half_carries_every_appearance_the_same_number_of_times():
 
 
 def test_split_halves_is_not_confounded_with_box_style():
-    """A split that puts every panelled slot on one side measures robustness
-    to a translucent rectangle, not the stability of the word direction."""
+    """Both halves carry every box style and every font. A split with every
+    paneled slot on one side would compare panel against no panel, and the
+    split-half cosine would then reflect the translucent rectangle as well as
+    the word."""
     a, b = S.split_halves()
     t = S.slot_table().set_index("slot")
     assert set(t.loc[list(a), "box"]) == set(t.loc[list(b), "box"])

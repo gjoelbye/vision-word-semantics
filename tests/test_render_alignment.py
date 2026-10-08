@@ -1,5 +1,7 @@
 """An embedding cache is bound to its manifest by row position, so the manifest
-order must be canonical and the fingerprint must see any reordering."""
+order must be fixed and the fingerprint must see any reordering. The recorded
+text centers of the slots and the resolution of recorded paths are checked
+here too."""
 import pandas as pd
 
 from src.render import CLEAN, fingerprint
@@ -39,8 +41,8 @@ def test_fingerprint_is_stable():
 
 
 def test_the_centre_table_is_recorded_and_reused(tmp_path, monkeypatch):
-    """The centres depend on the widest word, so they are recorded once and a
-    wider vocabulary that still fits reuses them."""
+    """The text centers depend on the widest word, so they are recorded once and
+    a wider vocabulary that still fits reuses them."""
     from src import render as R
 
     path = tmp_path / "centres.parquet"

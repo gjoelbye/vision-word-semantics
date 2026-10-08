@@ -5,7 +5,7 @@ the final-layer class-token caches of the 14 image models written by
 ``scripts/features/embed.py --manifest two_clue``, and scores the 12
 confirmatory and the 6 pilot clue grids as separate analysis sets, with Holm
 correction across the 13 pretrained models within each set. Writes
-``composition/results/summary.parquet``.
+``results/two_clue_summary.parquet``.
 """
 from __future__ import annotations
 
@@ -30,13 +30,13 @@ from src.composition_stimuli import (
     load_curated_items,
     manifest_fingerprint,
 )
-from src.config import COMPOSITION
+from src.config import RESULTS
 from src.models import DEFAULT_SWEEP
 from src.stats import holm
 
 BOOTSTRAP_SEED = 20260828
 N_BOOTSTRAP = 20_000
-OUT = COMPOSITION / "results" / "summary.parquet"
+OUT = RESULTS / "two_clue_summary.parquet"
 
 #: The analysis sets, each scored on its own clue grids.
 ANALYSIS_SETS = ("confirmatory", "pilot")
@@ -156,7 +156,7 @@ def summarize(families: pd.DataFrame, models: list[str]) -> pd.DataFrame:
                        "base_axis_gain_over_feature"):
             row[f"{metric}_p_greater"] = exact_sign_flip_p(
                 frame[metric].to_numpy(float))
-        # The residual has no predicted sign.
+        # The interaction margin has no predicted sign, so its test is two-sided.
         row["interaction_margin_p_two_sided"] = exact_sign_flip_p(
             frame["interaction_margin"].to_numpy(float), alternative="two-sided")
         row["structured_iut_effect"] = min(
@@ -219,7 +219,7 @@ def main() -> None:
         "model", "feature_axis_gain_over_base", "base_axis_gain_over_feature",
         "structured_iut_p_holm", "joint_margin_p_holm", "interaction_margin",
     ]].to_string(index=False, float_format=lambda value: f"{value:.4f}"))
-    print(f"wrote composition/results/{OUT.name}")
+    print(f"wrote results/{OUT.name}")
 
 
 if __name__ == "__main__":

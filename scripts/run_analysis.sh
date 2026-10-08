@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# Analysis: the result tables behind every figure and table of the paper, one
-# script per figure or table group, then the notebooks, executed in place,
-# which print the quoted numbers and write the figures and LaTeX tables.
+# Analysis: one script per figure or table group writes its result tables to
+# results/ from the caches, then the notebooks print the quoted numbers and
+# write the figures to figures/ and the LaTeX tables to tables/. The executed
+# notebooks, with their outputs, go to data/notebooks/, so the committed ones
+# stay without outputs.
 #
 # Hardware: CPU.
 # Time: about an hour.
@@ -17,5 +19,6 @@ PY="${PYTHON:-python}"
 "$PY" scripts/analysis/figure6_finetune.py
 "$PY" scripts/analysis/table1_models.py
 "$PY" scripts/analysis/table2_concepts.py
-"$PY" -m jupyter nbconvert --to notebook --execute --inplace \
+"$PY" -m jupyter nbconvert --to notebook --execute \
+    --output-dir "${VIT_SEMANTIC_DATA:-data}/notebooks" \
     --ExecutePreprocessor.kernel_name=python3 notebooks/*.ipynb

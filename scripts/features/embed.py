@@ -1,12 +1,12 @@
 """Cache the class-token features of every rendered image.
 
-By default the fourteen sweep models embed the vocabulary manifest,
+By default the 14 image models embed the vocabulary manifest,
 ``lexicon/manifest.parquet``, at ten depths into ``embeddings/``.
-``--finetuned`` embeds it with the twenty SPEECH-COCO finetunes instead.
+``--finetuned`` embeds it with the 20 SPEECH-COCO finetunes instead.
 ``--manifest concepts`` embeds the class-name renders and the class photographs
-with the sweep models, into ``embeddings/concepts/renders/`` and
+with the 14 models, into ``embeddings/concepts/renders/`` and
 ``embeddings/concepts/images/``. ``--manifest two_clue`` embeds the two-clue
-renders with the sweep models at the final layer only, into
+renders with the 14 models at the final layer only, into
 ``composition/embeddings/``. A finished cache is skipped and an unfinished one
 resumes.
 """
@@ -23,7 +23,7 @@ from src.config import EMBEDDINGS, LEXICON, ensure_dirs
 from src.embed import embed_manifest
 from src.models import DEFAULT_SWEEP, FINETUNES
 
-#: Images per forward pass; halved automatically on an out-of-memory error.
+#: Images per forward pass, halved on an out-of-memory error.
 BATCH_SIZE = 128
 
 #: The script that writes each manifest.
@@ -33,7 +33,7 @@ PRODUCED_BY = {"main": "scripts/stimuli/render.py",
 
 
 def two_clue_manifest() -> tuple[pd.DataFrame, str]:
-    """The two-clue manifest and its fingerprint, refused unless fully rendered."""
+    """The two-clue manifest and its fingerprint; exits unless it matches its metadata and is fully rendered."""
     manifest = pd.read_parquet(two_clue.MANIFEST_PATH).reset_index(drop=True)
     manifest_sha = two_clue.manifest_fingerprint(manifest)
     meta = json.loads(two_clue.MANIFEST_META_PATH.read_text())

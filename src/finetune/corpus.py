@@ -22,7 +22,7 @@ SHARDS = DATA_ROOT / "spokencoco-wds-288"
 #: Prefix of the scan, exclude list, manifest and provenance under ``CORPUS``.
 PREFIX = "speech-coco_"
 
-#: ImageNet channel statistics, under which every backbone was pretrained.
+#: ImageNet channel statistics, which the processor of every finetuned backbone uses.
 MEAN = (0.485, 0.456, 0.406)
 STD = (0.229, 0.224, 0.225)
 
@@ -83,7 +83,7 @@ def kept_size() -> int:
 
 def transform(image_size: int, train: bool):
     """Image preprocessing: a random crop of 90 to 100 percent of the frame for
-    training, a centre crop for validation, both bicubic."""
+    training, a center crop for validation, both bicubic."""
     from torchvision import transforms as T
 
     resample = T.InterpolationMode.BICUBIC

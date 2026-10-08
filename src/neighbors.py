@@ -1,8 +1,8 @@
-"""Nearest-neighbour readouts on word directions: partner retrieval and neighbour purity, both at radius K.
+"""Nearest-neighbor readouts on word directions: top-10 accuracy and neighbor purity.
 
-A partner's rank counts the words strictly nearer than it, so a tie counts for
-the partner. Intervals subsample words without replacement, because a resampled
-duplicate is its own nearest neighbour.
+Both count the ``K`` nearest words. A partner's rank counts the words strictly
+nearer than it, so a tie counts for the partner. Intervals subsample words
+without replacement, because a resampled duplicate is its own nearest neighbor.
 """
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ import numpy as np
 from .stats import binomial_se, subsample_summary
 from .tau import rownorm
 
-#: The radius of both readouts: top-10 retrieval and neighbour purity.
+#: Nearest words counted by both readouts: top-10 accuracy and neighbor purity.
 K = 10
 N_PERM = 2000
 N_SUBSAMPLE = 1000
@@ -21,7 +21,7 @@ SUBSAMPLE_FRAC = 0.8
 def similarity(T: np.ndarray) -> np.ndarray:
     """Word-by-word cosine similarity with the diagonal set to ``-inf``.
 
-    A word would otherwise be its own nearest neighbour and fill a slot in
+    A word would otherwise be its own nearest neighbor and fill a place in
     every query's top k.
     """
     Tn = rownorm(np.asarray(T, np.float32))
@@ -41,7 +41,7 @@ def partner_rank(S: np.ndarray, i: int, j: int) -> int:
 def partner_ranks(S: np.ndarray, index: dict[str, int],
                   pairs: list[tuple[str, str]], reverse: bool = False
                   ) -> np.ndarray:
-    """Partner rank for every pair, in one direction."""
+    """Partner rank for every pair in one direction; a pair with a word outside ``index`` is skipped."""
     out = []
     for a, b in pairs:
         if reverse:
@@ -73,13 +73,13 @@ def retrieval(S: np.ndarray, index: dict[str, int],
     return rows
 
 
-# --- neighbour purity --------------------------------------------------------
+# --- neighbor purity ---------------------------------------------------------
 
 def knn_purity(S: np.ndarray, labels: np.ndarray, k: int = K,
                restrict: np.ndarray | None = None) -> float:
-    """Share of each word's ``k`` nearest neighbours that carry its own label.
+    """Share of each word's ``k`` nearest neighbors that carry its own label.
 
-    ``restrict`` limits each word's neighbours to words sharing its value.
+    ``restrict`` limits each word's neighbors to words sharing its value.
     """
     nn = neighbour_indices(S, k, restrict)
     return float((labels[nn] == labels[:, None]).mean())
@@ -87,10 +87,10 @@ def knn_purity(S: np.ndarray, labels: np.ndarray, k: int = K,
 
 def neighbour_indices(S: np.ndarray, k: int = K,
                       restrict: np.ndarray | None = None) -> np.ndarray:
-    """``(n, k)`` row indices of each word's ``k`` nearest neighbours.
+    """``(n, k)`` row indices of each word's ``k`` nearest neighbors.
 
     The diagonal is excluded, and ``restrict`` excludes words that do not share
-    its value. A word with fewer than ``k`` admissible neighbours raises
+    its value. A word with fewer than ``k`` admissible neighbors raises
     ValueError.
     """
     work = np.array(S, dtype=np.float32, copy=True)
@@ -115,7 +115,7 @@ def chance_purity(labels: np.ndarray) -> float:
 
 def restricted_chance_purity(labels: np.ndarray,
                              restrict: np.ndarray) -> float:
-    """Chance purity when every neighbour must share ``restrict`` with its query.
+    """Chance purity when every neighbor must share ``restrict`` with its query.
 
     For each query, the share of the other words in its restriction group that
     carry its label, averaged over queries.
@@ -152,7 +152,7 @@ def purity_permutation(S: np.ndarray, labels: np.ndarray, k: int = K,
     """Observed purity against a null that shuffles the labels with the geometry fixed.
 
     Labels are shuffled within the cells of ``restrict`` crossed with
-    ``strata``; ``restrict`` also limits the neighbours, ``strata`` does not.
+    ``strata``; ``restrict`` also limits the neighbors, ``strata`` does not.
     The p-value is ``(count + 1) / (n_perm + 1)``.
     """
     labels = np.asarray(labels)
@@ -190,7 +190,7 @@ def purity_subsample(S: np.ndarray, labels: np.ndarray, k: int = K,
 
     Each draw keeps ``frac`` of the words without replacement and recomputes
     purity on the reduced similarity matrix. The spread is rescaled by the
-    finite-population factor and the interval is centred on the point estimate
+    finite-population factor and the interval is centered on the point estimate
     (see :func:`src.stats.subsample_summary`).
     """
     labels = np.asarray(labels)

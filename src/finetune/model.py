@@ -1,7 +1,7 @@
 """The image backbone joined to a cached caption tower.
 
-The backbone is built by :func:`src.models.load`, the call that embeds the
-pretrained model, so the finetune differs from its twin in weights alone. Two
+The backbone is built by :func:`src.models.load`, the loader the embeddings
+use, so the finetune differs from its twin in weights alone. Two
 parameters join the two sides: a projection into the tower's space and a
 learned temperature. Both are dropped when the checkpoint is read back.
 """
@@ -19,12 +19,12 @@ from .recipe import Recipe
 #: Starting temperature as a log scale, CLIP's 1/0.07; the value is learned.
 INITIAL_LOGIT_SCALE = math.log(1 / 0.07)
 
-#: Ceiling on the learned log scale, 100.
+#: Ceiling on the learned log scale, so the scale is at most 100.
 MAX_LOGIT_SCALE = math.log(100.0)
 
 
 class CachedTower(nn.Module):
-    """Precomputed target vectors, looked up rather than recomputed. Holds no parameters."""
+    """Precomputed caption vectors, returned as float32 after a width check. Holds no parameters."""
 
     def __init__(self, dim: int) -> None:
         super().__init__()
@@ -44,7 +44,7 @@ class JointModel(nn.Module):
     def __init__(self, recipe: Recipe, *, device: str = "cuda") -> None:
         super().__init__()
         backbone, _, _, spec = load(recipe.backbone, device="cpu")
-        # load() returns a model for measurement; here it is trained.
+        # load() returns the model frozen and in eval mode.
         backbone.requires_grad_(True)
         backbone.train()
 
@@ -62,7 +62,7 @@ class JointModel(nn.Module):
         self.to(device)
 
     def encode_image(self, images: torch.Tensor) -> torch.Tensor:
-        """Projected, normalised class token, or patch mean where there is no class token."""
+        """Projected, normalized class token, or patch mean where there is no class token."""
         out = self.backbone(pixel_values=images).last_hidden_state
         summary = out[:, 0] if self.reads_class_token else out.mean(dim=1)
         return F.normalize(self.image_proj(summary.float()), dim=-1)

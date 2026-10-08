@@ -35,9 +35,9 @@ BATCH = 1056
 def schedule(kept: int, batch: int = BATCH) -> dict[str, int]:
     """Steps, warmup, validation interval and checkpoint interval for a corpus of ``kept`` samples.
 
-    The run is capped at ``MAX_EPOCHS`` passes; warmup is a tenth of it,
-    validation every twelfth and a checkpoint every sixth, each at most
-    ``CADENCE_CEILING`` and at least 10 steps.
+    The run is ``MAX_EPOCHS`` passes, capped at ``STEP_CEILING`` steps; warmup
+    is a tenth of it, validation every twelfth and a checkpoint every sixth,
+    each at most ``CADENCE_CEILING`` and at least 10 steps.
     """
     steps = min(STEP_CEILING, max(1, int(MAX_EPOCHS * kept / batch)))
     return {"steps": steps,

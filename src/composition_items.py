@@ -1,7 +1,9 @@
 """Reading and validating the two-clue item tables.
 
-The pilot and confirmatory tables are recorded inputs. The checks cover the
-shape of every clue grid and the measurable properties of its words.
+A clue grid crosses two broad clues (``feature``) with four narrow clues
+(``base``), with one target per cell. The pilot and confirmatory tables are
+recorded inputs. The checks cover the shape of every clue grid and the
+measurable properties of its words.
 """
 from __future__ import annotations
 

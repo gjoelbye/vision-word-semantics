@@ -1,8 +1,8 @@
 """Layout, manifest and rendering of the two-clue items.
 
 Each item is rendered in six conditions on the 96 slots of the main word set,
-under ``composition/``. The position of the broad clue and of the target cross
-2 by 2 over the four background replicates.
+under ``composition/``. The positions of the broad clue and of the target
+cross two by two over the four background replicates.
 """
 from __future__ import annotations
 
@@ -78,7 +78,7 @@ def replicate_assignment(replicate: int) -> tuple[str, str]:
 def pair_centres(anchor: tuple[int, int], text_height: int,
                  panel_padding: int, gap: int) -> tuple[tuple[int, int],
                                                        tuple[int, int]]:
-    """Two vertically separated centres around a shared anchor."""
+    """Two vertically separated centers around a shared anchor."""
     separation = text_height + 2 * panel_padding + gap
     upper = (int(anchor[0]), int(round(anchor[1] - separation / 2)))
     lower = (int(anchor[0]), int(round(anchor[1] + separation / 2)))
@@ -115,7 +115,7 @@ def _assert_pair_fits(upper: tuple[int, int], lower: tuple[int, int],
 
 
 def build_layout(items: pd.DataFrame) -> pd.DataFrame:
-    """Compute one pair of word centres per slot, shared by every item."""
+    """One pair of word centers per slot, shared by every item."""
     words = sorted(set(items.feature) | set(items.base) | set(items.target))
     rows = []
     for slot in slot_table().itertuples(index=False):
@@ -191,7 +191,7 @@ def _equation_dir(row, root: Path) -> Path:
 def build_manifest(items: pd.DataFrame, layout: pd.DataFrame,
                    dataset_sha: str, layout_sha: str,
                    renders_root: Path = RENDERS_ROOT) -> pd.DataFrame:
-    """Return the canonical expected manifest without rendering images."""
+    """The manifest, one row per item, slot and condition, built without rendering."""
     rows = []
     layout_records = layout.to_dict("records")
     for item in items.itertuples(index=False):

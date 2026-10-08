@@ -1,11 +1,11 @@
 """Draw the class names on the 96 slots, write the class photographs, and scan them for text.
 
-The names go into the ``renders/`` tree at the vocabulary's recorded centres,
-and ``concepts/manifest.parquet`` lists them. The photographs are every
-ImageNet-1k validation image except the 96 backgrounds, centre-cropped to 256
-pixels under ``concepts/images/`` and listed in ``concepts/images.parquet``,
-which also records the CRAFT box count and text area of each. Existing images
-are kept.
+The names go into the ``renders/`` tree at the text centers recorded for the
+vocabulary, and ``concepts/manifest.parquet`` lists them. The photographs are
+every ImageNet-1k validation image except the 96 backgrounds, center-cropped
+to 256 pixels under ``concepts/images/``. ``concepts/images.parquet`` lists
+them with the CRAFT box count and text area of each. Existing images are kept,
+and the text scan runs again on every photograph.
 """
 from __future__ import annotations
 
@@ -28,7 +28,7 @@ WORKERS = 12
 
 
 def render() -> None:
-    """The class names on every slot, at the centres the vocabulary fixed."""
+    """Draw the class names on every slot at the vocabulary's text centers and write their manifest."""
     if not CENTRES_PATH.exists():
         raise SystemExit(f"{CENTRES_PATH} does not exist. Render the vocabulary "
                          f"first with scripts/stimuli/render.py.")
@@ -48,7 +48,7 @@ def render() -> None:
 
 
 def images() -> pd.DataFrame:
-    """Every validation photograph but the backgrounds, in (class, key) order."""
+    """Write every validation photograph except the backgrounds; return their table in (class, key) order."""
     skip = concepts.background_keys()
     concepts.IMAGES.mkdir(parents=True, exist_ok=True)
     rows, n_skipped, n_failed = [], 0, 0
@@ -82,7 +82,7 @@ def images() -> pd.DataFrame:
     frame = pd.DataFrame(rows)
     if frame.empty:
         raise SystemExit("no validation images were written")
-    # Row i of a cache is the embedding of row i here, so the order is canonical.
+    # Row i of an embedding cache is the embedding of row i here, so the order is fixed.
     frame = frame.sort_values(["wnid", "key"], kind="mergesort").reset_index(drop=True)
     per_class = frame.groupby("wnid").size()
     print(f"\n{len(frame):,} photographs over {frame.wnid.nunique()} classes")
@@ -93,7 +93,10 @@ def images() -> pd.DataFrame:
 
 
 def scan(frame: pd.DataFrame) -> pd.DataFrame:
-    """``frame`` with the text scan of each saved 256 pixel photograph appended."""
+    """``frame`` with the CRAFT text scan of each photograph appended.
+
+    An unreadable photograph gets -1 boxes and no text area.
+    """
     detector = reader(torch.cuda.is_available())
     found = []
     for path in tqdm(frame.image_path, desc="scan", unit="img"):

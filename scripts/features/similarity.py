@@ -1,10 +1,11 @@
 """Word-by-word cosine similarity matrices for the 14 image models and 4 encoders.
 
-An image model's word directions come from the headline estimator at the final
-layer, and an encoder's from its text or speech vectors centred over words.
-Writes ``results/similarity/<model>.npy`` and the index
-``results/similarity.parquet``, which is rewritten as each matrix is saved and
-records the word and manifest fingerprints of every matrix.
+An image model contributes its word directions at the final layer, centered
+over words, and an encoder its text or speech vectors, centered the same way.
+Writes ``similarity/<model>.npy`` under the data root and the index
+``similarity/index.parquet``, which is rewritten as each matrix is saved. The
+index records the word fingerprint of every matrix and the manifest
+fingerprint of every image model's matrix.
 """
 from __future__ import annotations
 
@@ -16,7 +17,7 @@ import numpy as np
 import pandas as pd
 
 from src import wordspeech, wordtext
-from src.config import RESULTS, ensure_dirs
+from src.config import SIMILARITY, ensure_dirs
 from src.models import DEFAULT_SWEEP
 from src.render import fingerprint
 from src.tau import HEADLINE, estimator, manifest, rownorm, word_order
@@ -25,8 +26,7 @@ from src.tau import HEADLINE, estimator, manifest, rownorm, word_order
 #: speech encoder.
 MODELS = DEFAULT_SWEEP + wordtext.TEXT_MODELS + wordspeech.SPEECH_MODELS
 
-OUTPUT = RESULTS / "similarity"
-INDEX = RESULTS / "similarity.parquet"
+INDEX = SIMILARITY / "index.parquet"
 
 
 def kind_of(key: str) -> str:
@@ -38,7 +38,7 @@ def kind_of(key: str) -> str:
 
 
 def directions(key: str, words: list[str]) -> np.ndarray:
-    """The per-word directions of one model or encoder, centred over words."""
+    """The per-word directions of one model or encoder, centered over words."""
     kind = kind_of(key)
     if kind == "vision":
         return estimator(HEADLINE)(key, -1)
@@ -50,7 +50,6 @@ def directions(key: str, words: list[str]) -> np.ndarray:
 def main() -> None:
     argparse.ArgumentParser(description=__doc__).parse_args()
     ensure_dirs()
-    OUTPUT.mkdir(parents=True, exist_ok=True)
 
     words = list(word_order())
     word_sha = wordtext.fingerprint(words)
@@ -67,7 +66,7 @@ def main() -> None:
         direction = directions(key, words)
         unit = rownorm(np.asarray(direction, np.float32))
         similarity = (unit @ unit.T).astype(np.float32)
-        np.save(OUTPUT / f"{key}.npy", similarity)
+        np.save(SIMILARITY / f"{key}.npy", similarity)
         del direction, unit, similarity
         gc.collect()
         rows.append({
@@ -82,7 +81,7 @@ def main() -> None:
         pd.DataFrame(rows).to_parquet(INDEX)
         print(f"{key}: {time.time() - started:.0f}s")
 
-    print(f"{len(rows)} matrices indexed in results/similarity.parquet")
+    print(f"{len(rows)} matrices indexed in similarity/index.parquet")
 
 
 if __name__ == "__main__":

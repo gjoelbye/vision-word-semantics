@@ -1,9 +1,10 @@
-"""Read the word set from ``lexicon/block*.txt`` and write the tables the pipeline uses.
+"""Read the word set from ``lexicon/block*.txt`` and write the word, pair and audit tables.
 
 Writes ``lexicon/words.parquet`` (one row per word with its role, frequency and
 form metrics), ``lexicon/pairs.parquet`` (the pairs of ``src.lexicon.PAIRS``)
-and ``lexicon/audit.parquet`` (the deterministic gates), and stops if a
-blocking gate fails.
+and ``lexicon/audit.parquet`` (the checks on the word set). Stops if a word
+appears twice, a word does not fit the crop-safe window, or a blocking gate
+fails.
 """
 from __future__ import annotations
 
@@ -67,9 +68,9 @@ def main() -> None:
     dupes = words.word[words.word.duplicated()].tolist()
     if dupes:
         raise SystemExit(f"a word appears twice across the blocks: {dupes[:10]}")
-    # Nullable integer: ortho is defined only for the two crossed grids.
+    # Nullable integer: ortho, the spelling cluster, exists only for nouns and brands.
     words["ortho"] = words.ortho.astype("Int64")
-    # The frequency floor: 3.0 for pair words, 2.2 for the two crossed grids.
+    # Zipf floor: 3.0 for pair words, 2.2 for nouns and brands, none for pseudowords.
     words["zipf_floor"] = words.role.map(
         {"category": 2.2, "brand": 2.2}).fillna(3.0).where(
             words.role != "pseudoword")

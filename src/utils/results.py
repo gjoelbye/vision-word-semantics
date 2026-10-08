@@ -11,7 +11,7 @@ import pandas as pd
 
 from .. import wordtext
 from ..composition_stimuli import MANIFEST_PATH, load_curated_items, manifest_fingerprint
-from ..config import COMPOSITION, LEXICON, RESULTS
+from ..config import LEXICON, RESULTS
 from ..models import DEFAULT_SWEEP, PRETTY
 from ..render import fingerprint
 from ..tau import CONCEPT_IMAGES, CONCEPT_WORDS, MAIN, manifest, word_order
@@ -32,7 +32,7 @@ def pairs() -> pd.DataFrame:
 
 
 def audit() -> pd.DataFrame:
-    """``lexicon/audit.parquet``: the gates of the vocabulary."""
+    """``lexicon/audit.parquet``: the checks run on the vocabulary before rendering."""
     return pd.read_parquet(LEXICON / "audit.parquet")
 
 
@@ -42,7 +42,7 @@ def concept_words() -> pd.DataFrame:
 
 
 def concept_audit() -> pd.DataFrame:
-    """``lexicon/concepts_audit.parquet``: the gates of the class names."""
+    """``lexicon/concepts_audit.parquet``: the checks run on the class names before rendering."""
     return pd.read_parquet(LEXICON / "concepts_audit.parquet")
 
 
@@ -73,20 +73,20 @@ def read(name: str) -> pd.DataFrame:
 
 
 def composition_summary() -> pd.DataFrame:
-    """``composition/results/summary.parquet``, refused unless it matches the two-clue inputs.
+    """``results/two_clue_summary.parquet``, refused unless it matches the two-clue inputs.
 
     ``dataset_sha`` is checked against the committed two-clue item tables and
     ``manifest_sha`` against the composition manifest.
     """
-    path = COMPOSITION / "results" / "summary.parquet"
+    path = RESULTS / "two_clue_summary.parquet"
     if not path.exists():
-        raise FileNotFoundError("composition/results/summary.parquet is missing")
+        raise FileNotFoundError("results/two_clue_summary.parquet is missing")
     frame = pd.read_parquet(path)
     current = {"dataset_sha": load_curated_items()[2],
                "manifest_sha": manifest_fingerprint(pd.read_parquet(MANIFEST_PATH))}
     for column, sha in current.items():
         if set(frame[column]) != {sha}:
-            raise RuntimeError(f"composition/results/summary.parquet has a "
+            raise RuntimeError(f"results/two_clue_summary.parquet has a "
                                f"different {column} from the current inputs")
     return frame
 

@@ -19,23 +19,23 @@ from .config import CROP_SAFE_FRAC, IMAGE_SIZE
 
 # --- factors ---------------------------------------------------------------
 
-# Six families spanning genuinely different letterform construction: two sans
-# of different width, two serifs of different origin, one monospace, and one
-# geometric face with a single-storey 'a' and circular bowls.
+# Six families of different letterform construction: two sans of different
+# width, two serifs of different origin, one monospace, and one geometric face
+# with a single-story 'a' and circular bowls.
 FONT_FAMILIES: tuple[str, ...] = (
     "DejaVu Sans",       # humanist sans, wide
     "PT Sans",           # sans, narrower aperture
     "DejaVu Serif",      # slab-ish serif
     "Nimbus Roman",      # transitional serif, Times lineage
     "DejaVu Sans Mono",  # monospace: every advance width identical
-    "URW Gothic",        # geometric sans, single-storey a
+    "URW Gothic",        # geometric sans, single-story a
 )
 
 # The family whose advance widths do not vary by glyph, so rendered width is a
 # function of character count alone.
 MONOSPACE_FAMILIES: frozenset[str] = frozenset({"DejaVu Sans Mono"})
 
-# Cap height as a fraction of the image's short edge.
+# Font size as a fraction of the image side; font_px converts it to pixels.
 SIZE_BANDS: tuple[tuple[str, float], ...] = (
     ("small", 0.05),
     ("medium", 0.08),
@@ -44,8 +44,7 @@ SIZE_BANDS: tuple[tuple[str, float], ...] = (
 SIZE_BAND_NAMES: tuple[str, ...] = tuple(n for n, _ in SIZE_BANDS)
 SIZE_BAND_TO_FRAC: dict[str, float] = dict(SIZE_BANDS)
 
-# One representative colour per group, each separable from the others in hue or
-# value so that no two are confusable after JPEG compression.
+# One ink color per group, each distinct from the others in hue or lightness.
 COLOR_GROUPS: tuple[tuple[str, tuple[int, int, int]], ...] = (
     ("dark", (15, 15, 15)),
     ("light", (235, 235, 235)),
@@ -57,10 +56,10 @@ COLOR_GROUPS: tuple[tuple[str, tuple[int, int, int]], ...] = (
 COLOR_GROUP_NAMES: tuple[str, ...] = tuple(n for n, _ in COLOR_GROUPS)
 COLOR_GROUP_TO_RGB: dict[str, tuple[int, int, int]] = dict(COLOR_GROUPS)
 
-#: Which quarter of the crop-safe window the text centre sits in, vertically.
-#: A designed factor, balanced against the others; legibility is optimised
-#: within the band. Horizontal position is always the centre of the window,
-#: because the widest word nearly fills it.
+#: Which of four vertical bands of the crop-safe window holds the text center.
+#: A designed factor, balanced against the others; the center is chosen for
+#: legibility within the band. The horizontal position is always the middle of
+#: the window, because the widest word nearly fills it.
 PLACEMENTS: tuple[str, ...] = ("top", "upper_middle", "lower_middle", "bottom")
 
 # Whether a translucent panel sits behind the text.
@@ -76,8 +75,8 @@ def font_path_for(family: str) -> str:
     """Absolute path to a TrueType file for ``family``.
 
     Resolved through matplotlib's font manager, which has already indexed the
-    system fonts. Raises rather than silently substituting a fallback face: a
-    silent substitution would make one appearance factor a lie.
+    system fonts. A family that is not installed raises LookupError, so no
+    fallback face stands in for a level of the font factor.
     """
     from matplotlib import font_manager
 
@@ -115,10 +114,10 @@ def _cramers_v(a: pd.Series, b: pd.Series) -> float:
 
 
 def balance_report(design: pd.DataFrame) -> pd.DataFrame:
-    """One row per factor pair: the crosstab's min and max cell, and whether
-    that pair is exactly balanced. Exact balance is only possible when the
-    number of tuples divides by the product of the two level counts, so this
-    reports the truth rather than asserting a uniform standard."""
+    """One row per factor pair: the smallest and largest crosstab cell, whether
+    the pair is exactly balanced, and Cramer's V. Exact balance needs the number
+    of tuples to be a multiple of the product of the two level counts, so some
+    pairs cannot reach it."""
     rows = []
     for i, x in enumerate(FACTORS):
         for y in FACTORS[i + 1:]:
@@ -170,11 +169,11 @@ def build_appearance_design(reps: int = 1, seed: int = 0,
                             n_candidates: int = 600) -> pd.DataFrame:
     """The 24 appearance tuples, built by a seeded search.
 
-    Font crosses placement, one tuple per cell. Colour is a Latin rectangle over
-    (placement, font), so every placement sees all six colours once. Size and
+    Font crosses placement, one tuple per cell. Color is a Latin rectangle over
+    (placement, font), so every placement sees all six colors once. Size and
     box style are balanced within each placement, and the search keeps the
-    candidate with the smallest remaining association on ``font x size`` and
-    ``font x colour``, the two pairs that cannot be exactly balanced.
+    candidate whose largest Cramer's V over the pairs that are not exactly
+    balanced is smallest.
     """
     nf, np_, ns, nc, nb = (len(FONT_FAMILIES), len(PLACEMENTS),
                            len(SIZE_BAND_NAMES), len(COLOR_GROUP_NAMES),
@@ -187,9 +186,8 @@ def build_appearance_design(reps: int = 1, seed: int = 0,
         # that both font x box and placement x box come out exactly balanced.
         box_of = _degree_constrained(nf, np_, per_row=np_ // nb, rng=rng,
                                      col_total=nf // nb)
-        # size: 2 of each size per placement, and every font must see every
-        # size at least once or a leave-one-font-out split would drop a whole
-        # size band along with the font.
+        # size: 2 of each size per placement, and every font sees every size
+        # at least once.
         size_of = None
         for _ in range(400):
             cand_s = []
@@ -238,7 +236,7 @@ def build_appearance_design(reps: int = 1, seed: int = 0,
 
 def crop_safe_window(size: int = IMAGE_SIZE,
                      frac: float = CROP_SAFE_FRAC) -> tuple[int, int, int]:
-    """``(x0, y0, side)`` of the centred square that survives a centre crop."""
+    """``(x0, y0, side)`` of the centered square that survives a center crop."""
     side = int(round(frac * size))
     return (size - side) // 2, (size - side) // 2, side
 
@@ -253,7 +251,7 @@ def text_extent(family: str, size_band: str, text: str) -> tuple[int, int]:
 
 
 def band_range(band: str, half_h: int, size: int = IMAGE_SIZE) -> tuple[int, int]:
-    """The vertical span a slot's text centre may occupy, given its band."""
+    """The vertical span a slot's text center may occupy, given its band."""
     _, wy, side = crop_safe_window(size)
     lo, hi = wy + half_h, wy + side - half_h
     if hi <= lo:
@@ -267,13 +265,13 @@ def band_range(band: str, half_h: int, size: int = IMAGE_SIZE) -> tuple[int, int
 def legible_centre(background: "Image.Image", color_group: str, size_band: str,
                    half_w: int, half_h: int, band: str, grid: int = 9,
                    clutter_weight: float = 0.6) -> tuple[int, int]:
-    """The text centre for one slot, shared by every word drawn there.
+    """The text center for one slot, shared by every word drawn there.
 
-    Candidate centres on a vertical grid within ``band`` are scored on the
-    contrast between the ink colour and the local background minus a clutter
+    Candidate centers on a vertical grid within ``band`` are scored on the
+    contrast between the ink color and the local background minus a clutter
     penalty. ``half_w`` and ``half_h`` are half the extent of the widest and
-    tallest word, so every word fits at the chosen centre. The horizontal
-    position is the centre of the window.
+    tallest word, so every word fits at the chosen center. The horizontal
+    position is the middle of the window.
     """
     import numpy as np
 
@@ -305,7 +303,7 @@ def legible_centre(background: "Image.Image", color_group: str, size_band: str,
 
 def box_at_centre(centre: tuple[int, int], text_w: int, text_h: int,
                   size: int = IMAGE_SIZE) -> Box:
-    """A word's box centred on the slot's fixed point, clamped into the window."""
+    """A word's box centered on the slot's fixed point, clamped into the window."""
     wx, wy, side = crop_safe_window(size)
     x = int(round(centre[0] - text_w / 2))
     y = int(round(centre[1] - text_h / 2))
@@ -335,7 +333,7 @@ def _draw_panel(draw: ImageDraw.ImageDraw, box: Box, pad: int | None = None,
 
 
 def panel_fill(color_group: str) -> tuple[int, int, int, int]:
-    """Panel colour on the opposite side of mid-grey from the ink."""
+    """Panel color on the opposite side of mid-gray from the ink."""
     r, g, b = COLOR_GROUP_TO_RGB[color_group]
     luma = 0.299 * r + 0.587 * g + 0.114 * b
     return (20, 20, 20, 150) if luma > 140 else (255, 255, 255, 140)
@@ -352,8 +350,8 @@ def render_overlay(background: Image.Image, text: str, box: Box,
         _draw_panel(draw, box, fill=panel_fill(color_group))
     font = load_font(family, font_px(size_band))
     bx = font.getbbox(text)
-    # horizontal from the ink so the word is centred; vertical from the
-    # baseline so a descender does not move it
+    # Horizontal from the ink's left edge, so the ink fills the box width;
+    # vertical from the ascender line, so a descender does not move the word.
     draw.text((box.x - bx[0], box.y), text, font=font, anchor="la",
               fill=(*COLOR_GROUP_TO_RGB[color_group], 255))
     return Image.alpha_composite(base, layer).convert("RGB")
@@ -361,7 +359,7 @@ def render_overlay(background: Image.Image, text: str, box: Box,
 
 def text_inkmap(family: str, size_band: str, text: str,
                 w: int, h: int) -> np.ndarray:
-    """Greyscale ink coverage of the word inside a ``w`` by ``h`` box."""
+    """Grayscale ink coverage of the word inside a ``w`` by ``h`` box."""
     font = load_font(family, font_px(size_band))
     canvas = Image.new("L", (max(1, w), max(1, h)), 0)
     bx = font.getbbox(text)
@@ -370,7 +368,7 @@ def text_inkmap(family: str, size_band: str, text: str,
 
 
 def phase_scramble(ink: np.ndarray, seed: int) -> np.ndarray:
-    """The ink map with its Fourier phase randomised and its magnitude spectrum,
+    """The ink map with its Fourier phase randomized and its magnitude spectrum,
     mean and spread kept: the same ink and spatial frequencies without the glyphs."""
     rng = np.random.default_rng(seed)
     F = np.fft.fft2(ink)

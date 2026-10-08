@@ -20,7 +20,7 @@ SPLIT_SEED = 0
 
 
 def balanced_split(frame: pd.DataFrame, seed: int) -> np.ndarray:
-    """Return train/test labels, halving every label×orthography cell."""
+    """A ``train`` or ``test`` label per row, halving every category-by-spelling-cluster cell."""
     rng = np.random.default_rng(seed)
     split = np.full(len(frame), "", dtype=object)
     for label in sorted(frame.label.unique()):
@@ -74,7 +74,7 @@ def dataset_frame(words: pd.DataFrame, dataset: str, role: str,
 def centred_centroids(
     X: np.ndarray, labels: np.ndarray, label_order: np.ndarray,
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Label centroids and directions from their unweighted grand mean."""
+    """Label centroids, and each centroid minus the unweighted mean of the centroids."""
     centroids = np.stack([X[labels == label].mean(0)
                           for label in label_order])
     directions = centroids - centroids.mean(0, keepdims=True)

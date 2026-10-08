@@ -1,6 +1,7 @@
-"""Class-token features of every image in a manifest, at ten depths.
+"""Class-token features of every image in a manifest, at ten depths or at the final block.
 
-Each cache is a float16 ``.cls.npy`` memory map with a ``.meta.json`` sidecar
+A backbone without a class token (SigLIP2) gives the mean over its patches
+instead. Each cache is a float16 ``.cls.npy`` memory map with a ``.meta.json`` sidecar
 that records the sha of the manifest it was built against, the layers kept and
 how far the run got. :mod:`src.tau` refuses a cache whose sha is not the
 current manifest's.
@@ -126,7 +127,7 @@ def embed_manifest(key: str, manifest: pd.DataFrame, *, batch_size: int = 128,
                  dim=int(d_hidden), class_token=bool(class_token),
                  layer_mode=layer_mode)))
 
-    # Decode the next batch on worker threads while the current one runs; order is unchanged.
+    # Futures are read in submission order, so rows keep the manifest order.
     decoder = ThreadPoolExecutor(max_workers=_DECODE_WORKERS)
 
     def _open(path: Path) -> Image.Image:

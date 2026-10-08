@@ -5,9 +5,9 @@ backbone first, each in its own process, skipping any whose provenance exists.
 A run resumes from ``latest.pt`` when one exists. It writes
 ``checkpoints/<key>/best.slim.pt`` (the weights at the lowest validation loss)
 and ``provenance.json``, then deletes ``latest.pt``. The schedule follows from
-the corpus size: at most three epochs, warmup a tenth of the run, validation
-every twelfth and a checkpoint every sixth, early stop after three validations
-without improvement.
+the corpus size: at most three epochs and 10,000 steps, warmup a tenth of the
+run, validation every twelfth and a checkpoint every sixth (each between 10 and
+500 steps), and an early stop after three validations without improvement.
 """
 from __future__ import annotations
 
@@ -40,6 +40,7 @@ def sha256(path, chunk: int = 1 << 24) -> str:
 
 
 def train(backbone: str, tower: str) -> None:
+    """Run one finetune and write its best checkpoint and provenance."""
     if backbone not in MICRO_BATCH:
         raise SystemExit(f"{backbone} is not finetuned; have {sorted(MICRO_BATCH)}")
     kept = corpus.kept_size()
@@ -101,7 +102,7 @@ def train(backbone: str, tower: str) -> None:
 
 
 def train_all() -> None:
-    """Every finetune, smallest backbone first, one process each."""
+    """Run every finetune that has no provenance, smallest backbone first, each in its own process."""
     failed = []
     for key in sorted(FINETUNES, key=lambda k: PARAMS_M[k]):
         if (CHECKPOINTS / key / "provenance.json").exists():

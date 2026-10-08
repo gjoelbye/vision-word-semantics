@@ -1,8 +1,8 @@
-"""Deterministic checks applied before rendering and reporting.
+"""Deterministic checks on the word set, run before it is rendered.
 
-Nothing renders until the blocking checks pass. Named-entity rates are
-reported rather than gated because the geography pairs contain proper nouns by
-design.
+A failed blocking check stops rendering. The share of named entities is
+reported rather than gated, because the geography pairs contain proper nouns
+by design.
 """
 from __future__ import annotations
 
@@ -29,7 +29,7 @@ def gate(name: str, detail: str, value, threshold, ok: bool,
 
 
 def audit_words(words: pd.DataFrame) -> list[dict]:
-    """Rendering safety: every word must fit the crop-safe window everywhere."""
+    """One row counting the words wider than the crop-safe window at the largest size band."""
     _, _, side = crop_safe_window()
     over = words.loc[~words.fits, "word"].tolist() if "fits" in words else []
     return [gate("render/fits",
@@ -39,7 +39,7 @@ def audit_words(words: pd.DataFrame) -> list[dict]:
 
 
 def audit_offensive(words: pd.DataFrame) -> list[dict]:
-    """Reject blocked strings before committing or rendering the vocabulary."""
+    """One row counting the words on the blocklist or in an offensive WordNet usage domain."""
     from .lexicon import is_blocked
     from nltk.corpus import wordnet as wn
 
@@ -52,7 +52,9 @@ def audit_offensive(words: pd.DataFrame) -> list[dict]:
 
 def audit_pairs_orthography(pairs: pd.DataFrame,
                             vocab: list[str]) -> list[dict]:
-    """Gates that no meaning pair is a pair of word forms and no meaning relation overlaps in letters."""
+    """Rows checking that no meaning pair joins two forms of one word, and that no
+    meaning relation exceeds length-matched random pairs in letter overlap by
+    more than ``GATE_MAX_LETTER_EXCESS``."""
     from .lexicon import orthographic_relatives
     from .neighbors import letter_overlap
 
@@ -94,8 +96,7 @@ def audit_pairs_proper_nouns(pairs: pd.DataFrame) -> list[dict]:
 
 def report(rows: list[dict]) -> pd.DataFrame:
     df = pd.DataFrame(rows)
-    # thresholds are a mix of numbers and strings; keep the column one type so
-    # the table round-trips through parquet
+    # Thresholds mix numbers and strings, and a parquet column holds one type.
     df["threshold"] = df["threshold"].astype(str)
     order = {"FAIL": 0, "warn": 1, "pass": 2}
     return df.sort_values("status", key=lambda s: s.map(order)).reset_index(drop=True)
