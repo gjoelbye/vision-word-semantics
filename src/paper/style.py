@@ -173,18 +173,13 @@ def luminance(colour) -> float:
     return float(linear @ (0.2126, 0.7152, 0.0722))
 
 
-def halo_text(text, *, linewidth: float = 2.2) -> None:
-    """Draw a white stroke under ``text`` so it stays legible over lines."""
-    text.set_path_effects([
-        patheffects.Stroke(linewidth=linewidth, foreground=WHITE),
-        patheffects.Normal(),
-    ])
+def stroke_text(text, colour: str, linewidth: float) -> None:
+    """Draw ``text`` over a stroke of ``colour``.
 
-
-def emphasize_text(text, *, colour: str = SEMANTIC,
-                   linewidth: float = 0.25) -> None:
-    """Emphasize small text with a hairline stroke in its own color, since the
-    variable Noto face renders medium and semibold requests at regular weight."""
+    A white stroke keeps a label legible over lines. A hairline stroke in the
+    text's own color emphasizes small text, since the variable Noto face renders
+    medium and semibold requests at regular weight.
+    """
     text.set_path_effects([
         patheffects.Stroke(linewidth=linewidth, foreground=colour),
         patheffects.Normal(),
@@ -238,28 +233,20 @@ def use_real_bold(weight: int = 700) -> None:
         raise RuntimeError(f"bold resolves to {got.name}, not {path.name}")
 
 
-def save(fig, name: str, *, directory: Path | None = None,
-         formats: tuple[str, ...] = ("pdf",), dpi: float | None = None) -> None:
-    """Save the figure at its exact size as ``<name>.pdf`` under ``figures/``.
+def save(fig, name: str, *, dpi: float | None = None) -> None:
+    """Save the figure at its exact size as ``figures/<name>.pdf``.
 
-    ``directory`` overrides ``figures/``, ``formats`` can add ``png``, and
-    ``dpi`` overrides the style's ``savefig.dpi``.
+    ``dpi`` overrides the style's ``savefig.dpi`` for the raster parts.
     """
-    if not formats or not set(formats) <= {"png", "pdf"}:
-        raise ValueError("formats must contain png and/or pdf")
-    out = FIGURES if directory is None else Path(directory)
-    out.mkdir(parents=True, exist_ok=True)
+    FIGURES.mkdir(parents=True, exist_ok=True)
     # Constrained layout can move artists on its first draw; settle it before saving.
     fig.canvas.draw()
     fig.canvas.draw()
-    for ext in formats:
-        path = out / f"{name}.{ext}"
-        fig.savefig(path, bbox_inches=None, dpi=dpi,
-                    metadata={"Creator": "ViT-Semantic",
-                              "CreationDate": None, "ModDate": None})
-        shown = (path.relative_to(REPO_ROOT) if path.is_relative_to(REPO_ROOT)
-                 else path.name)
-        print(f"wrote {shown}")
+    path = FIGURES / f"{name}.pdf"
+    fig.savefig(path, bbox_inches=None, dpi=dpi,
+                metadata={"Creator": "ViT-Semantic",
+                          "CreationDate": None, "ModDate": None})
+    print(f"wrote {path.relative_to(REPO_ROOT)}")
 
 
 def _number(value: float) -> str:

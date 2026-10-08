@@ -72,12 +72,6 @@ def _check_groups() -> None:
         raise RuntimeError(f"GROUPS {listed} is not the sweep {DEFAULT_SWEEP}")
 
 
-def _encoder(frame: pd.DataFrame, model: str, readout: str, group: str,
-             direction: str = "") -> pd.Series:
-    return _one(frame, model=model, readout=readout, group=group,
-                direction=direction)
-
-
 # --- Figure 1a ---------------------------------------------------------------
 
 #: The models and the three queries of Figure 1a.
@@ -185,8 +179,8 @@ def table1_models(purity: pd.DataFrame, retrieval: pd.DataFrame,
         out = []
         for j, relations in enumerate(TABLE1_COLUMNS):
             readout, direction = ("purity", "") if j < 2 else ("rate10", "forward")
-            row = _encoder(encoder_lexical, model, readout, "+".join(relations),
-                           direction)
+            row = _one(encoder_lexical, model=model, readout=readout,
+                       group="+".join(relations), direction=direction)
             if abs(float(row.chance) - chance[j]) > 1e-9:
                 raise RuntimeError(f"{model} {relations}: chance {float(row.chance)} "
                                    f"is not the table's {chance[j]}")
@@ -275,27 +269,25 @@ def table4_lexical_retrieval(retrieval: pd.DataFrame,
         tops = [max(row[j][0] for row in table.values())
                 for j in range(len(relations))]
         base = table[BASELINE]
+
+        def render(m: str) -> list[str]:
+            return [cell(v, abs(v - tops[j]) < 1e-9,
+                         m != BASELINE
+                         and above_baseline(v, se, base[j][0], base[j][1]),
+                         se=se, se_size=TABLE4_SE_SIZE)
+                    for j, (v, se) in enumerate(table[m])]
+
         panel = []
         lines += ["\\midrule",
                   f"\\multicolumn{{{len(relations) + 1}}}{{l}}"
                   f"{{\\textbf{{{label}}}}} \\\\",
                   "\\addlinespace[2pt]"]
-        for g, group in enumerate(GROUPS):
-            if g:
-                lines.append("\\addlinespace")
-            for m in group:
-                cells = [cell(v, abs(v - tops[j]) < 1e-9,
-                              m != BASELINE
-                              and above_baseline(v, se, base[j][0], base[j][1]),
-                              se=se, se_size=TABLE4_SE_SIZE)
-                         for j, (v, se) in enumerate(table[m])]
-                panel.append((PRETTY[m], cells))
-                lines.append(band(g) + f"{PRETTY[m]} & " + " & ".join(cells)
-                             + " \\\\")
+        model_rows(lines, panel, DEFAULT_SWEEP, render)
         reference_rows(lines, panel, lambda m: [
             f"{float(row.estimate):.3f}"
             + se_suffix(float(row.se), size=TABLE4_SE_SIZE)
-            for row in (_encoder(encoder_lexical, m, "rate10", r, direction)
+            for row in (_one(encoder_lexical, model=m, readout="rate10",
+                             group=r, direction=direction)
                         for r, _ in relations)])
         chance_cells = [bare(f"{chance:.3f}", size=TABLE4_SE_SIZE)
                         for _ in relations]
@@ -347,16 +339,18 @@ def table5_items(items: pd.DataFrame, retrieval: pd.DataFrame,
     def reference(model: str) -> list[str]:
         cells = []
         for j, (block, _) in enumerate(blocks):
-            wins = _encoder(encoder_lexical, model, "wins", block)
+            wins = _one(encoder_lexical, model=model, readout="wins",
+                        group=block, direction="")
             cells.append(f"{int(wins.estimate)}")
             if j == 0:
                 for readout in ("other_above_baseline", "kept_above_baseline"):
-                    row = _encoder(encoder_lexical, model, readout, block)
+                    row = _one(encoder_lexical, model=model, readout=readout,
+                               group=block, direction="")
                     cells.append(f"{float(row.estimate):.2f}"
                                  + se_suffix(float(row.se), 2))
         for cls in ("concrete", "abstract"):
-            row = _encoder(encoder_lexical, model, "class_contrast", cls,
-                           "either")
+            row = _one(encoder_lexical, model=model, readout="class_contrast",
+                       group=cls, direction="either")
             cells.append(f"{int(row.estimate)}")
         return cells
 
@@ -383,40 +377,38 @@ def table5_items(items: pd.DataFrame, retrieval: pd.DataFrame,
              "& \\shortstack{Count\\\\of 50} & \\shortstack{Count\\\\of 35} "
              "& Concrete & Abstract \\\\",
              "\\midrule"]
+    def render(model: str) -> list[str]:
+        cells = []
+        for j, (block, n) in enumerate(blocks):
+            row = _one(head, model=model, block=block)
+            cells.append(starred(int(row.wins), int(row.wins) > n / 2,
+                                 float(row.sign_p)))
+            if j == 0:
+                far, far_se = z(model, "other_above_baseline")
+                cells.append(cell(far, False,
+                                  model != BASELINE
+                                  and above_baseline(far, far_se, twin_base,
+                                                     twin_base_se),
+                                  se=far_se, digits=2))
+                near, near_se = z(model, "kept_above_baseline")
+                cells.append(cell(near, abs(near - synonym_top) < 1e-9,
+                                  model != BASELINE
+                                  and above_baseline(near, near_se,
+                                                     synonym_base,
+                                                     synonym_base_se),
+                                  se=near_se, digits=2))
+        cls = _one(contrast, model=model)
+        concrete = starred(int(cls.concrete_found), True, float(cls.fisher_p))
+        for value, text in ((int(cls.concrete_found), concrete),
+                            (int(cls.abstract_found),
+                             str(int(cls.abstract_found)))):
+            if value == top:
+                text = text.replace(str(value), f"\\textbf{{{value}}}", 1)
+            cells.append(text)
+        return cells
+
     printed = []
-    for g, group in enumerate(GROUPS):
-        if g:
-            lines.append("\\addlinespace")
-        for model in group:
-            cells = []
-            for j, (block, n) in enumerate(blocks):
-                row = _one(head, model=model, block=block)
-                cells.append(starred(int(row.wins), int(row.wins) > n / 2,
-                                     float(row.sign_p)))
-                if j == 0:
-                    far, far_se = z(model, "other_above_baseline")
-                    cells.append(cell(far, False,
-                                      model != BASELINE
-                                      and above_baseline(far, far_se, twin_base,
-                                                         twin_base_se),
-                                      se=far_se, digits=2))
-                    near, near_se = z(model, "kept_above_baseline")
-                    cells.append(cell(near, abs(near - synonym_top) < 1e-9,
-                                      model != BASELINE
-                                      and above_baseline(near, near_se,
-                                                         synonym_base,
-                                                         synonym_base_se),
-                                      se=near_se, digits=2))
-            cls = _one(contrast, model=model)
-            concrete = starred(int(cls.concrete_found), True, float(cls.fisher_p))
-            for value, text in ((int(cls.concrete_found), concrete),
-                                (int(cls.abstract_found),
-                                 str(int(cls.abstract_found)))):
-                if value == top:
-                    text = text.replace(str(value), f"\\textbf{{{value}}}", 1)
-                cells.append(text)
-            printed.append((PRETTY[model], cells))
-            lines.append(band(g) + " & ".join([PRETTY[model]] + cells) + " \\\\")
+    model_rows(lines, printed, DEFAULT_SWEEP, render)
     reference_rows(lines, printed, reference)
     chance_cells = ["75", bare("0.00", 2), bare("0.00", 2), "25", "17.5",
                     f"{class_chance:.2f}", f"{class_chance:.2f}"]
@@ -464,7 +456,8 @@ def table6_category(purity: pd.DataFrame, latent_categories: pd.DataFrame,
     def reference(model: str) -> list[str]:
         cells = []
         for readout, group in reference_where:
-            row = _encoder(encoder_lexical, model, readout, group)
+            row = _one(encoder_lexical, model=model, readout=readout,
+                       group=group, direction="")
             cells += [f"{float(row.estimate):.3f}" + se_suffix(float(row.se)), "-"]
         return cells
 
@@ -494,21 +487,19 @@ def table6_category(purity: pd.DataFrame, latent_categories: pd.DataFrame,
              "Model & Value & $p$ & Value & $p$ "
              "& Value & $p$ & Value & $p$ \\\\",
              "\\midrule"]
+    def render(model: str) -> list[str]:
+        cells = []
+        for j, (value, se, p, _) in enumerate(table[model]):
+            cells.append(cell(value, abs(value - tops[j]) < 1e-9,
+                              model != BASELINE
+                              and above_baseline(value, se, base[j][0],
+                                                 base[j][1]),
+                              se=se))
+            cells.append(f"{p:.4f}")
+        return cells
+
     printed = []
-    for g, group in enumerate(GROUPS):
-        if g:
-            lines.append("\\addlinespace")
-        for model in group:
-            cells = []
-            for j, (value, se, p, _) in enumerate(table[model]):
-                cells.append(cell(value, abs(value - tops[j]) < 1e-9,
-                                  model != BASELINE
-                                  and above_baseline(value, se, base[j][0],
-                                                     base[j][1]),
-                                  se=se))
-                cells.append(f"{p:.4f}")
-            printed.append((PRETTY[model], cells))
-            lines.append(band(g) + " & ".join([PRETTY[model]] + cells) + " \\\\")
+    model_rows(lines, printed, DEFAULT_SWEEP, render)
     reference_rows(lines, printed, reference)
     chance_cells = [text for c in chance for text in (bare(f"{c:.3f}"), "-")]
     printed.append(("Chance", chance_cells))
@@ -542,6 +533,23 @@ def _positions(depth: pd.DataFrame, columns: list[str]) -> tuple[pd.DataFrame, l
                  - depth.loc[depth.layer_index.eq(i), "relative_depth"].min()
                  for i in positions)
     return depth, positions, labels, spread
+
+
+def _depth_block(lines: list[str], printed: list, tag: str, title: str,
+                 positions: list, labels: list, render) -> None:
+    """Append one block of a depth table: its title, a column per depth and a row per model."""
+    lines += [f"\\textbf{{{tag}}} {title}\\par\\smallskip",
+              "\\begin{tabular*}{\\textwidth}"
+              "{@{\\extracolsep{\\fill}}l" + "r" * len(positions) + "@{}}",
+              "\\toprule",
+              f" & \\multicolumn{{{len(positions)}}}{{c}}{{Relative depth}}"
+              " \\\\",
+              f"\\cmidrule(l){{2-{len(positions) + 1}}}",
+              "Model & " + " & ".join(f"{d:.2f}" for d in labels) + " \\\\",
+              "\\midrule"]
+    block = []
+    model_rows(lines, block, DEFAULT_SWEEP, render)
+    printed += [(f"{tag} {label}", cells) for label, cells in block]
 
 
 def table7_lexical_depth(depth: pd.DataFrame, purity: pd.DataFrame,
@@ -593,34 +601,21 @@ def table7_lexical_depth(depth: pd.DataFrame, purity: pd.DataFrame,
     for n, (tag, title, column, chance) in enumerate(blocks):
         if n:
             lines.append("\\par\\medskip")
-        lines += [f"\\textbf{{{tag}}} {title}\\par\\smallskip",
-                  "\\begin{tabular*}{\\textwidth}"
-                  "{@{\\extracolsep{\\fill}}l" + "r" * len(positions) + "@{}}",
-                  "\\toprule",
-                  f" & \\multicolumn{{{len(positions)}}}{{c}}{{Relative depth}}"
-                  " \\\\",
-                  f"\\cmidrule(l){{2-{len(positions) + 1}}}",
-                  "Model & " + " & ".join(f"{d:.2f}" for d in labels)
-                  + " \\\\",
-                  "\\midrule"]
-        for g, group in enumerate(GROUPS):
-            if g:
-                lines.append("\\addlinespace")
-            for model in group:
-                values = [value(model, i, column) for i in positions]
-                best = max(values)
-                cells = [cell(v, v == best > chance,
-                              model != BASELINE
-                              and above_baseline(
-                                  v, value(model, i, f"{column}_se"),
-                                  value(BASELINE, i, column),
-                                  value(BASELINE, i, f"{column}_se")),
-                              se=value(model, i, f"{column}_se"),
-                              se_size=TABLE7_SE_SIZE, strip_zero=True)
-                         for i, v in zip(positions, values)]
-                printed.append((f"{tag} {PRETTY[model]}", cells))
-                lines.append(band(g) + PRETTY[model] + " & "
-                             + " & ".join(cells) + " \\\\")
+
+        def render(model: str) -> list[str]:
+            values = [value(model, i, column) for i in positions]
+            best = max(values)
+            return [cell(v, v == best > chance,
+                         model != BASELINE
+                         and above_baseline(
+                             v, value(model, i, f"{column}_se"),
+                             value(BASELINE, i, column),
+                             value(BASELINE, i, f"{column}_se")),
+                         se=value(model, i, f"{column}_se"),
+                         se_size=TABLE7_SE_SIZE, strip_zero=True)
+                    for i, v in zip(positions, values)]
+
+        _depth_block(lines, printed, tag, title, positions, labels, render)
         chance_cells = [bare(without_zero(f"{chance:.3f}"), size=TABLE7_SE_SIZE)
                         for _ in positions]
         printed.append((f"{tag} Chance", chance_cells))
@@ -632,11 +627,6 @@ def table7_lexical_depth(depth: pd.DataFrame, purity: pd.DataFrame,
 
 
 # --- Tables 2, 8, 9 and 10 ---------------------------------------------------
-
-def _retrieval_row(retr: pd.DataFrame, model: str, subset: str,
-                   direction: str) -> pd.Series:
-    return _one(retr, model=model, subset=subset, direction=direction)
-
 
 def _chance(retr: pd.DataFrame, subset: str, direction: str,
             column: str) -> float:
@@ -669,7 +659,7 @@ def table2_class_names(class_alignment: pd.DataFrame,
         values = [float(full.alignment[model])]
         se = {0: float(full.se[model])}
         for j, direction in zip((1, 3), directions):
-            row = _retrieval_row(retr, model, "all", direction)
+            row = _one(retr, model=model, subset="all", direction=direction)
             values += [float(row.rate10), float(row.median_rank)]
             se[j] = float(row.rate10_se)
         rows[model], errors[model] = values, se
@@ -796,8 +786,8 @@ def table9_class_retrieval(class_retrieval: pd.DataFrame) -> Table:
     for m in have:
         cells = []
         for d in directions:
-            a = _retrieval_row(retr, m, "all", d)
-            t = _retrieval_row(retr, m, "text_free", d)
+            a = _one(retr, model=m, subset="all", direction=d)
+            t = _one(retr, model=m, subset="text_free", direction=d)
             cells += [(float(a.rate10), float(a.rate10_se)),
                       (float(a.median_rank), None),
                       (float(t.rate10), float(t.rate10_se))]
@@ -888,26 +878,13 @@ def table10_class_depth(class_depth: pd.DataFrame) -> Table:
     for n, (tag, title, column, chance, chance_row) in enumerate(blocks):
         if n:
             lines.append("\\par\\medskip")
-        lines += [f"\\textbf{{{tag}}} {title}\\par\\smallskip",
-                  "\\begin{tabular*}{\\textwidth}"
-                  "{@{\\extracolsep{\\fill}}l" + "r" * len(positions) + "@{}}",
-                  "\\toprule",
-                  f" & \\multicolumn{{{len(positions)}}}{{c}}{{Relative depth}}"
-                  " \\\\",
-                  f"\\cmidrule(l){{2-{len(positions) + 1}}}",
-                  "Model & " + " & ".join(f"{d:.2f}" for d in labels)
-                  + " \\\\",
-                  "\\midrule"]
-        for g, group in enumerate(GROUPS):
-            if g:
-                lines.append("\\addlinespace")
-            for model in group:
-                values = [value(model, i, column) for i in positions]
-                best = max(values)
-                cells = [cell(v, v == best, False) for v in values]
-                printed.append((f"{tag} {PRETTY[model]}", cells))
-                lines.append(band(g) + PRETTY[model] + " & "
-                             + " & ".join(cells) + " \\\\")
+
+        def render(model: str) -> list[str]:
+            values = [value(model, i, column) for i in positions]
+            best = max(values)
+            return [cell(v, v == best, False) for v in values]
+
+        _depth_block(lines, printed, tag, title, positions, labels, render)
         if chance_row:
             chance_cells = [f"{chance:.3f}" for _ in positions]
             printed.append((f"{tag} Chance", chance_cells))
