@@ -1,9 +1,12 @@
-"""Word directions: the mean over slots of a word's embedding minus its scrambled control's.
+"""Word directions from the rendered words, and visual directions from the class photographs.
 
-For a word ``w``, the direction is the mean over slots ``s`` of
+For a word ``w``, the word direction is the mean over slots ``s`` of
 ``f(background_s + w) - f(background_s + scramble_s(w))``. The estimator the
-results use, ``residual_centred``, also subtracts the mean over words. Caches
-are checked against the manifest they were built from before they are read.
+results use, ``residual_centred``, also subtracts the mean over words. For a
+class ``c`` with photographs ``I_c``, the visual direction is the mean of
+``f(x_i)`` over ``I_c`` minus the mean of those class means over every retained
+class. Caches are checked against the manifest they were built from before they
+are read.
 """
 from __future__ import annotations
 
@@ -14,11 +17,11 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from .config import EMBEDDINGS, LEXICON
-from .features.image import cache_paths
-from .stimuli.imagenet import IMAGE_MANIFEST, RENDER_MANIFEST
-from .stimuli.render import CLEAN, fingerprint
-from .stimuli.typography import split_halves
+from ..config import EMBEDDINGS, LEXICON
+from ..features.image import cache_paths
+from ..stimuli.imagenet import IMAGE_MANIFEST, MIN_IMAGES, RENDER_MANIFEST
+from ..stimuli.render import CLEAN, fingerprint
+from ..stimuli.typography import split_halves
 
 
 @dataclass(frozen=True)
@@ -211,3 +214,65 @@ def split_half_cosine(key: str, appearances, layer: int = -1) -> float:
     ta = rownorm(estimator(HEADLINE)(key, layer, tuple(a)))
     tb = rownorm(estimator(HEADLINE)(key, layer, tuple(b)))
     return float((ta * tb).sum(1).mean())
+
+
+#: Photograph subsets a class direction can be built from: every photograph, or
+#: those in which the text detector found no writing.
+SUBSETS = ("all", "text_free")
+
+
+def _rows(subset: str) -> pd.DataFrame:
+    man = manifest(CONCEPT_IMAGES)
+    if subset == "all":
+        return man
+    if subset != "text_free":
+        raise ValueError(f"unknown subset {subset!r}; choose from {SUBSETS}")
+    if "n_boxes" not in man.columns:
+        raise FileNotFoundError(
+            "the image manifest carries no text scan; run "
+            "scripts/stimuli/class_images.py")
+    return man[man.n_boxes == 0]
+
+
+@lru_cache(maxsize=8)
+def retained(subset: str = "all") -> tuple[str, ...]:
+    """The classes with at least ``MIN_IMAGES`` photographs in ``subset``, sorted by class id."""
+    counts = _rows(subset).groupby("wnid").size()
+    return tuple(sorted(counts.index[counts >= MIN_IMAGES]))
+
+
+def class_mean(key: str, layer: int = -1, subset: str = "all") -> np.ndarray:
+    """``(n_classes, d)`` class directions, rows aligned to ``retained(subset)``.
+
+    Each class is averaged over its photographs in ``subset``, and the mean over
+    the retained classes is subtracted.
+    """
+    x, _, _ = load_cache(key, ds=CONCEPT_IMAGES)
+    man = manifest(CONCEPT_IMAGES)
+    rows = _rows(subset)
+    classes = retained(subset)
+    index = {c: i for i, c in enumerate(classes)}
+    keep = rows.wnid.isin(index)
+    position = np.flatnonzero(man.index.isin(rows.index[keep]))
+    target = np.fromiter((index[c] for c in man.wnid.iloc[position]), int,
+                         count=len(position))
+
+    out = np.zeros((len(classes), x.shape[2]), np.float32)
+    count = np.zeros(len(classes))
+    # Sum the memory-mapped rows of the one layer in blocks of 4096.
+    for start in range(0, len(position), 4096):
+        chunk = position[start:start + 4096]
+        block = np.asarray(x[chunk, layer, :], np.float32)
+        np.add.at(out, target[start:start + 4096], block)
+        np.add.at(count, target[start:start + 4096], 1)
+    if not count.all():
+        empty = [classes[i] for i in np.flatnonzero(count == 0)][:5]
+        raise ValueError(f"a retained class received no photograph: {empty}")
+    out /= count[:, None]
+    if not np.abs(out).any():
+        raise DegenerateTau(
+            f"{key} layer {layer}: every class mean is exactly zero. At "
+            f"hidden-state index 0 the class token is still its learned "
+            f"initial value.")
+    out = out - out.mean(0, keepdims=True)
+    return out

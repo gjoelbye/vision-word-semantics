@@ -1,83 +1,17 @@
-"""Class directions from photographs, and the readouts that compare them with word directions.
+"""Readouts that compare word directions with the visual directions of the classes they name.
 
-For a class ``c`` with photographs ``I_c``, the class direction is the mean of
-``f(x_i)`` over ``I_c`` minus the mean of those class means over every retained
-class. Caches are read through :func:`src.tau.load_cache`, so each is checked
-against its own manifest.
+The visual directions are built in ``directions``, and each cache is checked
+against its own manifest there.
 """
 from __future__ import annotations
-
-from functools import lru_cache
 
 import numpy as np
 import pandas as pd
 
-from .neighbors import K, N_PERM, SUBSAMPLE_FRAC
-from .stats import (binomial_se, permutation_p, subsample_indices,
-                    subsample_summary)
-from .stimuli.imagenet import MIN_IMAGES
-from .tau import CONCEPT_IMAGES, DegenerateTau, load_cache, manifest
-
-#: Photograph subsets a class direction can be built from: every photograph, or
-#: those in which the text detector found no writing.
-SUBSETS = ("all", "text_free")
-
-
-def _rows(subset: str) -> pd.DataFrame:
-    man = manifest(CONCEPT_IMAGES)
-    if subset == "all":
-        return man
-    if subset != "text_free":
-        raise ValueError(f"unknown subset {subset!r}; choose from {SUBSETS}")
-    if "n_boxes" not in man.columns:
-        raise FileNotFoundError(
-            "the image manifest carries no text scan; run "
-            "scripts/stimuli/class_images.py")
-    return man[man.n_boxes == 0]
-
-
-@lru_cache(maxsize=8)
-def retained(subset: str = "all") -> tuple[str, ...]:
-    """The classes with at least :data:`src.stimuli.imagenet.MIN_IMAGES` photographs in ``subset``, sorted by class id."""
-    counts = _rows(subset).groupby("wnid").size()
-    return tuple(sorted(counts.index[counts >= MIN_IMAGES]))
-
-
-def class_mean(key: str, layer: int = -1, subset: str = "all") -> np.ndarray:
-    """``(n_classes, d)`` class directions, rows aligned to ``retained(subset)``.
-
-    Each class is averaged over its photographs in ``subset``, and the mean over
-    the retained classes is subtracted.
-    """
-    x, _, _ = load_cache(key, ds=CONCEPT_IMAGES)
-    man = manifest(CONCEPT_IMAGES)
-    rows = _rows(subset)
-    classes = retained(subset)
-    index = {c: i for i, c in enumerate(classes)}
-    keep = rows.wnid.isin(index)
-    position = np.flatnonzero(man.index.isin(rows.index[keep]))
-    target = np.fromiter((index[c] for c in man.wnid.iloc[position]), int,
-                         count=len(position))
-
-    out = np.zeros((len(classes), x.shape[2]), np.float32)
-    count = np.zeros(len(classes))
-    # Sum the memory-mapped rows of the one layer in blocks of 4096.
-    for start in range(0, len(position), 4096):
-        chunk = position[start:start + 4096]
-        block = np.asarray(x[chunk, layer, :], np.float32)
-        np.add.at(out, target[start:start + 4096], block)
-        np.add.at(count, target[start:start + 4096], 1)
-    if not count.all():
-        empty = [classes[i] for i in np.flatnonzero(count == 0)][:5]
-        raise ValueError(f"a retained class received no photograph: {empty}")
-    out /= count[:, None]
-    if not np.abs(out).any():
-        raise DegenerateTau(
-            f"{key} layer {layer}: every class mean is exactly zero. At "
-            f"hidden-state index 0 the class token is still its learned "
-            f"initial value.")
-    out = out - out.mean(0, keepdims=True)
-    return out
+from ..stats import (N_PERM, SUBSAMPLE_FRAC, binomial_se, permutation_p,
+                     subsample_indices, subsample_summary)
+from .directions import CONCEPT_IMAGES, _rows, load_cache, manifest, retained
+from .lexical import K
 
 
 def class_coherence(key: str, layer: int = -1,
@@ -131,7 +65,7 @@ def cross_rank(query: np.ndarray, candidates: np.ndarray,
     """Rank of each query's own target among the candidates, by cosine; 0 is nearest.
 
     Both arrays are unit rows. Ties count for the target, as in
-    :func:`src.neighbors.partner_rank`, and no candidate is excluded.
+    ``lexical.partner_rank``, and no candidate is excluded.
     """
     sim = query @ candidates.T
     own = sim[np.arange(len(target)), target]
@@ -155,7 +89,7 @@ def concept_alignment(T: np.ndarray, N: np.ndarray, rows: np.ndarray,
     ``T`` and ``N`` are unit rows; ``rows`` picks the words and ``target`` their
     classes. The null permutes which class goes with which word, the p-value is
     ``(count + 1) / (n + 1)``, and the standard error comes from subsamples of
-    words without replacement (see :func:`src.stats.subsample_summary`).
+    words without replacement (see ``stats.subsample_summary``).
     """
     per_word = (T[rows] * N[target]).sum(1)
     observed = float(per_word.mean())

@@ -15,17 +15,15 @@ import json
 import numpy as np
 import pandas as pd
 
-from src.composition_analysis import (
+from src.analysis.two_clue import (
     READOUTS,
-    bootstrap_mean_ci,
     condition_vectors,
-    exact_sign_flip_p,
     target_metrics,
     validate_dense_blocks,
 )
 from src.config import RESULTS
 from src.models import DEFAULT_SWEEP
-from src.stats import holm
+from src.stats import bootstrap_mean_ci, exact_sign_flip_p, holm
 from src.stimuli.two_clue_render import (
     EMBEDDINGS_ROOT,
     MANIFEST_META_PATH,

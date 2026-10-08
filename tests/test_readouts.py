@@ -2,7 +2,7 @@
 import numpy as np
 import pytest
 
-from src import neighbors as NB
+from src.analysis import lexical
 from src.stimuli.vocabulary import letter_overlap
 
 
@@ -21,14 +21,14 @@ def _blocked(n_per=25, n_class=4, d=32, seed=0, sep=3.0):
 def test_chance_purity_is_the_closed_form():
     """Four balanced classes of 25 give (25-1)/(100-1)."""
     labels = np.repeat(np.arange(4), 25)
-    assert NB.chance_purity(labels) == pytest.approx(24 / 99)
+    assert lexical.chance_purity(labels) == pytest.approx(24 / 99)
 
 
 def test_chance_purity_handles_unequal_classes():
     labels = np.array([0, 0, 0, 1, 1, 2])
     n = len(labels)
     expected = (3 * 2 + 2 * 1 + 1 * 0) / (n * (n - 1))
-    assert NB.chance_purity(labels) == pytest.approx(expected)
+    assert lexical.chance_purity(labels) == pytest.approx(expected)
 
 
 def test_restricted_chance_uses_only_admissible_candidates():
@@ -36,7 +36,8 @@ def test_restricted_chance_uses_only_admissible_candidates():
     same-label candidate among the three admissible neighbors."""
     labels = np.array([0, 0, 1, 1, 0, 0, 1, 1])
     clusters = np.array([0, 0, 0, 0, 1, 1, 1, 1])
-    assert NB.restricted_chance_purity(labels, clusters) == pytest.approx(1 / 3)
+    assert (lexical.restricted_chance_purity(labels, clusters)
+            == pytest.approx(1 / 3))
 
 
 def test_a_tie_counts_for_the_partner_not_against_it():
@@ -44,8 +45,8 @@ def test_a_tie_counts_for_the_partner_not_against_it():
     and score an exact tie as a loss."""
     S = np.zeros((4, 4))
     np.fill_diagonal(S, -np.inf)
-    assert NB.partner_rank(S, 0, 3) == 0
-    assert NB.partner_rank(S, 0, 1) == 0
+    assert lexical.partner_rank(S, 0, 3) == 0
+    assert lexical.partner_rank(S, 0, 1) == 0
 
 
 def test_a_within_item_tie_counts_for_neither_competitor():
@@ -60,22 +61,22 @@ def test_a_within_item_tie_counts_for_neither_competitor():
     synonym = np.array([np.cos(0.4), np.sin(0.4)])
     twin = np.array([np.cos(0.4), -np.sin(0.4)])
     far = np.array([-1.0, 0.0])
-    T = NB.rownorm(np.stack([anchor, synonym, twin, far]))
+    T = lexical.rownorm(np.stack([anchor, synonym, twin, far]))
 
     cosine = T @ T.T
     difference = cosine[0, 1] - cosine[0, 2]
     assert difference == pytest.approx(0.0, abs=1e-12)
     assert int(difference > 0) == 0 and int(difference < 0) == 0
 
-    S = NB.similarity(T)
-    assert NB.partner_rank(S, 0, 1) == NB.partner_rank(S, 0, 2) == 0
+    S = lexical.similarity(T)
+    assert lexical.partner_rank(S, 0, 1) == lexical.partner_rank(S, 0, 2) == 0
 
 
 def test_partner_rank_counts_only_strictly_better_words():
     S = np.array([[-np.inf, 0.1, 0.9, 0.5]])
     S = np.vstack([S, np.zeros((3, 4))])
-    assert NB.partner_rank(S, 0, 1) == 2      # 0.9 and 0.5 beat it
-    assert NB.partner_rank(S, 0, 2) == 0      # nothing beats it
+    assert lexical.partner_rank(S, 0, 1) == 2      # 0.9 and 0.5 beat it
+    assert lexical.partner_rank(S, 0, 2) == 0      # nothing beats it
 
 
 def test_within_ten_admits_nine_words_ahead_and_not_ten():
@@ -95,8 +96,9 @@ def test_within_ten_admits_nine_words_ahead_and_not_ten():
     S[4, 11] = 0.5
     words = [f"w{i}" for i in range(n)]
     index = {w: i for i, w in enumerate(words)}
-    rows = NB.retrieval(S, index, [("w0", "w1"), ("w2", "w3"), ("w4", "w5")],
-                        "test")
+    rows = lexical.retrieval(S, index,
+                             [("w0", "w1"), ("w2", "w3"), ("w4", "w5")],
+                             "test")
     fwd = {r["direction"]: r for r in rows}["forward"]
     assert fwd["hits"] == 0
     assert fwd["hits10"] == 2
@@ -106,8 +108,8 @@ def test_within_ten_admits_nine_words_ahead_and_not_ten():
 
 def test_the_permutation_null_lands_on_chance():
     T, labels = _blocked()
-    S = NB.similarity(T)
-    out = NB.purity_permutation(S, labels, n_perm=200)
+    S = lexical.similarity(T)
+    out = lexical.purity_permutation(S, labels, n_perm=200)
     assert out["purity"] > 0.9
     assert out["null_mean"] == pytest.approx(out["chance"], abs=0.03)
     assert out["p"] < 0.01
@@ -117,7 +119,7 @@ def test_the_p_value_cannot_be_exactly_zero():
     """A finite number of shuffles cannot support p = 0, so the
     (count+1)/(n+1) correction floors it at 1/(n+1), here 1/201."""
     T, labels = _blocked()
-    out = NB.purity_permutation(NB.similarity(T), labels, n_perm=200)
+    out = lexical.purity_permutation(lexical.similarity(T), labels, n_perm=200)
     assert out["p"] >= 1 / 201
 
 
@@ -127,9 +129,9 @@ def test_purity_interval_brackets_its_own_point_estimate():
     too, because a smaller pool lowers purity."""
     for seed in range(6):
         T, labels = _blocked(seed=seed, sep=0.45, n_per=30)
-        S = NB.similarity(T)
-        point = NB.knn_purity(S, labels)
-        out = NB.purity_subsample(S, labels, n=200)
+        S = lexical.similarity(T)
+        point = lexical.knn_purity(S, labels)
+        out = lexical.purity_subsample(S, labels, n=200)
         lo, hi = out["ci_lo"], out["ci_hi"]
         assert lo <= point <= hi, f"seed {seed}: {point} outside [{lo}, {hi}]"
 
@@ -137,9 +139,9 @@ def test_purity_interval_brackets_its_own_point_estimate():
 def test_restricted_purity_interval_brackets_its_point_estimate():
     T, labels = _blocked(seed=2, sep=0.45, n_per=30)
     clusters = np.tile(np.arange(4), len(labels) // 4)
-    S = NB.similarity(T)
-    point = NB.knn_purity(S, labels, restrict=clusters)
-    out = NB.purity_subsample(S, labels, n=200, restrict=clusters)
+    S = lexical.similarity(T)
+    point = lexical.knn_purity(S, labels, restrict=clusters)
+    out = lexical.purity_subsample(S, labels, n=200, restrict=clusters)
     assert out["ci_lo"] <= point <= out["ci_hi"]
 
 
@@ -161,11 +163,11 @@ def test_purity_interval_is_wide_enough_to_cover_the_truth():
                                        replace=False) for c in range(n_class)])
         return pop[idx], pop_labels[idx]
 
-    points = [NB.knn_purity(NB.similarity(*draw(s)[:1]), draw(s)[1])
+    points = [lexical.knn_purity(lexical.similarity(*draw(s)[:1]), draw(s)[1])
               for s in range(20)]
     spread = 1.96 * np.std(points, ddof=1)
     T, labels = draw(0)
-    out = NB.purity_subsample(NB.similarity(T), labels, n=200)
+    out = lexical.purity_subsample(lexical.similarity(T), labels, n=200)
     lo, hi = out["ci_lo"], out["ci_hi"]
     assert (hi - lo) / 2 >= 0.6 * spread, \
         f"half-width {(hi - lo) / 2:.4f} against 1.96 SD {spread:.4f}"
@@ -182,16 +184,17 @@ def test_restricting_to_a_cluster_changes_who_the_neighbours_are():
     scored against words in its own cluster."""
     T, labels = _blocked()
     clusters = np.tile(np.arange(4), len(labels) // 4)
-    S = NB.similarity(T)
-    free = NB.knn_purity(S, labels)
-    tied = NB.knn_purity(S, labels, restrict=clusters)
+    S = lexical.similarity(T)
+    free = lexical.knn_purity(S, labels)
+    tied = lexical.knn_purity(S, labels, restrict=clusters)
     assert free != tied
 
 
 def test_public_neighbour_indices_obey_the_restriction():
     T, _ = _blocked(n_per=6, n_class=4)
     clusters = np.repeat(np.arange(4), 6)
-    nn = NB.neighbour_indices(NB.similarity(T), k=3, restrict=clusters)
+    nn = lexical.neighbour_indices(lexical.similarity(T), k=3,
+                                   restrict=clusters)
     assert np.all(clusters[nn] == clusters[:, None])
 
 
@@ -202,7 +205,8 @@ def test_a_restriction_too_tight_for_k_is_an_error_not_a_wrong_number():
     T, labels = _blocked(n_per=5, n_class=4)
     clusters = np.arange(len(labels)) % 10        # clusters of two
     with pytest.raises(ValueError, match="admissible neighbours"):
-        NB.knn_purity(NB.similarity(T), labels, k=10, restrict=clusters)
+        lexical.knn_purity(lexical.similarity(T), labels, k=10,
+                           restrict=clusters)
 
 
 def test_the_restricted_null_preserves_the_restriction():
@@ -214,7 +218,7 @@ def test_the_restricted_null_preserves_the_restriction():
     clusters = np.repeat(np.arange(4), 30)
     rng = np.random.default_rng(0)
     T = rng.normal(size=(120, 40))
-    out = NB.purity_permutation(NB.similarity(T), labels, n_perm=100,
+    out = lexical.purity_permutation(lexical.similarity(T), labels, n_perm=100,
                                 restrict=clusters)
     assert abs(out["null_mean"] - out["purity"]) < 0.1
 
@@ -223,8 +227,8 @@ def test_restricted_permutation_reports_its_own_chance():
     labels = np.array([0, 0, 1, 1, 0, 0, 1, 1])
     clusters = np.array([0, 0, 0, 0, 1, 1, 1, 1])
     rng = np.random.default_rng(0)
-    out = NB.purity_permutation(
-        NB.similarity(rng.normal(size=(8, 6))), labels, k=2,
+    out = lexical.purity_permutation(
+        lexical.similarity(rng.normal(size=(8, 6))), labels, k=2,
         n_perm=20, restrict=clusters)
     assert out["chance"] == pytest.approx(1 / 3)
 
@@ -235,7 +239,7 @@ def test_retrieval_reports_each_direction_with_its_own_denominator():
     words = [f"w{i}" for i in range(len(labels))]
     index = {w: i for i, w in enumerate(words)}
     pairs = [("w0", "w1"), ("w2", "w3")]
-    rows = NB.retrieval(NB.similarity(T), index, pairs, "test")
+    rows = lexical.retrieval(lexical.similarity(T), index, pairs, "test")
     by = {r["direction"]: r for r in rows}
     assert set(by) == {"forward", "backward"}
     assert by["forward"]["n"] == by["backward"]["n"] == 2

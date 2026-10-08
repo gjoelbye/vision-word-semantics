@@ -16,11 +16,12 @@ import time
 import numpy as np
 import pandas as pd
 
+from src.analysis.directions import (HEADLINE, estimator, manifest, rownorm,
+                                     word_order)
 from src.config import SIMILARITY, ensure_dirs
 from src.features import speech, text
 from src.models import DEFAULT_SWEEP
 from src.stimuli.render import fingerprint
-from src.tau import HEADLINE, estimator, manifest, rownorm, word_order
 
 #: Every matrix, in index order: the image models, the text encoders, the
 #: speech encoder.

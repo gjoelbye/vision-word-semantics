@@ -14,12 +14,12 @@ import numpy as np
 import pandas as pd
 from threadpoolctl import threadpool_limits
 
+from src.analysis.directions import manifest, word_order
 from src.config import LEXICON, RESULTS, SEED, SIMILARITY, ensure_dirs
 from src.features import speech, text
 from src.models import DEFAULT_SWEEP
 from src.stats import benjamini_hochberg
 from src.stimuli.render import fingerprint
-from src.tau import manifest, word_order
 
 INDEX = SIMILARITY / "index.parquet"
 OUT = RESULTS / "language_alignment.parquet"

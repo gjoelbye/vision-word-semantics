@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src import tau as TAU
+from src.analysis import directions
 from src.stimuli.render import CLEAN
 
 N_SLOTS, D = 4, 6
@@ -48,44 +48,44 @@ def _install(monkeypatch, control: str | None):
         feats.append(v)
     x = np.stack(feats)[:, None, :].astype(np.float16)
 
-    monkeypatch.setattr(TAU, "manifest", lambda ds=None: man)
-    monkeypatch.setattr(TAU, "load_cache", lambda k, *, ds=None: (x, np.array([0]), 1))
-    monkeypatch.setattr(TAU, "word_order", lambda ds=None: tuple(WORDS))
+    monkeypatch.setattr(directions, "manifest", lambda ds=None: man)
+    monkeypatch.setattr(directions, "load_cache", lambda k, *, ds=None: (x, np.array([0]), 1))
+    monkeypatch.setattr(directions, "word_order", lambda ds=None: tuple(WORDS))
 
 
 def test_uncentred_tau_is_dominated_by_what_the_words_share(monkeypatch):
     _install(monkeypatch, control="background")
-    T = TAU.residual_tau("fake", layer=0)
-    assert TAU.shared_mean_share(T) > 0.9
-    Tn = TAU.rownorm(T)
+    T = directions.residual_tau("fake", layer=0)
+    assert directions.shared_mean_share(T) > 0.9
+    Tn = directions.rownorm(T)
     off = (Tn @ Tn.T)[np.triu_indices(len(Tn), 1)]
     assert off.min() > 0.9, "arbitrary words should look near-identical here"
 
 
 def test_centring_removes_it(monkeypatch):
     _install(monkeypatch, control="background")
-    T = TAU.residual_tau("fake", layer=0, center=True)
-    assert TAU.shared_mean_share(T) < 1e-6
-    Tn = TAU.rownorm(T)
+    T = directions.residual_tau("fake", layer=0, center=True)
+    assert directions.shared_mean_share(T) < 1e-6
+    Tn = directions.rownorm(T)
     off = (Tn @ Tn.T)[np.triu_indices(len(Tn), 1)]
     assert off.max() < 0.1, "distinct words should now be distinguishable"
 
 
 def test_residual_tau_recovers_the_word_specific_part(monkeypatch):
     _install(monkeypatch, control="shared")
-    T = TAU.residual_tau("fake", layer=0)
+    T = directions.residual_tau("fake", layer=0)
     for i, w in enumerate(WORDS):
         np.testing.assert_allclose(T[i], SPECIFIC[w], atol=1e-2)
 
 
 def test_residual_tau_needs_the_control_condition(monkeypatch):
     _install(monkeypatch, control=None)
-    with pytest.raises(TAU.MissingCondition):
-        TAU.residual_tau("fake", layer=0)
+    with pytest.raises(directions.MissingCondition):
+        directions.residual_tau("fake", layer=0)
 
 
 def test_estimator_registry():
-    assert set(TAU.ESTIMATORS) == {"residual", "residual_centred"}
-    assert TAU.HEADLINE in TAU.ESTIMATORS
+    assert set(directions.ESTIMATORS) == {"residual", "residual_centred"}
+    assert directions.HEADLINE in directions.ESTIMATORS
     with pytest.raises(ValueError):
-        TAU.estimator("nonsense")
+        directions.estimator("nonsense")

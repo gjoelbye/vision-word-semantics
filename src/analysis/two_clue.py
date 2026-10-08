@@ -5,14 +5,12 @@ are averaged over the 96 slots before any cosine is taken.
 """
 from __future__ import annotations
 
-import functools
-import itertools
 from collections.abc import Mapping
 
 import numpy as np
 import pandas as pd
 
-from .stimuli.two_clue_render import CONDITIONS
+from ..stimuli.two_clue_render import CONDITIONS
 
 #: The difference vectors that are scored against the targets.
 READOUTS = ("joint", "feature", "base", "interaction")
@@ -164,42 +162,3 @@ def target_metrics(items: pd.DataFrame,
     result["base_axis_gain_over_feature"] = (
         result.joint_base_axis_margin - result.feature_base_axis_margin)
     return result
-
-
-@functools.lru_cache(maxsize=8)
-def _sign_patterns(n: int) -> np.ndarray:
-    """Every sign vector of length ``n``."""
-    return np.asarray(list(itertools.product((-1.0, 1.0), repeat=n)))
-
-
-def exact_sign_flip_p(values: np.ndarray, alternative: str = "greater") -> float:
-    """Exact sign-flip p-value over every sign pattern of the grid means.
-
-    The null is symmetric about zero. ``alternative`` is ``greater`` or
-    ``two-sided``.
-    """
-    values = np.asarray(values, dtype=float)
-    if values.ndim != 1 or not len(values) or not np.isfinite(values).all():
-        raise ValueError("sign-flip values must be a finite nonempty vector")
-    if len(values) > 20:
-        raise ValueError("exact enumeration is limited to 20 units")
-    observed = float(values.mean())
-    null = _sign_patterns(len(values)) @ values / len(values)
-    tolerance = np.finfo(float).eps * max(1.0, abs(observed)) * 8
-    if alternative == "greater":
-        return float(np.mean(null >= observed - tolerance))
-    if alternative == "two-sided":
-        return float(np.mean(np.abs(null) >= abs(observed) - tolerance))
-    raise ValueError("alternative must be greater or two-sided")
-
-
-def bootstrap_mean_ci(values: np.ndarray, draws: np.ndarray,
-                      confidence: float = 0.95) -> tuple[float, float]:
-    """Percentile interval of the mean, one resample per row of ``draws``."""
-    values = np.asarray(values, dtype=float)
-    draws = np.asarray(draws, dtype=int)
-    if draws.ndim != 2 or draws.shape[1] != len(values):
-        raise ValueError("bootstrap draws do not match the family vector")
-    means = values[draws].mean(axis=1)
-    tail = (1 - confidence) / 2
-    return tuple(float(x) for x in np.quantile(means, [tail, 1 - tail]))

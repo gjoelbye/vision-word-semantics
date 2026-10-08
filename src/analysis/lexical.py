@@ -1,21 +1,28 @@
-"""Nearest-neighbor readouts on word directions: top-10 accuracy and neighbor purity.
+"""Lexical readouts on word directions.
 
-Both count the ``K`` nearest words. A partner's rank counts the words strictly
-nearer than it, so a tie counts for the partner. Intervals subsample words
-without replacement, because a resampled duplicate is its own nearest neighbor.
+Partner retrieval and neighbor purity count the ``K`` nearest words. A
+partner's rank counts the words strictly nearer than it, so a tie counts for
+the partner. Intervals subsample words without replacement, because a
+resampled duplicate is its own nearest neighbor.
+
+Each item of the three blocks holds an anchor and two competitors, and is
+scored by which competitor is nearer to the anchor. Category accuracy assigns
+held-out nouns and brands to the nearest centroid on a fixed half split of
+every category-by-spelling-cluster cell. Both depend on the lexicon alone, so
+vision models and encoders are scored on the same items and the same held-out
+words.
 """
 from __future__ import annotations
 
 import numpy as np
+import pandas as pd
 
-from .stats import binomial_se, subsample_summary
-from .tau import rownorm
+from ..stats import (N_PERM, N_SUBSAMPLE, SUBSAMPLE_FRAC, binomial_se,
+                     subsample_summary)
+from .directions import rownorm
 
 #: Nearest words counted by both readouts: top-10 accuracy and neighbor purity.
 K = 10
-N_PERM = 2000
-N_SUBSAMPLE = 1000
-SUBSAMPLE_FRAC = 0.8
 
 
 def similarity(T: np.ndarray) -> np.ndarray:
@@ -191,7 +198,7 @@ def purity_subsample(S: np.ndarray, labels: np.ndarray, k: int = K,
     Each draw keeps ``frac`` of the words without replacement and recomputes
     purity on the reduced similarity matrix. The spread is rescaled by the
     finite-population factor and the interval is centered on the point estimate
-    (see :func:`src.stats.subsample_summary`).
+    (see ``stats.subsample_summary``).
     """
     labels = np.asarray(labels)
     rng = np.random.default_rng(seed)
@@ -209,3 +216,147 @@ def purity_subsample(S: np.ndarray, labels: np.ndarray, k: int = K,
                                 for _ in range(n))])
     lo, hi, se = subsample_summary(point, draws, N, m)
     return dict(purity=float(point), ci_lo=lo, ci_hi=hi, se=se, n=N, m=m)
+
+
+# --- comparisons within an item ----------------------------------------------
+
+BLOCKS = (
+    # name, the relation giving the kept competitor, the relation giving the
+    # competitor it is measured against, the two column names, and the number
+    # of items.
+    ("synonym_vs_twin", "synonym", "spelling_twin", "synonym", "twin", 150),
+    ("synonym_vs_antonym", "antonym_synonym", "antonym", "synonym", "antonym", 50),
+    ("synonym_vs_base", "negation", "negation_base", "synonym", "base", 35),
+)
+
+
+def build_items(pairs: pd.DataFrame, words: pd.DataFrame) -> dict:
+    """The three blocks as frames with ``anchor``, ``kept`` and ``other``.
+
+    ``class`` holds the anchor's picturability from the word table. Built from
+    ``pairs.parquet`` by joining two relations on their shared anchor. Raises
+    SystemExit unless every block has its number of items and block 1 holds 75
+    concrete and 75 abstract anchors.
+    """
+    picturability = dict(zip(words.word, words.picturability))
+    chars = dict(zip(words.word, words.n_chars))
+    out = {}
+    for name, kept_rel, other_rel, kept, other, expected in BLOCKS:
+        left = (pairs.loc[pairs.relation == kept_rel, ["a", "b"]]
+                .rename(columns={"b": kept}))
+        right = (pairs.loc[pairs.relation == other_rel, ["a", "b"]]
+                 .rename(columns={"b": other}))
+        frame = left.merge(right, on="a").rename(columns={"a": "anchor"})
+        if len(frame) != expected:
+            raise SystemExit(
+                f"block {name} joined to {len(frame)} items, not {expected}; "
+                f"the word set changed and the readout's n with it")
+        frame["kept"], frame["other"] = frame[kept], frame[other]
+        frame["class"] = frame.anchor.map(picturability)
+        frame["anchor_chars"] = frame.anchor.map(chars)
+        frame["kept_chars"] = frame.kept.map(chars)
+        out[name] = frame
+    block1 = out["synonym_vs_twin"]
+    counts = block1["class"].value_counts().to_dict()
+    if counts.get("concrete") != 75 or counts.get("abstract") != 75:
+        raise SystemExit(
+            f"block 1 holds {counts}, not 75 concrete and 75 abstract; the "
+            f"class contrast is no longer balanced and its Fisher test would "
+            f"be reading an imbalance instead of an effect")
+    return out
+
+
+# --- category accuracy -------------------------------------------------------
+
+#: The two grids, by the ``role`` each takes in ``words.parquet``.
+DATASETS = {"common_noun": "category", "brand": "brand"}
+
+#: The seed of the half split.
+SPLIT_SEED = 0
+
+
+def balanced_split(frame: pd.DataFrame, seed: int) -> np.ndarray:
+    """A ``train`` or ``test`` label per row, halving every category-by-spelling-cluster cell."""
+    rng = np.random.default_rng(seed)
+    split = np.full(len(frame), "", dtype=object)
+    for label in sorted(frame.label.unique()):
+        for ortho in sorted(frame.ortho.unique()):
+            rows = frame.index[
+                frame.label.eq(label) & frame.ortho.eq(ortho)
+            ].to_numpy()
+            if len(rows) < 2 or len(rows) % 2:
+                raise ValueError(
+                    f"{label!r} × ortho {ortho!r} has {len(rows)} words; "
+                    "the fixed half split requires a positive even count")
+            rows = rng.permutation(rows)
+            half = len(rows) // 2
+            split[rows[:half]] = "train"
+            split[rows[half:]] = "test"
+    if (split == "").any():
+        raise AssertionError("a word was not assigned to either split")
+    return split
+
+
+def length_bands(n_chars: pd.Series) -> np.ndarray:
+    """Word-length tercile (0, 1 or 2) per word.
+
+    Lengths are tied integers, so the bands can be unequal in size. Raises
+    SystemExit unless three bands survive.
+    """
+    band = pd.qcut(n_chars, 3, labels=False, duplicates="drop")
+    band = band.astype(int).to_numpy()
+    if len(np.unique(band)) != 3:
+        raise SystemExit(
+            f"word length gave {len(np.unique(band))} bands, not three; the "
+            f"stratified null needs three and the vocabulary has changed")
+    return band
+
+
+def dataset_frame(words: pd.DataFrame, dataset: str, role: str,
+                  split_seed: int) -> pd.DataFrame:
+    """The words of one list sorted by word, with label, spelling cluster, length band and split."""
+    frame = (words.loc[words.role.eq(role),
+                       ["word", "category", "ortho", "n_chars"]]
+             .rename(columns={"category": "label"})
+             .sort_values("word").reset_index(drop=True))
+    frame.insert(0, "dataset", dataset)
+    frame["ortho"] = frame.ortho.astype(int)
+    frame["n_chars"] = frame.n_chars.astype(int)
+    frame["length_band"] = length_bands(frame.n_chars)
+    frame["split"] = balanced_split(frame, split_seed)
+    return frame
+
+
+def centred_centroids(
+    X: np.ndarray, labels: np.ndarray, label_order: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Label centroids, and each centroid minus the unweighted mean of the centroids."""
+    centroids = np.stack([X[labels == label].mean(0)
+                          for label in label_order])
+    directions = centroids - centroids.mean(0, keepdims=True)
+    return centroids, directions
+
+
+def nearest_centroid_prediction(
+    X_train: np.ndarray, y_train: np.ndarray, X_test: np.ndarray,
+    label_order: np.ndarray,
+) -> np.ndarray:
+    """The label of the nearest training centroid, by cosine, per held-out word."""
+    centroids, _ = centred_centroids(X_train, y_train, label_order)
+    return label_order[np.argmax(X_test @ rownorm(centroids).T, axis=1)]
+
+
+def nearest_centroid_accuracy(
+    X: np.ndarray, frame: pd.DataFrame, label_order: np.ndarray,
+) -> tuple[float, int, int]:
+    """Held-out accuracy, the number correct, and the number held out.
+
+    ``X`` holds one unit-length row per word of ``frame``, in its row order.
+    """
+    train = frame.split.eq("train").to_numpy()
+    test = frame.split.eq("test").to_numpy()
+    prediction = nearest_centroid_prediction(
+        X[train], frame.loc[train, "label"].to_numpy(), X[test], label_order)
+    correct = int((prediction == frame.loc[test, "label"].to_numpy()).sum())
+    held = int(test.sum())
+    return correct / held, correct, held

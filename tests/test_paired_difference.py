@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src import tau as TAU
+from src.analysis import directions
 from src.stimuli.render import CLEAN
 
 N_SLOTS, D = 4, 3
@@ -44,10 +44,10 @@ def _features(rows: list[dict]) -> np.ndarray:
 
 
 def _install(mp, man: pd.DataFrame, x: np.ndarray) -> None:
-    mp.setattr(TAU, "manifest", lambda ds=None: man)
-    mp.setattr(TAU, "load_cache",
+    mp.setattr(directions, "manifest", lambda ds=None: man)
+    mp.setattr(directions, "load_cache",
                lambda key, *, ds=None: (x, np.array([0]), 1))
-    mp.setattr(TAU, "word_order", lambda ds=None: tuple(WORDS))
+    mp.setattr(directions, "word_order", lambda ds=None: tuple(WORDS))
 
 
 @pytest.fixture
@@ -59,7 +59,7 @@ def synthetic(monkeypatch):
 
 
 def test_paired_difference_recovers_the_word_effect(synthetic):
-    t = TAU.residual_tau("fake", layer=0)
+    t = directions.residual_tau("fake", layer=0)
     for i, w in enumerate(WORDS):
         np.testing.assert_allclose(t[i], EXPECTED[w], atol=1e-2)
 
@@ -78,7 +78,7 @@ def test_control_is_paired_by_word_and_slot_not_by_row_position(synthetic):
                              scramble.iloc[1::2]]).reset_index(drop=True)
     with pytest.MonkeyPatch.context() as mp:
         _install(mp, interleaved, _features(interleaved.to_dict("records")))
-        t = TAU.residual_tau("fake", layer=0)
+        t = directions.residual_tau("fake", layer=0)
     for i, w in enumerate(WORDS):
         np.testing.assert_allclose(t[i], EXPECTED[w], atol=1e-2)
 
@@ -86,12 +86,12 @@ def test_control_is_paired_by_word_and_slot_not_by_row_position(synthetic):
                           ).reset_index(drop=True)
     with pytest.MonkeyPatch.context() as mp:
         _install(mp, mispaired, _features(mispaired.to_dict("records")))
-        with pytest.raises(TAU.MissingCondition, match="not paired"):
-            TAU.residual_tau("fake", layer=0)
+        with pytest.raises(directions.MissingCondition, match="not paired"):
+            directions.residual_tau("fake", layer=0)
 
 
 def test_slot_subset_still_recovers_it(synthetic):
-    t = TAU.residual_tau("fake", layer=0, slots=(0, 2))
+    t = directions.residual_tau("fake", layer=0, slots=(0, 2))
     np.testing.assert_allclose(t[0], EXPECTED["alpha"], atol=1e-2)
     np.testing.assert_allclose(t[1], EXPECTED["beta"], atol=1e-2)
 
@@ -104,8 +104,8 @@ def test_degenerate_layer_raises_instead_of_scoring_zero(monkeypatch):
     rows = _rows()
     const = np.ones((len(rows), 1, D), np.float16)      # same vector everywhere
     _install(monkeypatch, pd.DataFrame(rows), const)
-    with pytest.raises(TAU.DegenerateTau):
-        TAU.residual_tau("fake", layer=0)
+    with pytest.raises(directions.DegenerateTau):
+        directions.residual_tau("fake", layer=0)
 
 
 def test_the_untrained_floor_is_reproducible():

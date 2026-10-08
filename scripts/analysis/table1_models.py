@@ -20,16 +20,17 @@ import numpy as np
 import pandas as pd
 from scipy.stats import fisher_exact
 
-from src import categories as CAT
-from src import neighbors as NB
+from src.analysis import lexical
+from src.analysis.directions import (HEADLINE, DegenerateTau, estimator,
+                                     load_cache, manifest, rownorm,
+                                     shared_mean_share, word_order)
+from src.analysis.lexical import K
 from src.config import LEXICON, RESULTS, SIMILARITY, ensure_dirs
 from src.features import speech, text
-from src.items import build_items, sign_test, vocabulary_spread
 from src.models import DEFAULT_SWEEP
-from src.stats import binomial_se, holm
+from src.stats import (N_PERM, binomial_se, holm, sign_test,
+                       vocabulary_spread)
 from src.stimuli.render import fingerprint
-from src.tau import (HEADLINE, DegenerateTau, estimator, load_cache, manifest,
-                     rownorm, shared_mean_share, word_order)
 
 #: The encoders in table order: the three text encoders, then the speech encoder.
 ENCODERS = text.TEXT_MODELS + speech.SPEECH_MODELS
@@ -53,16 +54,17 @@ def lexicon() -> SimpleNamespace:
         grids[name] = dict(rows=np.array([index[w] for w in frame.word]),
                            labels=frame.category.to_numpy(),
                            clusters=frame.ortho.to_numpy().astype(int),
-                           bands=CAT.length_bands(frame.n_chars))
-    blocks = build_items(pairs, words)
+                           bands=lexical.length_bands(frame.n_chars))
+    blocks = lexical.build_items(pairs, words)
     missing = {w for frame in blocks.values()
                for column in ("anchor", "kept", "other")
                for w in frame[column] if w not in index}
     if missing:
         raise SystemExit(f"{len(missing)} item words are not rendered: "
                          f"{sorted(missing)[:5]}")
-    splits = {dataset: CAT.dataset_frame(words, dataset, role, CAT.SPLIT_SEED)
-              for dataset, role in CAT.DATASETS.items()}
+    splits = {dataset: lexical.dataset_frame(words, dataset, role,
+                                             lexical.SPLIT_SEED)
+              for dataset, role in lexical.DATASETS.items()}
     return SimpleNamespace(
         words=words, pairs=pairs, vocab=vocab, index=index, grids=grids,
         blocks=blocks, splits=splits,
@@ -101,7 +103,7 @@ def items_rows(key: str, cosine: np.ndarray, S: np.ndarray,
     found = np.zeros(len(records), bool)
     for left, right in (("anchor", "kept"), ("kept", "anchor")):
         found |= np.array([
-            NB.partner_rank(S, index[row[left]], index[row[right]]) < NB.K
+            lexical.partner_rank(S, index[row[left]], index[row[right]]) < K
             for row in records])
     concrete = (block1["class"] == "concrete").to_numpy()
     table = [[int((found & concrete).sum()), int((~found & concrete).sum())],
@@ -131,13 +133,13 @@ def latent_rows(key: str, T: np.ndarray, lex: SimpleNamespace) -> list[dict]:
         y_test = frame.loc[test, "label"].to_numpy()
         ortho_test = frame.loc[test, "ortho"].to_numpy()
         band_test = frame.loc[test, "length_band"].to_numpy()
-        prediction = CAT.nearest_centroid_prediction(
+        prediction = lexical.nearest_centroid_prediction(
             X[train], y_train, X[test], label_order)
         accuracy = float(np.mean(prediction == y_test))
         strata = np.unique(np.stack([ortho_test, band_test], axis=1), axis=0)
         rng = np.random.default_rng([PERMUTATION_SEED, 1])
-        null = np.empty(NB.N_PERM, dtype=float)
-        for repeat in range(NB.N_PERM):
+        null = np.empty(N_PERM, dtype=float)
+        for repeat in range(N_PERM):
             shuffled = y_test.copy()
             for ortho, band in strata:
                 group = (ortho_test == ortho) & (band_test == band)
@@ -150,8 +152,8 @@ def latent_rows(key: str, T: np.ndarray, lex: SimpleNamespace) -> list[dict]:
             full_classification_accuracy_se=binomial_se(correct, held),
             classification_chance=float(1 / len(label_order)),
             length_stratified_full_classification_accuracy_p=(
-                (int((null >= accuracy).sum()) + 1) / (NB.N_PERM + 1)),
-            n_perm=NB.N_PERM))
+                (int((null >= accuracy).sum()) + 1) / (N_PERM + 1)),
+            n_perm=N_PERM))
     return rows
 
 
@@ -170,18 +172,19 @@ def final_layer(key: str, lex: SimpleNamespace) -> dict[str, list[dict]]:
                                  shared_mean_share=shared_mean_share(base)))
     base = base - base.mean(0, keepdims=True)
     T = rownorm(base)
-    S = NB.similarity(T)
+    S = lexical.similarity(T)
 
     for relation, plist in lex.relations.items():
-        for row in NB.retrieval(S, lex.index, plist, relation):
+        for row in lexical.retrieval(S, lex.index, plist, relation):
             out["retrieval"].append(dict(model=key, kind=lex.kind_of[relation],
                                          **row))
 
     for axis, grid in lex.grids.items():
-        Sg = NB.similarity(T[grid["rows"]])
+        Sg = lexical.similarity(T[grid["rows"]])
         labels = grid["labels"]
-        perm = NB.purity_permutation(Sg, labels, k=NB.K, strata=grid["bands"])
-        sub = NB.purity_subsample(Sg, labels, k=NB.K)
+        perm = lexical.purity_permutation(Sg, labels, k=K,
+                                          strata=grid["bands"])
+        sub = lexical.purity_subsample(Sg, labels, k=K)
         out["purity"].append(dict(
             model=key, axis=axis, n=len(labels), purity=perm["purity"],
             se=sub["se"], p=perm["p"], chance=perm["chance"],
@@ -189,9 +192,9 @@ def final_layer(key: str, lex: SimpleNamespace) -> dict[str, list[dict]]:
         if axis == "category":
             out["letter_cluster"].append(dict(
                 model=key, axis=axis,
-                within_cluster=NB.knn_purity(Sg, labels,
-                                             restrict=grid["clusters"]),
-                within_cluster_chance=NB.restricted_chance_purity(
+                within_cluster=lexical.knn_purity(Sg, labels,
+                                                  restrict=grid["clusters"]),
+                within_cluster_chance=lexical.restricted_chance_purity(
                     labels, grid["clusters"])))
 
     out["items"] = items_rows(key, T @ T.T, S, lex)
@@ -218,14 +221,15 @@ def depth_rows(key: str, lex: SimpleNamespace) -> list[dict]:
                                       retrieval=np.nan, retrieval10=np.nan,
                                       retrieval10_se=np.nan))
             continue
-        S = NB.similarity(T[grid["rows"]])
-        ranks = NB.partner_ranks(NB.similarity(T), lex.index, lex.capitals)
-        pure = NB.purity_subsample(S, grid["labels"])
+        S = lexical.similarity(T[grid["rows"]])
+        ranks = lexical.partner_ranks(lexical.similarity(T), lex.index,
+                                      lex.capitals)
+        pure = lexical.purity_subsample(S, grid["labels"])
         rows.append(record | dict(
             purity=pure["purity"], purity_se=pure["se"],
             retrieval=float((ranks == 0).mean()),
-            retrieval10=float((ranks < NB.K).mean()),
-            retrieval10_se=binomial_se(int((ranks < NB.K).sum()), len(ranks))))
+            retrieval10=float((ranks < K).mean()),
+            retrieval10_se=binomial_se(int((ranks < K).sum()), len(ranks))))
     return rows
 
 
@@ -247,7 +251,7 @@ def encoder_rows(key: str, index_row: pd.Series,
     np.fill_diagonal(S, -np.inf)
     forward = {}
     for relation, plist in lex.relations.items():
-        for row in NB.retrieval(S, index, plist, relation):
+        for row in lexical.retrieval(S, index, plist, relation):
             if row["direction"] == "forward":
                 forward[relation] = (row["hits10"], row["n"])
             records.append(common | dict(
@@ -261,17 +265,18 @@ def encoder_rows(key: str, index_row: pd.Series,
     records.append(common | dict(
         readout="rate10", group="+".join(POOLED), direction="forward",
         estimate=k / n, se=binomial_se(k, n), n=n, m=np.nan, hits10=k,
-        chance=NB.K / (len(vocab) - 1), method="binomial"))
+        chance=K / (len(vocab) - 1), method="binomial"))
 
     for axis, grid in lex.grids.items():
         rows, labels = grid["rows"], grid["labels"]
         Sg = cosine[np.ix_(rows, rows)].copy()
         np.fill_diagonal(Sg, -np.inf)
-        out = NB.purity_subsample(Sg, labels, k=NB.K)
+        out = lexical.purity_subsample(Sg, labels, k=K)
         records.append(common | dict(
             readout="purity", group=axis, direction="",
             estimate=out["purity"], se=out["se"], n=out["n"], m=out["m"],
-            hits10=pd.NA, chance=NB.chance_purity(labels), method="subsample"))
+            hits10=pd.NA, chance=lexical.chance_purity(labels),
+            method="subsample"))
 
     baseline, spread = vocabulary_spread(cosine)
     for name, frame in lex.blocks.items():
@@ -301,7 +306,7 @@ def encoder_rows(key: str, index_row: pd.Series,
     found = np.zeros(len(item_rows), bool)
     for left, right in (("anchor", "kept"), ("kept", "anchor")):
         found |= np.array([
-            NB.partner_rank(S, index[row[left]], index[row[right]]) < NB.K
+            lexical.partner_rank(S, index[row[left]], index[row[right]]) < K
             for row in item_rows])
     for cls in ("concrete", "abstract"):
         take = (block1["class"] == cls).to_numpy()
@@ -320,7 +325,7 @@ def encoder_rows(key: str, index_row: pd.Series,
     for dataset, frame in lex.splits.items():
         label_order = np.array(sorted(frame.label.unique()))
         X = unit[np.array([index[w] for w in frame.word])]
-        accuracy, correct, held = CAT.nearest_centroid_accuracy(
+        accuracy, correct, held = lexical.nearest_centroid_accuracy(
             X, frame, label_order)
         records.append(common | dict(
             readout="classification", group=dataset, direction="",

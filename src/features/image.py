@@ -3,7 +3,7 @@
 A backbone without a class token (SigLIP2) gives the mean over its patches
 instead. Each cache is a float16 ``.cls.npy`` memory map with a ``.meta.json`` sidecar
 that records the sha of the manifest it was built against, the layers kept and
-how far the run got. :mod:`src.tau` refuses a cache whose sha is not the
+how far the run got. ``src.analysis.directions`` refuses a cache whose sha is not the
 current manifest's.
 """
 from __future__ import annotations

@@ -18,11 +18,12 @@ import gc
 import numpy as np
 import pandas as pd
 
-from src import neighbors as NB
+from src.analysis import lexical
+from src.analysis.directions import (HEADLINE, estimator, load_cache, manifest,
+                                     rownorm, word_order)
 from src.config import LEXICON, RESULTS, ensure_dirs
 from src.models import DEFAULT_SWEEP
 from src.stimuli.render import fingerprint
-from src.tau import HEADLINE, estimator, load_cache, manifest, rownorm, word_order
 
 #: Nearest words kept per query.
 NEIGHBOURS = 4
@@ -39,7 +40,7 @@ DISPLAY = ("colombia", "finland", "nigeria", "poland", "turkey", "vietnam")
 def neighbour_rows(model: str, S: np.ndarray, frame: pd.DataFrame, pool: str,
                    meaning_pairs: set[tuple[str, str]]) -> pd.DataFrame:
     """The nearest words of every word of ``frame``, in the row order of ``S``."""
-    nn = NB.neighbour_indices(S, k=NEIGHBOURS)
+    nn = lexical.neighbour_indices(S, k=NEIGHBOURS)
     query_i = np.repeat(np.arange(len(frame)), NEIGHBOURS)
     neighbour_i = nn.reshape(-1)
     query = frame.iloc[query_i].reset_index(drop=True)
@@ -218,7 +219,7 @@ def main() -> None:
         if int(layers[-1]) != n_layers:
             raise SystemExit(f"{model}: the last cached layer is not the final one")
         T = rownorm(estimator(HEADLINE)(model, -1))
-        neighbours.append(neighbour_rows(model, NB.similarity(T), vocab_frame,
+        neighbours.append(neighbour_rows(model, lexical.similarity(T), vocab_frame,
                                          "vocabulary", meaning_pairs))
         offsets.append(offset_row(model, T, source_rows, target_rows))
         if model == PROJECTED_MODEL:

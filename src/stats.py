@@ -1,12 +1,21 @@
-"""Standard errors, subsampling intervals, permutation p-values and p-value corrections.
+"""Standard errors, subsampling intervals, permutation and sign tests, and p-value corrections.
 
 Words are subsampled without replacement, because a duplicated word is its own
 nearest neighbor and inflates purity. A share over pairs or items takes the
-binomial standard error.
+binomial standard error. The two-clue tests treat each clue grid as one unit.
 """
 from __future__ import annotations
 
+import functools
+import itertools
+
 import numpy as np
+
+#: Permutation draws of the purity, category-accuracy and word-class nulls.
+N_PERM = 2000
+#: Subsamples behind the purity interval, and the share of words each keeps.
+N_SUBSAMPLE = 1000
+SUBSAMPLE_FRAC = 0.8
 
 
 def binomial_se(k: int, n: int) -> float:
@@ -76,3 +85,67 @@ def benjamini_hochberg(p: np.ndarray) -> np.ndarray:
     out = np.empty_like(p)
     out[order] = np.minimum(adjusted, 1.0)
     return out
+
+
+def sign_test(differences: np.ndarray) -> dict:
+    """Items won by the kept competitor, and the two-sided exact sign test.
+
+    A tie counts for neither side and leaves the denominator.
+    """
+    from scipy.stats import binomtest
+
+    wins = int((differences > 0).sum())
+    losses = int((differences < 0).sum())
+    p = (float(binomtest(wins, wins + losses, 0.5).pvalue)
+         if wins + losses else float("nan"))
+    return dict(n=int(len(differences)), wins=wins, sign_p=p)
+
+
+def vocabulary_spread(cosine: np.ndarray) -> tuple[float, float]:
+    """The mean and standard deviation of the off-diagonal cells of a cosine matrix.
+
+    Cosines are expressed as z-scores against these two numbers, so they can be
+    compared across models.
+    """
+    upper = np.triu_indices(len(cosine), 1)
+    off = cosine[upper]
+    return float(off.mean()), float(off.std())
+
+
+@functools.lru_cache(maxsize=8)
+def _sign_patterns(n: int) -> np.ndarray:
+    """Every sign vector of length ``n``."""
+    return np.asarray(list(itertools.product((-1.0, 1.0), repeat=n)))
+
+
+def exact_sign_flip_p(values: np.ndarray, alternative: str = "greater") -> float:
+    """Exact sign-flip p-value over every sign pattern of the grid means.
+
+    The null is symmetric about zero. ``alternative`` is ``greater`` or
+    ``two-sided``.
+    """
+    values = np.asarray(values, dtype=float)
+    if values.ndim != 1 or not len(values) or not np.isfinite(values).all():
+        raise ValueError("sign-flip values must be a finite nonempty vector")
+    if len(values) > 20:
+        raise ValueError("exact enumeration is limited to 20 units")
+    observed = float(values.mean())
+    null = _sign_patterns(len(values)) @ values / len(values)
+    tolerance = np.finfo(float).eps * max(1.0, abs(observed)) * 8
+    if alternative == "greater":
+        return float(np.mean(null >= observed - tolerance))
+    if alternative == "two-sided":
+        return float(np.mean(np.abs(null) >= abs(observed) - tolerance))
+    raise ValueError("alternative must be greater or two-sided")
+
+
+def bootstrap_mean_ci(values: np.ndarray, draws: np.ndarray,
+                      confidence: float = 0.95) -> tuple[float, float]:
+    """Percentile interval of the mean, one resample per row of ``draws``."""
+    values = np.asarray(values, dtype=float)
+    draws = np.asarray(draws, dtype=int)
+    if draws.ndim != 2 or draws.shape[1] != len(values):
+        raise ValueError("bootstrap draws do not match the family vector")
+    means = values[draws].mean(axis=1)
+    tail = (1 - confidence) / 2
+    return tuple(float(x) for x in np.quantile(means, [tail, 1 - tail]))

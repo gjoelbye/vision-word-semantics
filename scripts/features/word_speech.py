@@ -15,10 +15,10 @@ import time
 import numpy as np
 import torch
 
+from src.analysis.directions import word_order
 from src.config import ensure_dirs
 from src.features import speech, text
 from src.models import ENCODERS
-from src.tau import word_order
 
 
 def main() -> None:

@@ -19,8 +19,7 @@ import random
 import numpy as np
 import pandas as pd
 
-from src import neighbors as NB
-from src import tau
+from src.analysis import directions, lexical
 from src.config import LEXICON, RESULTS, ensure_dirs
 from src.models import FINETUNES, TWIN_OF
 from src.stimuli.render import fingerprint
@@ -57,7 +56,7 @@ def retrieval_tasks() -> dict[str, list[tuple[str, str]]]:
 def measure(models) -> tuple[pd.DataFrame, pd.DataFrame]:
     """The readouts of every model at every image count, and the draws they used."""
     words = pd.read_parquet(LEXICON / "words.parquet")
-    index = {w: i for i, w in enumerate(tau.word_order())}
+    index = {w: i for i, w in enumerate(directions.word_order())}
     nouns = words[words.role == "category"].reset_index(drop=True)
     noun_rows = np.array([index[w] for w in nouns.word])
     labels = nouns.category.to_numpy()
@@ -76,29 +75,31 @@ def measure(models) -> tuple[pd.DataFrame, pd.DataFrame]:
                 if key == models[0]:
                     drawn += [dict(images=images, draw=draw, appearance=int(a))
                               for a in chosen]
-                T = tau.rownorm(tau.estimator(tau.HEADLINE)(
-                    key, -1, slots_for(chosen)))
-                similarity = NB.similarity(T)
+                T = directions.rownorm(
+                    directions.estimator(directions.HEADLINE)(
+                        key, -1, slots_for(chosen)))
+                similarity = lexical.similarity(T)
                 for name, pairs in tasks.items():
-                    ranks = NB.partner_ranks(similarity, index, pairs)
+                    ranks = lexical.partner_ranks(similarity, index, pairs)
                     got.setdefault(("retrieval", name, K), []).append(
                         float((ranks < K).mean()))
                 got.setdefault(("purity", "common_noun", K), []).append(
-                    NB.knn_purity(NB.similarity(T[noun_rows]), labels, K))
+                    lexical.knn_purity(lexical.similarity(T[noun_rows]),
+                                       labels, K))
                 got.setdefault(("reliability", "tau", 0), []).append(
-                    tau.split_half_cosine(key, chosen))
+                    directions.split_half_cosine(key, chosen))
             for (readout, task, k), values in got.items():
                 rows.append(dict(model=key, readout=readout, task=task, k=int(k),
                                  images=int(images), draws=int(draws),
                                  value=float(np.mean(values)),
                                  spread=float(np.std(values))))
             print(f"  {key:26s} {images:>3} images", flush=True)
-        tau.load_cache.cache_clear()
+        directions.load_cache.cache_clear()
 
-    sha = fingerprint(tau.manifest())
+    sha = fingerprint(directions.manifest())
     effect = pd.DataFrame(rows).assign(
         manifest_sha=sha, representation="cls",
-        estimator=tau.HEADLINE, layer_index=-1)
+        estimator=directions.HEADLINE, layer_index=-1)
     setting = (slot_table().drop_duplicates("appearance")
                .set_index("appearance")[["font", "placement", "size", "color", "box"]])
     assert set(setting.columns) == set(FACTORS)

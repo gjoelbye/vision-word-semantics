@@ -18,15 +18,17 @@ import gc
 import numpy as np
 import pandas as pd
 
-from src import nu
+from src.analysis import word_class
+from src.analysis.directions import (CONCEPT_IMAGES, CONCEPT_WORDS, HEADLINE,
+                                     SUBSETS, DegenerateTau, class_mean,
+                                     estimator, load_cache, manifest, retained,
+                                     rownorm, word_order)
+from src.analysis.lexical import K
 from src.config import BACKGROUNDS, LEXICON, RESULTS, ensure_dirs
 from src.models import DEFAULT_SWEEP
-from src.neighbors import K
 from src.stimuli import imagenet
 from src.stimuli.render import fingerprint
 from src.stimuli.typography import slot_table
-from src.tau import (CONCEPT_IMAGES, CONCEPT_WORDS, HEADLINE, DegenerateTau,
-                     estimator, load_cache, manifest, rownorm, word_order)
 
 
 def referent_slots(words: pd.DataFrame) -> dict[str, list[int]]:
@@ -47,8 +49,8 @@ def referent_slots(words: pd.DataFrame) -> dict[str, list[int]]:
 def referent_check(key: str, T_full: np.ndarray, words: pd.DataFrame,
                    index: dict[str, int], own_slot: dict[str, list[int]]) -> dict:
     """Mean matched cosine of the names drawn on a background of their own class, with and without that slot."""
-    N = rownorm(nu.class_mean(key, -1, "all"))
-    rows, target = nu.word_class_rows(words.word, words.wnid, "all")
+    N = rownorm(class_mean(key, -1, "all"))
+    rows, target = word_class.word_class_rows(words.word, words.wnid, "all")
     words_kept = list(words.word.iloc[rows])
     r_all = np.array([index[w] for w in words_kept])
     by_slot = {}
@@ -72,14 +74,14 @@ def referent_check(key: str, T_full: np.ndarray, words: pd.DataFrame,
 
 def class_rows(key: str, words: pd.DataFrame) -> pd.DataFrame:
     """Coherence of each class's photographs and its nearest other class."""
-    N = rownorm(nu.class_mean(key, -1, "all"))
-    classes = list(nu.retained("all"))
-    who, close = nu.nearest_class(N)
+    N = rownorm(class_mean(key, -1, "all"))
+    classes = list(retained("all"))
+    who, close = word_class.nearest_class(N)
     named = dict(zip(words.wnid, words.word))
     return pd.DataFrame(dict(
         model=key, wnid=classes,
         word=[named.get(c, "") for c in classes],
-        coherence=nu.class_coherence(key, -1, "all"),
+        coherence=word_class.class_coherence(key, -1, "all"),
         nearest_wnid=[classes[i] for i in who],
         nearest_word=[named.get(classes[i], "") for i in who],
         nearest_cosine=close))
@@ -88,7 +90,7 @@ def class_rows(key: str, words: pd.DataFrame) -> pd.DataFrame:
 def depth_rows(key: str, words: pd.DataFrame,
                index: dict[str, int]) -> list[dict]:
     """Matched cosine and word-to-class top-10 accuracy at cached depths 1 to 9."""
-    rows, target = nu.word_class_rows(words.word, words.wnid, "all")
+    rows, target = word_class.word_class_rows(words.word, words.wnid, "all")
     rows = np.array([index[w] for w in words.word.iloc[rows]])
     _, layers, n_layers = load_cache(key, ds=CONCEPT_WORDS)
     out = []
@@ -100,13 +102,13 @@ def depth_rows(key: str, words: pd.DataFrame,
                       relative_depth=round(float(layer) / n_layers, 4))
         try:
             T = rownorm(estimator(HEADLINE)(key, i, ds=CONCEPT_WORDS))
-            N = rownorm(nu.class_mean(key, i, "all"))
+            N = rownorm(class_mean(key, i, "all"))
         except DegenerateTau:
             out.append(record | dict(alignment=np.nan,
                                      word_to_class_rate10=np.nan,
                                      word_to_class_chance10=np.nan))
             continue
-        rank = nu.cross_rank(T[rows], N, target)
+        rank = word_class.cross_rank(T[rows], N, target)
         out.append(record | dict(
             alignment=float((T[rows] * N[target]).sum(1).mean()),
             word_to_class_rate10=int((rank < K).sum()) / len(rank),
@@ -129,14 +131,15 @@ def main() -> None:
                                     "concept_depth")}
     for key in DEFAULT_SWEEP:
         T_full = rownorm(estimator(HEADLINE)(key, -1, ds=CONCEPT_WORDS))
-        for subset in nu.SUBSETS:
-            N = rownorm(nu.class_mean(key, -1, subset))
-            rows, target = nu.word_class_rows(words.word, words.wnid, subset)
+        for subset in SUBSETS:
+            N = rownorm(class_mean(key, -1, subset))
+            rows, target = word_class.word_class_rows(
+                words.word, words.wnid, subset)
             rows = np.array([index[w] for w in words.word.iloc[rows]])
             tables["concept_alignment"].append(dict(
                 model=key, subset=subset, n_classes=len(N),
-                **nu.concept_alignment(T_full, N, rows, target)))
-            for row in nu.concept_retrieval(T_full, N, rows, target):
+                **word_class.concept_alignment(T_full, N, rows, target)))
+            for row in word_class.concept_retrieval(T_full, N, rows, target):
                 tables["concept_retrieval"].append(
                     dict(model=key, subset=subset, **row))
             del N
