@@ -50,12 +50,10 @@ def subsample_indices(n: int, frac: float = 0.8, draws: int = 1000,
         yield rng.choice(n, m, replace=False)
 
 
-def permutation_p(observed: float, null: np.ndarray,
-                  two_sided: bool = False) -> float:
+def permutation_p(observed: float, null: np.ndarray) -> float:
     """Permutation p-value ``(count + 1) / (n + 1)``, where count is the null draws at or above ``observed``."""
     null = np.asarray(null, float)
-    hits = (np.abs(null) >= abs(observed)) if two_sided else (null >= observed)
-    return float((int(hits.sum()) + 1) / (len(null) + 1))
+    return float((int((null >= observed).sum()) + 1) / (len(null) + 1))
 
 
 def holm(pvalues) -> np.ndarray:

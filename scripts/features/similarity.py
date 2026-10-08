@@ -16,8 +16,8 @@ import time
 import numpy as np
 import pandas as pd
 
-from src.analysis.directions import (HEADLINE, estimator, manifest, rownorm,
-                                     word_order)
+from src.analysis.directions import (HEADLINE, manifest, rownorm,
+                                     word_directions, word_order)
 from src.config import SIMILARITY, ensure_dirs
 from src.features import speech, text
 from src.models import DEFAULT_SWEEP
@@ -42,7 +42,7 @@ def directions(key: str, words: list[str]) -> np.ndarray:
     """The per-word directions of one model or encoder, centered over words."""
     kind = kind_of(key)
     if kind == "vision":
-        return estimator(HEADLINE)(key, -1)
+        return word_directions(key, -1, center=True)
     loader = speech if kind == "speech" else text
     vectors = loader.load(key, words)
     return vectors - vectors.mean(0, keepdims=True)

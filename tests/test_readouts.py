@@ -136,15 +136,6 @@ def test_purity_interval_brackets_its_own_point_estimate():
         assert lo <= point <= hi, f"seed {seed}: {point} outside [{lo}, {hi}]"
 
 
-def test_restricted_purity_interval_brackets_its_point_estimate():
-    T, labels = _blocked(seed=2, sep=0.45, n_per=30)
-    clusters = np.tile(np.arange(4), len(labels) // 4)
-    S = lexical.similarity(T)
-    point = lexical.knn_purity(S, labels, restrict=clusters)
-    out = lexical.purity_subsample(S, labels, n=200, restrict=clusters)
-    assert out["ci_lo"] <= point <= out["ci_hi"]
-
-
 def test_purity_interval_is_wide_enough_to_cover_the_truth():
     """An uncorrected subsample of 80% varies about half as much as the
     estimate does, so its percentiles give an interval half the right width.
@@ -207,30 +198,6 @@ def test_a_restriction_too_tight_for_k_is_an_error_not_a_wrong_number():
     with pytest.raises(ValueError, match="admissible neighbours"):
         lexical.knn_purity(lexical.similarity(T), labels, k=10,
                            restrict=clusters)
-
-
-def test_the_restricted_null_preserves_the_restriction():
-    """The null shuffles labels within clusters. A global shuffle would break
-    the crossing, so that a cluster no longer holds equal numbers of each
-    category, and the restricted readout would be compared with an unrestricted
-    null."""
-    labels = np.tile(np.repeat(np.arange(4), 1), 40)[:120]
-    clusters = np.repeat(np.arange(4), 30)
-    rng = np.random.default_rng(0)
-    T = rng.normal(size=(120, 40))
-    out = lexical.purity_permutation(lexical.similarity(T), labels, n_perm=100,
-                                restrict=clusters)
-    assert abs(out["null_mean"] - out["purity"]) < 0.1
-
-
-def test_restricted_permutation_reports_its_own_chance():
-    labels = np.array([0, 0, 1, 1, 0, 0, 1, 1])
-    clusters = np.array([0, 0, 0, 0, 1, 1, 1, 1])
-    rng = np.random.default_rng(0)
-    out = lexical.purity_permutation(
-        lexical.similarity(rng.normal(size=(8, 6))), labels, k=2,
-        n_perm=20, restrict=clusters)
-    assert out["chance"] == pytest.approx(1 / 3)
 
 
 def test_retrieval_reports_each_direction_with_its_own_denominator():

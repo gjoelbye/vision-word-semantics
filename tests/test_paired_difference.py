@@ -59,7 +59,7 @@ def synthetic(monkeypatch):
 
 
 def test_paired_difference_recovers_the_word_effect(synthetic):
-    t = directions.residual_tau("fake", layer=0)
+    t = directions.word_directions("fake", layer=0, center=False)
     for i, w in enumerate(WORDS):
         np.testing.assert_allclose(t[i], EXPECTED[w], atol=1e-2)
 
@@ -78,7 +78,7 @@ def test_control_is_paired_by_word_and_slot_not_by_row_position(synthetic):
                              scramble.iloc[1::2]]).reset_index(drop=True)
     with pytest.MonkeyPatch.context() as mp:
         _install(mp, interleaved, _features(interleaved.to_dict("records")))
-        t = directions.residual_tau("fake", layer=0)
+        t = directions.word_directions("fake", layer=0, center=False)
     for i, w in enumerate(WORDS):
         np.testing.assert_allclose(t[i], EXPECTED[w], atol=1e-2)
 
@@ -87,11 +87,11 @@ def test_control_is_paired_by_word_and_slot_not_by_row_position(synthetic):
     with pytest.MonkeyPatch.context() as mp:
         _install(mp, mispaired, _features(mispaired.to_dict("records")))
         with pytest.raises(directions.MissingCondition, match="not paired"):
-            directions.residual_tau("fake", layer=0)
+            directions.word_directions("fake", layer=0, center=False)
 
 
 def test_slot_subset_still_recovers_it(synthetic):
-    t = directions.residual_tau("fake", layer=0, slots=(0, 2))
+    t = directions.word_directions("fake", layer=0, slots=(0, 2), center=False)
     np.testing.assert_allclose(t[0], EXPECTED["alpha"], atol=1e-2)
     np.testing.assert_allclose(t[1], EXPECTED["beta"], atol=1e-2)
 
@@ -105,7 +105,7 @@ def test_degenerate_layer_raises_instead_of_scoring_zero(monkeypatch):
     const = np.ones((len(rows), 1, D), np.float16)      # same vector everywhere
     _install(monkeypatch, pd.DataFrame(rows), const)
     with pytest.raises(directions.DegenerateTau):
-        directions.residual_tau("fake", layer=0)
+        directions.word_directions("fake", layer=0, center=False)
 
 
 def test_the_untrained_floor_is_reproducible():

@@ -19,10 +19,10 @@ import numpy as np
 import pandas as pd
 
 from src.analysis import word_class
-from src.analysis.directions import (CLASS_IMAGES, CLASS_NAMES, HEADLINE,
-                                     SUBSETS, DegenerateTau, class_mean,
-                                     estimator, load_cache, manifest, retained,
-                                     rownorm, word_order)
+from src.analysis.directions import (CLASS_IMAGES, CLASS_NAMES, SUBSETS,
+                                     DegenerateTau, class_mean, load_cache,
+                                     manifest, retained, rownorm,
+                                     word_directions, word_order)
 from src.analysis.lexical import K
 from src.config import BACKGROUNDS, LEXICON, RESULTS, ensure_dirs
 from src.models import DEFAULT_SWEEP
@@ -61,7 +61,8 @@ def referent_check(key: str, T_full: np.ndarray, words: pd.DataFrame,
     with_all, without, done = [], [], []
     for sl, members in sorted(by_slot.items()):
         other = tuple(x for x in every if x != sl)
-        T_less = rownorm(estimator(HEADLINE)(key, -1, other, ds=CLASS_NAMES))
+        T_less = rownorm(word_directions(key, -1, other, center=True,
+                                         ds=CLASS_NAMES))
         for i in members:
             with_all.append(float((T_full[r_all[i]] * N[target[i]]).sum()))
             without.append(float((T_less[r_all[i]] * N[target[i]]).sum()))
@@ -81,7 +82,7 @@ def class_rows(key: str, words: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(dict(
         model=key, wnid=classes,
         word=[named.get(c, "") for c in classes],
-        coherence=word_class.class_coherence(key, -1, "all"),
+        coherence=word_class.class_coherence(key, -1),
         nearest_wnid=[classes[i] for i in who],
         nearest_word=[named.get(classes[i], "") for i in who],
         nearest_cosine=close))
@@ -101,7 +102,7 @@ def depth_rows(key: str, words: pd.DataFrame,
                       n_layers=int(n_layers),
                       relative_depth=round(float(layer) / n_layers, 4))
         try:
-            T = rownorm(estimator(HEADLINE)(key, i, ds=CLASS_NAMES))
+            T = rownorm(word_directions(key, i, center=True, ds=CLASS_NAMES))
             N = rownorm(class_mean(key, i, "all"))
         except DegenerateTau:
             out.append(record | dict(alignment=np.nan,
@@ -130,7 +131,8 @@ def main() -> None:
                                     "class_checks", "class_diagnostics",
                                     "class_depth")}
     for key in DEFAULT_SWEEP:
-        T_full = rownorm(estimator(HEADLINE)(key, -1, ds=CLASS_NAMES))
+        T_full = rownorm(word_directions(key, -1, center=True,
+                                         ds=CLASS_NAMES))
         for subset in SUBSETS:
             N = rownorm(class_mean(key, -1, subset))
             rows, target = word_class.word_class_rows(

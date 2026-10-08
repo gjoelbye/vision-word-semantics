@@ -10,25 +10,22 @@ import pandas as pd
 
 from ..stats import (N_PERM, SUBSAMPLE_FRAC, binomial_se, permutation_p,
                      subsample_indices, subsample_summary)
-from .directions import CLASS_IMAGES, _rows, load_cache, manifest, retained
+from .directions import CLASS_IMAGES, load_cache, manifest, retained
 from .lexical import K
 
 
-def class_coherence(key: str, layer: int = -1,
-                    subset: str = "all") -> np.ndarray:
+def class_coherence(key: str, layer: int = -1) -> np.ndarray:
     """Mean cosine between two photographs of a class, one number per retained class.
 
-    Photographs are centered on the mean over all photographs and scaled to unit
-    length. For unit ``v_i`` the mean off-diagonal cosine is
-    ``(||sum v_i||^2 - n) / (n (n - 1))``.
+    Every photograph counts, text or not. Photographs are centered on the mean
+    over all photographs and scaled to unit length. For unit ``v_i`` the mean
+    off-diagonal cosine is ``(||sum v_i||^2 - n) / (n (n - 1))``.
     """
     x, _, _ = load_cache(key, ds=CLASS_IMAGES)
     man = manifest(CLASS_IMAGES)
-    rows = _rows(subset)
-    classes = retained(subset)
+    classes = retained()
     index = {c: i for i, c in enumerate(classes)}
-    position = np.flatnonzero(man.index.isin(rows.index)
-                              & man.wnid.isin(index).to_numpy())
+    position = np.flatnonzero(man.wnid.isin(index).to_numpy())
     target = np.fromiter((index[c] for c in man.wnid.iloc[position]), int,
                          count=len(position))
 

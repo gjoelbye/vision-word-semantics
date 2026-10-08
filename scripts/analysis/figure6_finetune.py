@@ -76,8 +76,8 @@ def measure(models) -> tuple[pd.DataFrame, pd.DataFrame]:
                     drawn += [dict(images=images, draw=draw, appearance=int(a))
                               for a in chosen]
                 T = directions.rownorm(
-                    directions.estimator(directions.HEADLINE)(
-                        key, -1, slots_for(chosen)))
+                    directions.word_directions(key, -1, slots_for(chosen),
+                                               center=True))
                 similarity = lexical.similarity(T)
                 for name, pairs in tasks.items():
                     ranks = lexical.partner_ranks(similarity, index, pairs)

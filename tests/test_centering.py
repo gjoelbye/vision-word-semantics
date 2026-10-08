@@ -55,7 +55,7 @@ def _install(monkeypatch, control: str | None):
 
 def test_uncentred_tau_is_dominated_by_what_the_words_share(monkeypatch):
     _install(monkeypatch, control="background")
-    T = directions.residual_tau("fake", layer=0)
+    T = directions.word_directions("fake", layer=0, center=False)
     assert directions.shared_mean_share(T) > 0.9
     Tn = directions.rownorm(T)
     off = (Tn @ Tn.T)[np.triu_indices(len(Tn), 1)]
@@ -64,28 +64,21 @@ def test_uncentred_tau_is_dominated_by_what_the_words_share(monkeypatch):
 
 def test_centring_removes_it(monkeypatch):
     _install(monkeypatch, control="background")
-    T = directions.residual_tau("fake", layer=0, center=True)
+    T = directions.word_directions("fake", layer=0, center=True)
     assert directions.shared_mean_share(T) < 1e-6
     Tn = directions.rownorm(T)
     off = (Tn @ Tn.T)[np.triu_indices(len(Tn), 1)]
     assert off.max() < 0.1, "distinct words should now be distinguishable"
 
 
-def test_residual_tau_recovers_the_word_specific_part(monkeypatch):
+def test_word_directions_recover_the_word_specific_part(monkeypatch):
     _install(monkeypatch, control="shared")
-    T = directions.residual_tau("fake", layer=0)
+    T = directions.word_directions("fake", layer=0, center=False)
     for i, w in enumerate(WORDS):
         np.testing.assert_allclose(T[i], SPECIFIC[w], atol=1e-2)
 
 
-def test_residual_tau_needs_the_control_condition(monkeypatch):
+def test_word_directions_need_the_control_condition(monkeypatch):
     _install(monkeypatch, control=None)
     with pytest.raises(directions.MissingCondition):
-        directions.residual_tau("fake", layer=0)
-
-
-def test_estimator_registry():
-    assert set(directions.ESTIMATORS) == {"residual", "residual_centred"}
-    assert directions.HEADLINE in directions.ESTIMATORS
-    with pytest.raises(ValueError):
-        directions.estimator("nonsense")
+        directions.word_directions("fake", layer=0, center=False)

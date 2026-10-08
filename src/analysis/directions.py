@@ -114,21 +114,20 @@ def word_order(ds: Dataset = MAIN) -> tuple[str, ...]:
     return tuple(sorted(set(man.loc[man.word != CLEAN, "word"])))
 
 
-def residual_tau(key: str, layer: int = -1, slots: tuple[int, ...] | None = None,
-                 *, center: bool = False, ds: Dataset = MAIN) -> np.ndarray:
+def word_directions(key: str, layer: int = -1,
+                    slots: tuple[int, ...] | None = None, *, center: bool,
+                    ds: Dataset = MAIN) -> np.ndarray:
     """Word directions: the mean over slots of f(background + word) - f(background + scrambled word).
 
     Rows follow word_order(), and the scrambled word keeps the word's ink and
     spatial frequency but loses its glyph structure. ``slots`` restricts the mean,
     ``center`` subtracts the mean over words, and DegenerateTau is raised where
-    every direction is zero.
+    every direction is zero. ``center`` has no default because the results use
+    both: the centered directions everywhere, the uncentered ones to measure
+    what centering removes.
     """
     x, _, _ = load_cache(key, ds=ds)
     man = manifest(ds)
-    if "condition" not in man.columns:
-        raise MissingCondition(
-            f"the {ds.name} manifest has no 'condition' column, so it holds no "
-            f"scrambled control. Re-render it with {ds.produced_by}.")
     word_mask = ((man.word != CLEAN) & man.condition.eq("word")).to_numpy()
     control_mask = ((man.word != CLEAN)
                     & man.condition.eq("scramble")).to_numpy()
@@ -182,20 +181,8 @@ def shared_mean_share(T: np.ndarray) -> float:
     return float(np.linalg.norm(T.mean(0)) ** 2 / (T ** 2).sum(1).mean())
 
 
-def estimator(name: str):
-    """The estimator called ``name``: ``residual`` (uncentered) or ``residual_centred``."""
-    table = {
-        "residual": lambda k, l=-1, s=None, *, ds=MAIN:
-            residual_tau(k, l, s, center=False, ds=ds),
-        "residual_centred": lambda k, l=-1, s=None, *, ds=MAIN:
-            residual_tau(k, l, s, center=True, ds=ds),
-    }
-    if name not in table:
-        raise ValueError(f"unknown estimator {name!r}; choose from {sorted(table)}")
-    return table[name]
-
-
-ESTIMATORS = ("residual", "residual_centred")
+#: The name the result tables and the similarity index record for the centered
+#: word directions.
 HEADLINE = "residual_centred"
 
 
@@ -206,13 +193,12 @@ def rownorm(x: np.ndarray) -> np.ndarray:
 def split_half_cosine(key: str, appearances, layer: int = -1) -> float:
     """Mean over words of the cosine between the two matched-appearance halves.
 
-    Each half's word directions come from the ``HEADLINE`` estimator on that
-    half's slots, restricted to ``appearances`` (``None`` keeps every appearance
-    tuple).
+    Each half's centered word directions come from that half's slots,
+    restricted to ``appearances`` (``None`` keeps every appearance tuple).
     """
     a, b = split_halves(appearances)
-    ta = rownorm(estimator(HEADLINE)(key, layer, tuple(a)))
-    tb = rownorm(estimator(HEADLINE)(key, layer, tuple(b)))
+    ta = rownorm(word_directions(key, layer, tuple(a), center=True))
+    tb = rownorm(word_directions(key, layer, tuple(b), center=True))
     return float((ta * tb).sum(1).mean())
 
 

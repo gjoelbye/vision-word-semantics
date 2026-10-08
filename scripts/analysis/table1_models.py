@@ -21,9 +21,9 @@ import pandas as pd
 from scipy.stats import fisher_exact
 
 from src.analysis import lexical
-from src.analysis.directions import (HEADLINE, DegenerateTau, estimator,
-                                     load_cache, manifest, rownorm,
-                                     shared_mean_share, word_order)
+from src.analysis.directions import (DegenerateTau, load_cache, manifest,
+                                     rownorm, shared_mean_share,
+                                     word_directions, word_order)
 from src.analysis.lexical import K
 from src.config import LEXICON, RESULTS, SIMILARITY, ensure_dirs
 from src.features import speech, text
@@ -166,8 +166,8 @@ def final_layer(key: str, lex: SimpleNamespace) -> dict[str, list[dict]]:
     out = {name: [] for name in ("retrieval", "purity", "letter_cluster",
                                  "centering", "items", "latent_categories")}
     # The centering share is computed on the uncentered word directions, which
-    # are then centered as ``estimator(HEADLINE)`` centers them.
-    base = estimator("residual")(key, -1)
+    # are then centered as ``word_directions(..., center=True)`` centers them.
+    base = word_directions(key, -1, center=False)
     out["centering"].append(dict(model=key,
                                  shared_mean_share=shared_mean_share(base)))
     base = base - base.mean(0, keepdims=True)
@@ -215,7 +215,7 @@ def depth_rows(key: str, lex: SimpleNamespace) -> list[dict]:
                       n_layers=int(n_layers),
                       relative_depth=round(float(layer) / n_layers, 4))
         try:
-            T = rownorm(estimator(HEADLINE)(key, i))
+            T = rownorm(word_directions(key, i, center=True))
         except DegenerateTau:
             rows.append(record | dict(purity=np.nan, purity_se=np.nan,
                                       retrieval=np.nan, retrieval10=np.nan,

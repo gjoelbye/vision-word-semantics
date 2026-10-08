@@ -19,8 +19,8 @@ import numpy as np
 import pandas as pd
 
 from src.analysis import lexical
-from src.analysis.directions import (HEADLINE, estimator, load_cache, manifest,
-                                     rownorm, word_order)
+from src.analysis.directions import (load_cache, manifest, rownorm,
+                                     word_directions, word_order)
 from src.config import LEXICON, RESULTS, ensure_dirs
 from src.models import DEFAULT_SWEEP
 from src.stimuli.render import fingerprint
@@ -218,7 +218,7 @@ def main() -> None:
         _, layers, n_layers = load_cache(model)
         if int(layers[-1]) != n_layers:
             raise SystemExit(f"{model}: the last cached layer is not the final one")
-        T = rownorm(estimator(HEADLINE)(model, -1))
+        T = rownorm(word_directions(model, -1, center=True))
         neighbours.append(neighbour_rows(model, lexical.similarity(T), vocab_frame,
                                          "vocabulary", meaning_pairs))
         offsets.append(offset_row(model, T, source_rows, target_rows))

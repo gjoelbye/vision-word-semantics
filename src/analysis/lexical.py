@@ -142,35 +142,24 @@ def restricted_chance_purity(labels: np.ndarray,
     return float(np.mean(probabilities))
 
 
-def shuffle_groups(n: int, *keys) -> np.ndarray:
-    """Cell index per word for the intersection of the given groupings; ``None`` keys are ignored."""
-    present = [np.asarray(key) for key in keys if key is not None]
-    if not present:
-        return np.zeros(n, dtype=int)
-    pairs = list(zip(*(key.tolist() for key in present)))
-    order = {cell: i for i, cell in enumerate(sorted(set(pairs)))}
-    return np.array([order[cell] for cell in pairs])
-
-
 def purity_permutation(S: np.ndarray, labels: np.ndarray, k: int = K,
                        n_perm: int = N_PERM, seed: int = 0,
-                       restrict: np.ndarray | None = None,
                        strata: np.ndarray | None = None) -> dict:
     """Observed purity against a null that shuffles the labels with the geometry fixed.
 
-    Labels are shuffled within the cells of ``restrict`` crossed with
-    ``strata``; ``restrict`` also limits the neighbors, ``strata`` does not.
-    The p-value is ``(count + 1) / (n_perm + 1)``.
+    Labels are shuffled within each value of ``strata``, or over all words
+    without it. The p-value is ``(count + 1) / (n_perm + 1)``.
     """
     labels = np.asarray(labels)
     rng = np.random.default_rng(seed)
-    nn = neighbour_indices(S, k, restrict)
+    nn = neighbour_indices(S, k)
 
     def score(y: np.ndarray) -> float:
         return float((y[nn] == y[:, None]).mean())
 
     observed = score(labels)
-    cells = shuffle_groups(len(labels), restrict, strata)
+    cells = (np.zeros(len(labels), dtype=int) if strata is None
+             else np.asarray(strata))
     members = [cells == value for value in np.unique(cells)]
 
     def shuffle() -> np.ndarray:
@@ -183,16 +172,14 @@ def purity_permutation(S: np.ndarray, labels: np.ndarray, k: int = K,
 
     null = np.array([score(shuffle()) for _ in range(n_perm)])
     p = (int((null >= observed).sum()) + 1) / (n_perm + 1)
-    chance = (restricted_chance_purity(labels, restrict)
-              if restrict is not None else chance_purity(labels))
     return dict(purity=observed, p=float(p), null_mean=float(null.mean()),
-                null_sd=float(null.std()), chance=chance, k=k, n_perm=n_perm)
+                null_sd=float(null.std()), chance=chance_purity(labels), k=k,
+                n_perm=n_perm)
 
 
 def purity_subsample(S: np.ndarray, labels: np.ndarray, k: int = K,
                      n: int = N_SUBSAMPLE, frac: float = SUBSAMPLE_FRAC,
-                     seed: int = 0,
-                     restrict: np.ndarray | None = None) -> dict:
+                     seed: int = 0) -> dict:
     """Purity with a 95% interval and standard error from subsamples of words.
 
     Each draw keeps ``frac`` of the words without replacement and recomputes
@@ -204,14 +191,8 @@ def purity_subsample(S: np.ndarray, labels: np.ndarray, k: int = K,
     rng = np.random.default_rng(seed)
     N = len(labels)
     m = int(frac * N)
-    if restrict is not None:
-        restrict = np.asarray(restrict)
-        if len(restrict) != N:
-            raise ValueError("labels and restrict must have the same length")
-    point = knn_purity(S, labels, k, restrict)
-    draws = np.array([knn_purity(
-        S[np.ix_(i, i)], labels[i], k,
-        None if restrict is None else restrict[i])
+    point = knn_purity(S, labels, k)
+    draws = np.array([knn_purity(S[np.ix_(i, i)], labels[i], k)
                       for i in (rng.choice(N, m, replace=False)
                                 for _ in range(n))])
     lo, hi, se = subsample_summary(point, draws, N, m)
@@ -239,7 +220,6 @@ def build_items(pairs: pd.DataFrame, words: pd.DataFrame) -> dict:
     concrete and 75 abstract anchors.
     """
     picturability = dict(zip(words.word, words.picturability))
-    chars = dict(zip(words.word, words.n_chars))
     out = {}
     for name, kept_rel, other_rel, kept, other, expected in BLOCKS:
         left = (pairs.loc[pairs.relation == kept_rel, ["a", "b"]]
@@ -253,8 +233,6 @@ def build_items(pairs: pd.DataFrame, words: pd.DataFrame) -> dict:
                 f"the word set changed and the readout's n with it")
         frame["kept"], frame["other"] = frame[kept], frame[other]
         frame["class"] = frame.anchor.map(picturability)
-        frame["anchor_chars"] = frame.anchor.map(chars)
-        frame["kept_chars"] = frame.kept.map(chars)
         out[name] = frame
     block1 = out["synonym_vs_twin"]
     counts = block1["class"].value_counts().to_dict()
@@ -327,22 +305,13 @@ def dataset_frame(words: pd.DataFrame, dataset: str, role: str,
     return frame
 
 
-def centred_centroids(
-    X: np.ndarray, labels: np.ndarray, label_order: np.ndarray,
-) -> tuple[np.ndarray, np.ndarray]:
-    """Label centroids, and each centroid minus the unweighted mean of the centroids."""
-    centroids = np.stack([X[labels == label].mean(0)
-                          for label in label_order])
-    directions = centroids - centroids.mean(0, keepdims=True)
-    return centroids, directions
-
-
 def nearest_centroid_prediction(
     X_train: np.ndarray, y_train: np.ndarray, X_test: np.ndarray,
     label_order: np.ndarray,
 ) -> np.ndarray:
     """The label of the nearest training centroid, by cosine, per held-out word."""
-    centroids, _ = centred_centroids(X_train, y_train, label_order)
+    centroids = np.stack([X_train[y_train == label].mean(0)
+                          for label in label_order])
     return label_order[np.argmax(X_test @ rownorm(centroids).T, axis=1)]
 
 
