@@ -6,7 +6,7 @@ fingerprints of the inputs it was computed from: `manifest_sha` for the
 vocabulary manifest, `word_manifest_sha` and `image_manifest_sha` for the
 class-name and class-image manifests, `word_sha` for the ordered word set the
 text and speech encoders embedded, and `dataset_sha` and `manifest_sha` for the
-two-clue items and their manifest. `src/utils/results.py` refuses a file whose
+two-clue items and their manifest. `src/paper/results.py` refuses a file whose
 fingerprints differ from those of the current inputs.
 
 | File | Written by | Paper | One row per | Columns |

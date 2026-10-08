@@ -1,7 +1,7 @@
 """Readers of the word lists and guarded readers of the result tables.
 
 A result table records the fingerprints of the manifests it was computed from.
-:func:`read` and :func:`composition_summary` refuse a table whose fingerprints
+:func:`read` and :func:`two_clue_summary` refuse a table whose fingerprints
 are not those of the current manifests, so no notebook or table shows a number
 from stale inputs.
 """
@@ -36,14 +36,9 @@ def audit() -> pd.DataFrame:
     return pd.read_parquet(LEXICON / "audit.parquet")
 
 
-def concept_words() -> pd.DataFrame:
+def class_names() -> pd.DataFrame:
     """``lexicon/concepts.parquet``: the 200 class names, as the class-name stage writes them."""
     return pd.read_parquet(LEXICON / "concepts.parquet")
-
-
-def concept_audit() -> pd.DataFrame:
-    """``lexicon/concepts_audit.parquet``: the checks run on the class names before rendering."""
-    return pd.read_parquet(LEXICON / "concepts_audit.parquet")
 
 
 def read(name: str) -> pd.DataFrame:
@@ -72,11 +67,11 @@ def read(name: str) -> pd.DataFrame:
     return frame
 
 
-def composition_summary() -> pd.DataFrame:
+def two_clue_summary() -> pd.DataFrame:
     """``results/two_clue_summary.parquet``, refused unless it matches the two-clue inputs.
 
     ``dataset_sha`` is checked against the committed two-clue item tables and
-    ``manifest_sha`` against the composition manifest.
+    ``manifest_sha`` against the two-clue manifest.
     """
     path = RESULTS / "two_clue_summary.parquet"
     if not path.exists():

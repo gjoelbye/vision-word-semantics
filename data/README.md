@@ -59,7 +59,7 @@ writes. Together they come to about 420 GB, and with the downloads to about
 | `captions/speech-coco/` | `scripts/finetune/caption_targets.py` | Frozen caption targets of Qwen3-0.6B and w2v-BERT 2.0 | 2.5 GB |
 | `checkpoints/` | `scripts/finetune/train.py` | The 20 finetunes, each with `best.slim.pt` and `provenance.json`; `latest.pt` holds a run in progress and is deleted when it ends | 39 GB, plus up to 14 GB while a run is in progress |
 | `embeddings/<model>-scocoft*` | `scripts/features/embed.py --finetuned` | Vocabulary caches of the finetuned models | 132 GB |
-| `fonts/` | `src/utils/viz.py` | The bold face cut from Noto Sans for the figures, written by the first figure | 0.4 MB |
+| `fonts/` | `src/paper/style.py` | The bold face cut from Noto Sans for the figures, written by the first figure | 0.4 MB |
 | `notebooks/` | `scripts/run_analysis.sh` | The executed notebooks with their printed outputs | 2 MB |
 
 ## Recorded names

@@ -18,8 +18,8 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest", "jupyter"]
 
-[tool.setuptools]
-packages = ["src", "src.utils", "src.finetune"]
+[tool.setuptools.packages.find]
+include = ["src*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

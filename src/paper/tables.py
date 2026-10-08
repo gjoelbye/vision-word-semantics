@@ -1,6 +1,6 @@
 """One builder per generated LaTeX table.
 
-A builder takes the result frames it prints, as :func:`src.utils.results.read`
+A builder takes the result frames it prints, as :func:`src.paper.results.read`
 returns them, and returns a :class:`Table` holding the printed cells as a
 DataFrame and the LaTeX file. A column's largest value is bold and a value more
 than two standard errors of the difference above the untrained ViT-B is
@@ -13,13 +13,13 @@ from pathlib import Path
 
 import pandas as pd
 
-from .config import REPO_ROOT, TABLES
-from .models import DEFAULT_SWEEP, PRETTY
-from .stats import binomial_se
-from .utils.latex import (BAND_NOTE, BASELINE, GROUPS, MARK_SIGMA, above_baseline,
-                          band, band_colour, bare, cell, class_header, fit,
-                          header, model_rows, pval, rank_text, reference_rows,
-                          printed_frame, se_suffix, without_zero, zero)
+from ..config import REPO_ROOT, TABLES
+from ..models import DEFAULT_SWEEP, PRETTY
+from ..stats import binomial_se
+from .latex import (BAND_NOTE, BASELINE, GROUPS, MARK_SIGMA, above_baseline,
+                    band, band_colour, bare, cell, class_header, fit,
+                    header, model_rows, pval, rank_text, reference_rows,
+                    printed_frame, se_suffix, without_zero, zero)
 
 
 @dataclass
