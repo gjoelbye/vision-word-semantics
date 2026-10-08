@@ -18,8 +18,8 @@ from tqdm import tqdm
 
 from .composition_items import (dataset_fingerprint, read_table,
                                 require_valid, validate_datasets)
-from .config import (BACKGROUNDS, COMPOSITION, WORD_LISTS, local_path,
-                     manifest_path)
+from .config import (BACKGROUNDS, COMPOSITION, TWO_CLUE_CONFIRMATORY_TSV,
+                     TWO_CLUE_PILOT_TSV, local_path, manifest_path)
 from .slots import slot_table
 from .typography import (Box, box_at_centre, crop_safe_window,
                          legible_centre, render_overlay, render_scramble,
@@ -43,8 +43,8 @@ CONDITIONS = (
     "target_scrambled",
 )
 
-PILOT_PATH = WORD_LISTS / "composition_pilot.tsv"
-CONFIRMATORY_PATH = WORD_LISTS / "composition_confirmatory.tsv"
+PILOT_PATH = TWO_CLUE_PILOT_TSV
+CONFIRMATORY_PATH = TWO_CLUE_CONFIRMATORY_TSV
 
 
 def load_curated_items() -> tuple[pd.DataFrame, pd.DataFrame, str]:

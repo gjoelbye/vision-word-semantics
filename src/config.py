@@ -13,13 +13,18 @@ from pathlib import Path, PurePosixPath
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
-#: The committed word lists: the eight lexical blocks, the class names and the
-#: two-clue items.
-WORD_LISTS = REPO_ROOT / "lexicon"
+#: The committed word lists. ``vocabulary.tsv`` holds the eight lexical lists,
+#: one row per word. ``class_names.tsv`` is the class-name curation record. The
+#: two two-clue tables are hashed cell by cell into the two-clue fingerprints.
+VOCABULARY_TSV = REPO_ROOT / "lexicon" / "vocabulary.tsv"
+CLASS_NAMES_TSV = REPO_ROOT / "lexicon" / "class_names.tsv"
+TWO_CLUE_PILOT_TSV = REPO_ROOT / "lexicon" / "two_clue_pilot.tsv"
+TWO_CLUE_CONFIRMATORY_TSV = REPO_ROOT / "lexicon" / "two_clue_confirmatory.tsv"
 
 DATA_ROOT = Path(os.environ.get("VIT_SEMANTIC_DATA", REPO_ROOT / "data"))
 
 BACKGROUNDS = DATA_ROOT / "backgrounds"
+#: Tables generated from the committed word lists, not the lists themselves.
 LEXICON = DATA_ROOT / "lexicon"
 RENDERS = DATA_ROOT / "renders"
 EMBEDDINGS = DATA_ROOT / "embeddings"

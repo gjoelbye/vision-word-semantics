@@ -1,4 +1,4 @@
-"""The committed word set: block reader, pair table, form metrics and checks.
+"""The committed word set: the vocabulary reader, the lists and pairs, form metrics and checks.
 
 Form metrics come at three levels: gross form (rendered width and ink area),
 character identity (edit distance) and character order (anagram membership).
@@ -8,13 +8,12 @@ for the fit check.
 """
 from __future__ import annotations
 
-import csv
 from functools import lru_cache
 
 import numpy as np
 import pandas as pd
 
-from .config import WORD_LISTS
+from .config import VOCABULARY_TSV
 from .typography import (FONT_FAMILIES, MONOSPACE_FAMILIES, crop_safe_window,
                          font_px, ink_mask, load_font)
 
@@ -117,38 +116,247 @@ def edit_distance(a: str, b: str) -> int:
     return prev[-1]
 
 
-def read_block(name: str) -> list[dict]:
-    """Rows of one block file in ``lexicon/``, as dicts keyed by the header.
+#: The eight lists of ``vocabulary.tsv`` in the paper's order, with brands
+#: before pseudowords: ``(slug, title, roles, example, purpose)``. ``roles``
+#: are the item roles of one item, in table order. ``example`` is the first
+#: word of the item Appendix A quotes, and ``purpose`` is what the list tests.
+LISTS = (
+    ("synonym_one_edit", "Synonym and one-edit comparison",
+     ("anchor", "synonym", "spelling_twin"), "torch", "meaning and spelling"),
+    ("synonym_antonym", "Synonym and antonym",
+     ("anchor", "synonym", "antonym"), "brave", "synonymy and opposition"),
+    ("synonym_negation", "Synonym and apparent negation/base",
+     ("negation", "synonym", "base"), "disappear", "meaning and similar form"),
+    ("singular_plural", "Singular and plural",
+     ("singular", "plural"), "road", "form with related meaning"),
+    ("country_capital", "Country and capital",
+     ("country", "capital"), "germany", "factual association"),
+    ("common_nouns", "Common nouns", ("category",), None, "Category membership"),
+    ("brands", "Brands", ("brand",), None, "Industry membership"),
+    ("pseudowords", "Pseudowords", ("pseudoword",), None,
+     "Retrieval candidates and centering"),
+)
+ROLES = {slug: roles for slug, _, roles, _, _ in LISTS}
 
-    A row with more fields than the header or an empty cell stops the run with
-    the file and line it is on.
+#: The pair table: ``(list, role a, role b, relation, kind)``. Meaning pairs
+#: carry the claim; spelling pairs are the control.
+PAIRS = (
+    ("synonym_one_edit", "anchor", "synonym",       "synonym",         "meaning"),
+    ("synonym_one_edit", "anchor", "spelling_twin", "spelling_twin",   "spelling"),
+    ("synonym_antonym",  "anchor", "synonym",       "antonym_synonym", "meaning"),
+    ("synonym_antonym",  "anchor", "antonym",       "antonym",         "meaning"),
+    ("synonym_negation", "negation", "synonym",     "negation",        "meaning"),
+    ("synonym_negation", "negation", "base",        "negation_base",   "spelling"),
+    ("singular_plural",  "singular", "plural",      "singular_plural", "spelling"),
+    ("country_capital",  "country", "capital",      "country_capital", "meaning"),
+)
+
+COLUMNS = ("list", "item", "item_role", "word", "category", "spelling_cluster",
+           "concreteness")
+
+
+def read_vocabulary(path=VOCABULARY_TSV) -> pd.DataFrame:
+    """``lexicon/vocabulary.tsv``, one row per word in file order.
+
+    Blank cells become missing values. ``spelling_cluster`` becomes the integer
+    column ``ortho`` and ``concreteness`` becomes ``picturability``, the names
+    the derived tables use. A file that breaks the schema raises ``ValueError``
+    naming the rows, counted from the header as line 1.
     """
-    out = []
-    with open(WORD_LISTS / name) as f:
-        reader = csv.DictReader(f, delimiter="\t")
-        for n, r in enumerate(reader, start=2):
-            if None in r:                      # a stray extra tab
-                raise SystemExit(f"{name} line {n}: more fields than the header")
-            row = {k: (v or "").strip() for k, v in r.items()}
-            blank = [k for k, v in row.items() if not v]
-            if blank:
-                raise SystemExit(f"{name} line {n}: empty cell in {blank}")
-            out.append(row)
-    return out
+    table = pd.read_csv(path, sep="\t", dtype=str, keep_default_na=False)
+    if tuple(table.columns) != COLUMNS:
+        raise ValueError(f"{path.name}: columns {list(table.columns)}, "
+                         f"expected {list(COLUMNS)}")
+
+    def lines(mask):
+        return (table.index[mask] + 2).tolist()[:10]
+
+    blank = table[["list", "item", "item_role", "word"]].eq("").any(axis=1)
+    if blank.any():
+        raise ValueError(f"{path.name} lines {lines(blank)}: empty list, item, "
+                         f"item_role or word")
+    repeated = table.word.duplicated(keep=False)
+    if repeated.any():
+        raise ValueError(f"{path.name} lines {lines(repeated)}: a word appears twice")
+    malformed = ~table.word.str.fullmatch(r"[a-z]{3,10}")
+    if malformed.any():
+        raise ValueError(f"{path.name} lines {lines(malformed)}: a word is not "
+                         f"three to ten lowercase letters")
+    roles = table.groupby(["list", "item"], sort=False).item_role.agg(sorted)
+    wrong = [key for key, got in roles.items()
+             if got != sorted(ROLES.get(key[0], ()))]
+    if wrong:
+        raise ValueError(f"{path.name}: items without exactly their list's roles: "
+                         f"{wrong[:10]}")
+
+    table = table.mask(table.eq(""))
+    table["spelling_cluster"] = table.spelling_cluster.astype("Int64")
+    return table.rename(columns={"spelling_cluster": "ortho",
+                                 "concreteness": "picturability"})
 
 
-#: The pair table: ``(block, column a, column b, relation, kind)``. Meaning
-#: pairs carry the claim; spelling pairs are the control.
-PAIRS = [
-    ("block1.txt", "anchor", "synonym",       "synonym",         "meaning"),
-    ("block1.txt", "anchor", "spelling_twin", "spelling_twin",   "spelling"),
-    ("block2.txt", "anchor", "synonym",       "antonym_synonym", "meaning"),
-    ("block2.txt", "anchor", "antonym",       "antonym",         "meaning"),
-    ("block3.txt", "negation", "synonym",     "negation",        "meaning"),
-    ("block3.txt", "negation", "base",        "negation_base",   "spelling"),
-    ("block4.txt", "singular", "plural",      "singular_plural", "spelling"),
-    ("block5.txt", "country", "capital",      "country_capital", "meaning"),
-]
+def item_table(vocabulary: pd.DataFrame, slug: str) -> pd.DataFrame:
+    """One row per item of a list in file order, one column per role."""
+    rows = vocabulary[vocabulary.list == slug]
+    return (rows.pivot(index="item", columns="item_role", values="word")
+            .reindex(index=rows.item.unique(), columns=list(ROLES[slug])))
+
+
+def pair_table(vocabulary: pd.DataFrame) -> pd.DataFrame:
+    """The pairs of ``PAIRS``, relation by relation and in item order within one.
+
+    The order is part of the result: the letter-overlap audit draws its random
+    words pair by pair.
+    """
+    rows = []
+    for slug, a, b, relation, kind in PAIRS:
+        items = item_table(vocabulary, slug)
+        rows += [dict(item=f"pair/{relation}/{x}", relation=relation, kind=kind,
+                      a=x, b=y) for x, y in zip(items[a], items[b])]
+    return pd.DataFrame(rows)
+
+
+def list_summary(vocabulary: pd.DataFrame) -> pd.DataFrame:
+    """Items, distinct words and pairs per list, with an example: Table 3.
+
+    Pairs are counted before the query direction is reversed. A dash marks a
+    cell the paper leaves empty.
+    """
+    pairs = pair_table(vocabulary)
+    pair_list = pairs.relation.map({relation: slug
+                                    for slug, _, _, relation, _ in PAIRS})
+    rows = []
+    for slug, title, _, anchor, purpose in LISTS:
+        words = vocabulary[vocabulary.list == slug]
+        listed = pairs[pair_list == slug]
+        example = listed[listed.a == anchor]
+        shown = ", ".join(f"{a}-{b}" for a, b in zip(example.a, example.b))
+        rows.append({"List": title, "Items": words.item.nunique(),
+                     "Words": words.word.nunique(), "Pairs": len(listed),
+                     "Example and purpose": f"{shown}: {purpose}" if anchor else purpose})
+    counts = pd.DataFrame(rows)
+    total = {"List": "Total", "Items": 0, "Words": counts.Words.sum(),
+             "Pairs": counts.Pairs.sum(), "Example and purpose": ""}
+    summary = pd.concat([counts, pd.DataFrame([total])]).set_index("List")
+    for column in ("Items", "Words", "Pairs"):
+        summary[column] = summary[column].map(lambda n: f"{n:,}" if n else "-")
+    return summary
+
+
+def _markdown_table(header, rows) -> str:
+    lines = ["| " + " | ".join(header) + " |", "|" + "---|" * len(header)]
+    lines += ["| " + " | ".join(str(cell) for cell in row) + " |" for row in rows]
+    return "\n".join(lines)
+
+
+def readme_markdown(vocabulary: pd.DataFrame, class_names: pd.DataFrame) -> str:
+    """The text of ``lexicon/README.md``, a readable view of the committed lists.
+
+    ``class_names`` is the kept rows of ``class_names.tsv``.
+    """
+    heading = {"spelling_twin": "One-edit word"}
+    titles = {slug: title for slug, title, *_ in LISTS}
+    summary = list_summary(vocabulary)
+    pseudo = vocabulary.list == "pseudowords"
+    out = [
+        "_Generated from `vocabulary.tsv` and `class_names.tsv` by "
+        "`python scripts/stimuli/wordlists.py --readme`. Edit those files, "
+        "not this page._",
+        "",
+        "# Word lists",
+        "",
+        f"`vocabulary.tsv` is the lexical vocabulary: {(~pseudo).sum():,} words "
+        f"and names and {pseudo.sum()} pseudowords in eight lists, one row per "
+        f"word. `class_names.tsv` is the curation record of the ImageNet-1k "
+        f"class names, one row per candidate with its decision; "
+        f"{len(class_names)} are kept. `two_clue_pilot.tsv` and "
+        f"`two_clue_confirmatory.tsv` hold the two-clue items.",
+        "",
+        "No fingerprint covers the roles, pairs or categories in "
+        "`vocabulary.tsv` and `class_names.tsv`, so a cache built before an "
+        "edit to either file still loads after it. After an edit, rerun every "
+        "stage from `scripts/run_stimuli.sh` on.",
+        "",
+        "## Reading the vocabulary",
+        "",
+        "```python",
+        "from src.lexicon import read_vocabulary",
+        "",
+        "vocabulary = read_vocabulary()",
+        "# or, without the checks and renames:",
+        "import pandas as pd",
+        "vocabulary = pd.read_csv(\"lexicon/vocabulary.tsv\", sep=\"\\t\", dtype=str,",
+        "                         keep_default_na=False)",
+        "```",
+        "",
+        _markdown_table(("Column", "Content"), [
+            ("`list`", "The list the word belongs to, named by the slugs below"),
+            ("`item`", "The first word of the word's item. An item of a relation "
+                       "list is one row of its table below; in the other lists "
+                       "an item is one word."),
+            ("`item_role`", "The word's part in its item. `spelling_twin` is the "
+                            "paper's one-edit word. A noun's role is `category`, "
+                            "a brand's `brand`, a pseudoword's `pseudoword`."),
+            ("`word`", "The rendered string: lowercase, three to ten letters, "
+                       "and unique in the file"),
+            ("`category`", "The category of a noun or the industry of a brand"),
+            ("`spelling_cluster`", "The spelling cluster of a noun or brand, 0 "
+                                   "to 3. The derived tables call it `ortho`."),
+            ("`concreteness`", "Whether the item of list 1 is concrete or "
+                               "abstract. The derived tables call it "
+                               "`picturability`."),
+        ]),
+        "",
+        "The derived tables and the results name each pair relation as follows.",
+        "",
+        _markdown_table(("Relation", "List", "Pair"), [
+            (f"`{relation}`", titles[slug],
+             f"{heading.get(a, a).lower()} and {heading.get(b, b).lower()}")
+            for slug, a, b, relation, _ in PAIRS]),
+        "",
+        "## The eight lists",
+        "",
+        "Words counts distinct words, and Pairs counts pairs before the query "
+        "direction is reversed.",
+        "",
+        _markdown_table(("List", *summary.columns),
+                        [(name, *row) for name, *row in summary.itertuples()]),
+    ]
+    for number, (slug, title, roles, _, _) in enumerate(LISTS, start=1):
+        rows = vocabulary[vocabulary.list == slug]
+        out += ["", f"### ({number}) {title}", "",
+                f"`{slug}`: {rows.item.nunique()} items, {len(rows)} words.", ""]
+        if slug == "pseudowords":
+            out.append(", ".join(rows.word))
+        elif len(roles) == 1:
+            label = "Category" if slug == "common_nouns" else "Industry"
+            clusters = sorted(rows.ortho.unique())
+            grid = rows.groupby(["category", "ortho"], sort=False).word.agg(", ".join)
+            out.append(_markdown_table(
+                (label, *(f"Cluster {c}" for c in clusters)),
+                [(category, *(grid[category, c] for c in clusters))
+                 for category in rows.category.unique()]))
+        else:
+            items = item_table(vocabulary, slug)
+            header = [heading.get(role, role.capitalize()) for role in roles]
+            if rows.picturability.notna().any():
+                items["concreteness"] = rows.groupby("item").picturability.first()
+                header.append("Concreteness")
+            out.append(_markdown_table(header, items.itertuples(index=False)))
+    by_category = class_names.groupby("category").word.agg(", ".join)
+    out += ["", "## Class names", "",
+            f"The {len(class_names)} kept class names of `class_names.tsv`, by "
+            f"category.", "",
+            _markdown_table(("Category", "Class names"), by_category.items()),
+            "", "## Two-clue items", "",
+            "`two_clue_pilot.tsv` holds the pilot grids used during development "
+            "and `two_clue_confirmatory.tsv` the confirmatory grids. Their cells "
+            "and column names are hashed into the two-clue dataset "
+            "fingerprint, which seeds the layout and the scrambles, so an edit "
+            "to either file, a column name included, means rendering the two-clue "
+            "stimuli again. In them the `feature` column holds the broad clue and "
+            "`base` the narrow clue."]
+    return "\n".join(out) + "\n"
 
 
 # --- the crossed grids ---------------------------------------------------------

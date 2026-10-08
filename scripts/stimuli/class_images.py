@@ -35,7 +35,7 @@ def render() -> None:
     audit = pd.read_parquet(LEXICON / "concepts_audit.parquet")
     print(summarise(audit))
     if ((audit.status == "FAIL") & audit.blocking).any():
-        raise SystemExit("blocking gates are failing; fix lexicon/concepts.tsv")
+        raise SystemExit("blocking gates are failing; fix lexicon/class_names.tsv")
 
     words = sorted(concepts.concept_words().word)
     print(f"{len(words):,} words x {n_slots()} slots x 2 conditions "

@@ -15,10 +15,10 @@ from pathlib import Path
 import pandas as pd
 from PIL import Image
 
-from .config import BACKGROUNDS, CONCEPTS, DATA_ROOT, WORD_LISTS
+from .config import BACKGROUNDS, CLASS_NAMES_TSV, CONCEPTS, DATA_ROOT
 
 #: The committed class-name list, one row per candidate with its decision.
-CONCEPT_LIST = WORD_LISTS / "concepts.tsv"
+CONCEPT_LIST = CLASS_NAMES_TSV
 
 IMAGES = CONCEPTS / "images"
 RENDER_MANIFEST = CONCEPTS / "manifest.parquet"

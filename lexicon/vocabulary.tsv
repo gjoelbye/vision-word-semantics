@@ -1,0 +1,1562 @@
+list	item	item_role	word	category	spelling_cluster	concreteness
+synonym_one_edit	torch	anchor	torch			concrete
+synonym_one_edit	torch	synonym	flashlight			concrete
+synonym_one_edit	torch	spelling_twin	touch			concrete
+synonym_one_edit	cooker	anchor	cooker			concrete
+synonym_one_edit	cooker	synonym	stove			concrete
+synonym_one_edit	cooker	spelling_twin	booker			concrete
+synonym_one_edit	petrol	anchor	petrol			concrete
+synonym_one_edit	petrol	synonym	gasoline			concrete
+synonym_one_edit	petrol	spelling_twin	patrol			concrete
+synonym_one_edit	purse	anchor	purse			concrete
+synonym_one_edit	purse	synonym	handbag			concrete
+synonym_one_edit	purse	spelling_twin	pulse			concrete
+synonym_one_edit	jug	anchor	jug			concrete
+synonym_one_edit	jug	synonym	pitcher			concrete
+synonym_one_edit	jug	spelling_twin	dug			concrete
+synonym_one_edit	cot	anchor	cot			concrete
+synonym_one_edit	cot	synonym	crib			concrete
+synonym_one_edit	cot	spelling_twin	colt			concrete
+synonym_one_edit	cart	anchor	cart			concrete
+synonym_one_edit	cart	synonym	trolley			concrete
+synonym_one_edit	cart	spelling_twin	dart			concrete
+synonym_one_edit	trench	anchor	trench			concrete
+synonym_one_edit	trench	synonym	ditch			concrete
+synonym_one_edit	trench	spelling_twin	wrench			concrete
+synonym_one_edit	quilt	anchor	quilt			concrete
+synonym_one_edit	quilt	synonym	blanket			concrete
+synonym_one_edit	quilt	spelling_twin	guilt			concrete
+synonym_one_edit	outlet	anchor	outlet			concrete
+synonym_one_edit	outlet	synonym	socket			concrete
+synonym_one_edit	outlet	spelling_twin	outset			concrete
+synonym_one_edit	chest	anchor	chest			concrete
+synonym_one_edit	chest	synonym	dresser			concrete
+synonym_one_edit	chest	spelling_twin	crest			concrete
+synonym_one_edit	loft	anchor	loft			concrete
+synonym_one_edit	loft	synonym	attic			concrete
+synonym_one_edit	loft	spelling_twin	soft			concrete
+synonym_one_edit	hallway	anchor	hallway			concrete
+synonym_one_edit	hallway	synonym	corridor			concrete
+synonym_one_edit	hallway	spelling_twin	halfway			concrete
+synonym_one_edit	patio	anchor	patio			concrete
+synonym_one_edit	patio	synonym	terrace			concrete
+synonym_one_edit	patio	spelling_twin	ratio			concrete
+synonym_one_edit	rotary	anchor	rotary			concrete
+synonym_one_edit	rotary	synonym	roundabout			concrete
+synonym_one_edit	rotary	spelling_twin	notary			concrete
+synonym_one_edit	couch	anchor	couch			concrete
+synonym_one_edit	couch	synonym	sofa			concrete
+synonym_one_edit	couch	spelling_twin	crouch			concrete
+synonym_one_edit	rug	anchor	rug			concrete
+synonym_one_edit	rug	synonym	carpet			concrete
+synonym_one_edit	rug	spelling_twin	bug			concrete
+synonym_one_edit	car	anchor	car			concrete
+synonym_one_edit	car	synonym	automobile			concrete
+synonym_one_edit	car	spelling_twin	par			concrete
+synonym_one_edit	cap	anchor	cap			concrete
+synonym_one_edit	cap	synonym	hat			concrete
+synonym_one_edit	cap	spelling_twin	gap			concrete
+synonym_one_edit	cove	anchor	cove			concrete
+synonym_one_edit	cove	synonym	inlet			concrete
+synonym_one_edit	cove	spelling_twin	cone			concrete
+synonym_one_edit	coast	anchor	coast			concrete
+synonym_one_edit	coast	synonym	shore			concrete
+synonym_one_edit	coast	spelling_twin	toast			concrete
+synonym_one_edit	cloth	anchor	cloth			concrete
+synonym_one_edit	cloth	synonym	fabric			concrete
+synonym_one_edit	cloth	spelling_twin	sloth			concrete
+synonym_one_edit	plank	anchor	plank			concrete
+synonym_one_edit	plank	synonym	board			concrete
+synonym_one_edit	plank	spelling_twin	blank			concrete
+synonym_one_edit	box	anchor	box			concrete
+synonym_one_edit	box	synonym	carton			concrete
+synonym_one_edit	box	spelling_twin	bog			concrete
+synonym_one_edit	jar	anchor	jar			concrete
+synonym_one_edit	jar	synonym	pot			concrete
+synonym_one_edit	jar	spelling_twin	ear			concrete
+synonym_one_edit	bottle	anchor	bottle			concrete
+synonym_one_edit	bottle	synonym	flask			concrete
+synonym_one_edit	bottle	spelling_twin	battle			concrete
+synonym_one_edit	hamper	anchor	hamper			concrete
+synonym_one_edit	hamper	synonym	basket			concrete
+synonym_one_edit	hamper	spelling_twin	harper			concrete
+synonym_one_edit	cup	anchor	cup			concrete
+synonym_one_edit	cup	synonym	mug			concrete
+synonym_one_edit	cup	spelling_twin	cue			concrete
+synonym_one_edit	wire	anchor	wire			concrete
+synonym_one_edit	wire	synonym	cable			concrete
+synonym_one_edit	wire	spelling_twin	hire			concrete
+synonym_one_edit	mallet	anchor	mallet			concrete
+synonym_one_edit	mallet	synonym	hammer			concrete
+synonym_one_edit	mallet	spelling_twin	ballet			concrete
+synonym_one_edit	corn	anchor	corn			concrete
+synonym_one_edit	corn	synonym	maize			concrete
+synonym_one_edit	corn	spelling_twin	morn			concrete
+synonym_one_edit	metro	anchor	metro			concrete
+synonym_one_edit	metro	synonym	subway			concrete
+synonym_one_edit	metro	spelling_twin	retro			concrete
+synonym_one_edit	shop	anchor	shop			concrete
+synonym_one_edit	shop	synonym	store			concrete
+synonym_one_edit	shop	spelling_twin	ship			concrete
+synonym_one_edit	gully	anchor	gully			concrete
+synonym_one_edit	gully	synonym	ravine			concrete
+synonym_one_edit	gully	spelling_twin	fully			concrete
+synonym_one_edit	perch	anchor	perch			concrete
+synonym_one_edit	perch	synonym	roost			concrete
+synonym_one_edit	perch	spelling_twin	peach			concrete
+synonym_one_edit	mitt	anchor	mitt			concrete
+synonym_one_edit	mitt	synonym	glove			concrete
+synonym_one_edit	mitt	spelling_twin	mint			concrete
+synonym_one_edit	pad	anchor	pad			concrete
+synonym_one_edit	pad	synonym	guard			concrete
+synonym_one_edit	pad	spelling_twin	sad			concrete
+synonym_one_edit	pin	anchor	pin			concrete
+synonym_one_edit	pin	synonym	brooch			concrete
+synonym_one_edit	pin	spelling_twin	ain			concrete
+synonym_one_edit	candle	anchor	candle			concrete
+synonym_one_edit	candle	synonym	taper			concrete
+synonym_one_edit	candle	spelling_twin	handle			concrete
+synonym_one_edit	cape	anchor	cape			concrete
+synonym_one_edit	cape	synonym	cloak			concrete
+synonym_one_edit	cape	spelling_twin	care			concrete
+synonym_one_edit	bowl	anchor	bowl			concrete
+synonym_one_edit	bowl	synonym	basin			concrete
+synonym_one_edit	bowl	spelling_twin	boil			concrete
+synonym_one_edit	bench	anchor	bench			concrete
+synonym_one_edit	bench	synonym	pew			concrete
+synonym_one_edit	bench	spelling_twin	bunch			concrete
+synonym_one_edit	robe	anchor	robe			concrete
+synonym_one_edit	robe	synonym	gown			concrete
+synonym_one_edit	robe	spelling_twin	roe			concrete
+synonym_one_edit	hut	anchor	hut			concrete
+synonym_one_edit	hut	synonym	shack			concrete
+synonym_one_edit	hut	spelling_twin	hue			concrete
+synonym_one_edit	fiddle	anchor	fiddle			concrete
+synonym_one_edit	fiddle	synonym	violin			concrete
+synonym_one_edit	fiddle	spelling_twin	riddle			concrete
+synonym_one_edit	fence	anchor	fence			concrete
+synonym_one_edit	fence	synonym	railing			concrete
+synonym_one_edit	fence	spelling_twin	hence			concrete
+synonym_one_edit	plain	anchor	plain			concrete
+synonym_one_edit	plain	synonym	prairie			concrete
+synonym_one_edit	plain	spelling_twin	pain			concrete
+synonym_one_edit	sea	anchor	sea			concrete
+synonym_one_edit	sea	synonym	ocean			concrete
+synonym_one_edit	sea	spelling_twin	tea			concrete
+synonym_one_edit	gravel	anchor	gravel			concrete
+synonym_one_edit	gravel	synonym	grit			concrete
+synonym_one_edit	gravel	spelling_twin	travel			concrete
+synonym_one_edit	jet	anchor	jet			concrete
+synonym_one_edit	jet	synonym	airliner			concrete
+synonym_one_edit	jet	spelling_twin	jest			concrete
+synonym_one_edit	dock	anchor	dock			concrete
+synonym_one_edit	dock	synonym	wharf			concrete
+synonym_one_edit	dock	spelling_twin	mock			concrete
+synonym_one_edit	inn	anchor	inn			concrete
+synonym_one_edit	inn	synonym	hotel			concrete
+synonym_one_edit	inn	spelling_twin	ion			concrete
+synonym_one_edit	pub	anchor	pub			concrete
+synonym_one_edit	pub	synonym	tavern			concrete
+synonym_one_edit	pub	spelling_twin	cub			concrete
+synonym_one_edit	castle	anchor	castle			concrete
+synonym_one_edit	castle	synonym	fortress			concrete
+synonym_one_edit	castle	spelling_twin	cattle			concrete
+synonym_one_edit	diner	anchor	diner			concrete
+synonym_one_edit	diner	synonym	restaurant			concrete
+synonym_one_edit	diner	spelling_twin	liner			concrete
+synonym_one_edit	cafe	anchor	cafe			concrete
+synonym_one_edit	cafe	synonym	bistro			concrete
+synonym_one_edit	cafe	spelling_twin	cave			concrete
+synonym_one_edit	toad	anchor	toad			concrete
+synonym_one_edit	toad	synonym	frog			concrete
+synonym_one_edit	toad	spelling_twin	load			concrete
+synonym_one_edit	broth	anchor	broth			concrete
+synonym_one_edit	broth	synonym	soup			concrete
+synonym_one_edit	broth	spelling_twin	both			concrete
+synonym_one_edit	jam	anchor	jam			concrete
+synonym_one_edit	jam	synonym	jelly			concrete
+synonym_one_edit	jam	spelling_twin	jaw			concrete
+synonym_one_edit	deck	anchor	deck			concrete
+synonym_one_edit	deck	synonym	porch			concrete
+synonym_one_edit	deck	spelling_twin	duck			concrete
+synonym_one_edit	cane	anchor	cane			concrete
+synonym_one_edit	cane	synonym	staff			concrete
+synonym_one_edit	cane	spelling_twin	sane			concrete
+synonym_one_edit	chute	anchor	chute			concrete
+synonym_one_edit	chute	synonym	slide			concrete
+synonym_one_edit	chute	spelling_twin	cute			concrete
+synonym_one_edit	map	anchor	map			concrete
+synonym_one_edit	map	synonym	chart			concrete
+synonym_one_edit	map	spelling_twin	tap			concrete
+synonym_one_edit	boss	anchor	boss			concrete
+synonym_one_edit	boss	synonym	chief			concrete
+synonym_one_edit	boss	spelling_twin	loss			concrete
+synonym_one_edit	pal	anchor	pal			concrete
+synonym_one_edit	pal	synonym	friend			concrete
+synonym_one_edit	pal	spelling_twin	gal			concrete
+synonym_one_edit	aide	anchor	aide			concrete
+synonym_one_edit	aide	synonym	helper			concrete
+synonym_one_edit	aide	spelling_twin	abide			concrete
+synonym_one_edit	spy	anchor	spy			concrete
+synonym_one_edit	spy	synonym	agent			concrete
+synonym_one_edit	spy	spelling_twin	shy			concrete
+synonym_one_edit	boat	anchor	boat			concrete
+synonym_one_edit	boat	synonym	craft			concrete
+synonym_one_edit	boat	spelling_twin	bat			concrete
+synonym_one_edit	puddle	anchor	puddle			concrete
+synonym_one_edit	puddle	synonym	pool			concrete
+synonym_one_edit	puddle	spelling_twin	paddle			concrete
+synonym_one_edit	cog	anchor	cog			concrete
+synonym_one_edit	cog	synonym	gear			concrete
+synonym_one_edit	cog	spelling_twin	log			concrete
+synonym_one_edit	pane	anchor	pane			concrete
+synonym_one_edit	pane	synonym	glass			concrete
+synonym_one_edit	pane	spelling_twin	plane			concrete
+synonym_one_edit	worm	anchor	worm			concrete
+synonym_one_edit	worm	synonym	grub			concrete
+synonym_one_edit	worm	spelling_twin	dorm			concrete
+synonym_one_edit	sill	anchor	sill			concrete
+synonym_one_edit	sill	synonym	ledge			concrete
+synonym_one_edit	sill	spelling_twin	dill			concrete
+synonym_one_edit	spout	anchor	spout			concrete
+synonym_one_edit	spout	synonym	nozzle			concrete
+synonym_one_edit	spout	spelling_twin	sprout			concrete
+synonym_one_edit	wool	anchor	wool			concrete
+synonym_one_edit	wool	synonym	fleece			concrete
+synonym_one_edit	wool	spelling_twin	fool			concrete
+synonym_one_edit	lift	anchor	lift			abstract
+synonym_one_edit	lift	synonym	elevator			abstract
+synonym_one_edit	lift	spelling_twin	lit			abstract
+synonym_one_edit	fog	anchor	fog			abstract
+synonym_one_edit	fog	synonym	mist			abstract
+synonym_one_edit	fog	spelling_twin	hog			abstract
+synonym_one_edit	breeze	anchor	breeze			abstract
+synonym_one_edit	breeze	synonym	wind			abstract
+synonym_one_edit	breeze	spelling_twin	freeze			abstract
+synonym_one_edit	stem	anchor	stem			abstract
+synonym_one_edit	stem	synonym	stalk			abstract
+synonym_one_edit	stem	spelling_twin	seem			abstract
+synonym_one_edit	ring	anchor	ring			abstract
+synonym_one_edit	ring	synonym	band			abstract
+synonym_one_edit	ring	spelling_twin	wing			abstract
+synonym_one_edit	coin	anchor	coin			abstract
+synonym_one_edit	coin	synonym	token			abstract
+synonym_one_edit	coin	spelling_twin	chin			abstract
+synonym_one_edit	vat	anchor	vat			abstract
+synonym_one_edit	vat	synonym	tub			abstract
+synonym_one_edit	vat	spelling_twin	vet			abstract
+synonym_one_edit	pasture	anchor	pasture			abstract
+synonym_one_edit	pasture	synonym	meadow			abstract
+synonym_one_edit	pasture	spelling_twin	posture			abstract
+synonym_one_edit	port	anchor	port			abstract
+synonym_one_edit	port	synonym	harbor			abstract
+synonym_one_edit	port	spelling_twin	poet			abstract
+synonym_one_edit	branch	anchor	branch			abstract
+synonym_one_edit	branch	synonym	limb			abstract
+synonym_one_edit	branch	spelling_twin	brunch			abstract
+synonym_one_edit	yarn	anchor	yarn			abstract
+synonym_one_edit	yarn	synonym	thread			abstract
+synonym_one_edit	yarn	spelling_twin	earn			abstract
+synonym_one_edit	brink	anchor	brink			abstract
+synonym_one_edit	brink	synonym	edge			abstract
+synonym_one_edit	brink	spelling_twin	blink			abstract
+synonym_one_edit	brood	anchor	brood			abstract
+synonym_one_edit	brood	synonym	litter			abstract
+synonym_one_edit	brood	spelling_twin	blood			abstract
+synonym_one_edit	pack	anchor	pack			abstract
+synonym_one_edit	pack	synonym	troop			abstract
+synonym_one_edit	pack	spelling_twin	puck			abstract
+synonym_one_edit	den	anchor	den			abstract
+synonym_one_edit	den	synonym	lair			abstract
+synonym_one_edit	den	spelling_twin	din			abstract
+synonym_one_edit	buoy	anchor	buoy			abstract
+synonym_one_edit	buoy	synonym	float			abstract
+synonym_one_edit	buoy	spelling_twin	busy			abstract
+synonym_one_edit	hatch	anchor	hatch			abstract
+synonym_one_edit	hatch	synonym	flap			abstract
+synonym_one_edit	hatch	spelling_twin	hitch			abstract
+synonym_one_edit	meter	anchor	meter			abstract
+synonym_one_edit	meter	synonym	gauge			abstract
+synonym_one_edit	meter	spelling_twin	deter			abstract
+synonym_one_edit	path	anchor	path			abstract
+synonym_one_edit	path	synonym	track			abstract
+synonym_one_edit	path	spelling_twin	math			abstract
+synonym_one_edit	haze	anchor	haze			abstract
+synonym_one_edit	haze	synonym	smog			abstract
+synonym_one_edit	haze	spelling_twin	maze			abstract
+synonym_one_edit	poster	anchor	poster			abstract
+synonym_one_edit	poster	synonym	flyer			abstract
+synonym_one_edit	poster	spelling_twin	potter			abstract
+synonym_one_edit	hike	anchor	hike			abstract
+synonym_one_edit	hike	synonym	trek			abstract
+synonym_one_edit	hike	spelling_twin	pike			abstract
+synonym_one_edit	feud	anchor	feud			abstract
+synonym_one_edit	feud	synonym	rift			abstract
+synonym_one_edit	feud	spelling_twin	fend			abstract
+synonym_one_edit	toil	anchor	toil			abstract
+synonym_one_edit	toil	synonym	labor			abstract
+synonym_one_edit	toil	spelling_twin	soil			abstract
+synonym_one_edit	pause	anchor	pause			abstract
+synonym_one_edit	pause	synonym	lull			abstract
+synonym_one_edit	pause	spelling_twin	cause			abstract
+synonym_one_edit	finding	anchor	finding			abstract
+synonym_one_edit	finding	synonym	discovery			abstract
+synonym_one_edit	finding	spelling_twin	funding			abstract
+synonym_one_edit	hobby	anchor	hobby			abstract
+synonym_one_edit	hobby	synonym	pastime			abstract
+synonym_one_edit	hobby	spelling_twin	hubby			abstract
+synonym_one_edit	sleep	anchor	sleep			abstract
+synonym_one_edit	sleep	synonym	slumber			abstract
+synonym_one_edit	sleep	spelling_twin	bleep			abstract
+synonym_one_edit	talk	anchor	talk			abstract
+synonym_one_edit	talk	synonym	speech			abstract
+synonym_one_edit	talk	spelling_twin	walk			abstract
+synonym_one_edit	debate	anchor	debate			abstract
+synonym_one_edit	debate	synonym	discussion			abstract
+synonym_one_edit	debate	spelling_twin	rebate			abstract
+synonym_one_edit	message	anchor	message			abstract
+synonym_one_edit	message	synonym	memo			abstract
+synonym_one_edit	message	spelling_twin	massage			abstract
+synonym_one_edit	tale	anchor	tale			abstract
+synonym_one_edit	tale	synonym	story			abstract
+synonym_one_edit	tale	spelling_twin	table			abstract
+synonym_one_edit	start	anchor	start			abstract
+synonym_one_edit	start	synonym	onset			abstract
+synonym_one_edit	start	spelling_twin	smart			abstract
+synonym_one_edit	warning	anchor	warning			abstract
+synonym_one_edit	warning	synonym	caution			abstract
+synonym_one_edit	warning	spelling_twin	warming			abstract
+synonym_one_edit	promise	anchor	promise			abstract
+synonym_one_edit	promise	synonym	pledge			abstract
+synonym_one_edit	promise	spelling_twin	premise			abstract
+synonym_one_edit	vacation	anchor	vacation			abstract
+synonym_one_edit	vacation	synonym	holiday			abstract
+synonym_one_edit	vacation	spelling_twin	vocation			abstract
+synonym_one_edit	duty	anchor	duty			abstract
+synonym_one_edit	duty	synonym	obligation			abstract
+synonym_one_edit	duty	spelling_twin	duly			abstract
+synonym_one_edit	mission	anchor	mission			abstract
+synonym_one_edit	mission	synonym	assignment			abstract
+synonym_one_edit	mission	spelling_twin	fission			abstract
+synonym_one_edit	rumor	anchor	rumor			abstract
+synonym_one_edit	rumor	synonym	gossip			abstract
+synonym_one_edit	rumor	spelling_twin	humor			abstract
+synonym_one_edit	sorrow	anchor	sorrow			abstract
+synonym_one_edit	sorrow	synonym	grief			abstract
+synonym_one_edit	sorrow	spelling_twin	borrow			abstract
+synonym_one_edit	worry	anchor	worry			abstract
+synonym_one_edit	worry	synonym	anxiety			abstract
+synonym_one_edit	worry	spelling_twin	sorry			abstract
+synonym_one_edit	gloom	anchor	gloom			abstract
+synonym_one_edit	gloom	synonym	melancholy			abstract
+synonym_one_edit	gloom	spelling_twin	groom			abstract
+synonym_one_edit	scorn	anchor	scorn			abstract
+synonym_one_edit	scorn	synonym	contempt			abstract
+synonym_one_edit	scorn	spelling_twin	sworn			abstract
+synonym_one_edit	awe	anchor	awe			abstract
+synonym_one_edit	awe	synonym	amazement			abstract
+synonym_one_edit	awe	spelling_twin	axe			abstract
+synonym_one_edit	hunch	anchor	hunch			abstract
+synonym_one_edit	hunch	synonym	instinct			abstract
+synonym_one_edit	hunch	spelling_twin	lunch			abstract
+synonym_one_edit	loyalty	anchor	loyalty			abstract
+synonym_one_edit	loyalty	synonym	devotion			abstract
+synonym_one_edit	loyalty	spelling_twin	royalty			abstract
+synonym_one_edit	vigor	anchor	vigor			abstract
+synonym_one_edit	vigor	synonym	energy			abstract
+synonym_one_edit	vigor	spelling_twin	rigor			abstract
+synonym_one_edit	tension	anchor	tension			abstract
+synonym_one_edit	tension	synonym	stress			abstract
+synonym_one_edit	tension	spelling_twin	pension			abstract
+synonym_one_edit	bulk	anchor	bulk			abstract
+synonym_one_edit	bulk	synonym	size			abstract
+synonym_one_edit	bulk	spelling_twin	bunk			abstract
+synonym_one_edit	extent	anchor	extent			abstract
+synonym_one_edit	extent	synonym	scope			abstract
+synonym_one_edit	extent	spelling_twin	extant			abstract
+synonym_one_edit	era	anchor	era			abstract
+synonym_one_edit	era	synonym	epoch			abstract
+synonym_one_edit	era	spelling_twin	err			abstract
+synonym_one_edit	myth	anchor	myth			abstract
+synonym_one_edit	myth	synonym	fallacy			abstract
+synonym_one_edit	myth	spelling_twin	moth			abstract
+synonym_one_edit	friction	anchor	friction			abstract
+synonym_one_edit	friction	synonym	discord			abstract
+synonym_one_edit	friction	spelling_twin	fraction			abstract
+synonym_one_edit	consent	anchor	consent			abstract
+synonym_one_edit	consent	synonym	permission			abstract
+synonym_one_edit	consent	spelling_twin	content			abstract
+synonym_one_edit	assent	anchor	assent			abstract
+synonym_one_edit	assent	synonym	approval			abstract
+synonym_one_edit	assent	spelling_twin	absent			abstract
+synonym_one_edit	denial	anchor	denial			abstract
+synonym_one_edit	denial	synonym	refusal			abstract
+synonym_one_edit	denial	spelling_twin	dental			abstract
+synonym_one_edit	ban	anchor	ban			abstract
+synonym_one_edit	ban	synonym	veto			abstract
+synonym_one_edit	ban	spelling_twin	lan			abstract
+synonym_one_edit	skill	anchor	skill			abstract
+synonym_one_edit	skill	synonym	expertise			abstract
+synonym_one_edit	skill	spelling_twin	skull			abstract
+synonym_one_edit	aptitude	anchor	aptitude			abstract
+synonym_one_edit	aptitude	synonym	competence			abstract
+synonym_one_edit	aptitude	spelling_twin	altitude			abstract
+synonym_one_edit	knack	anchor	knack			abstract
+synonym_one_edit	knack	synonym	talent			abstract
+synonym_one_edit	knack	spelling_twin	knock			abstract
+synonym_one_edit	flair	anchor	flair			abstract
+synonym_one_edit	flair	synonym	artistry			abstract
+synonym_one_edit	flair	spelling_twin	fair			abstract
+synonym_one_edit	fluke	anchor	fluke			abstract
+synonym_one_edit	fluke	synonym	accident			abstract
+synonym_one_edit	fluke	spelling_twin	flake			abstract
+synonym_one_edit	risk	anchor	risk			abstract
+synonym_one_edit	risk	synonym	hazard			abstract
+synonym_one_edit	risk	spelling_twin	disk			abstract
+synonym_one_edit	danger	anchor	danger			abstract
+synonym_one_edit	danger	synonym	menace			abstract
+synonym_one_edit	danger	spelling_twin	ranger			abstract
+synonym_one_edit	big	anchor	big			abstract
+synonym_one_edit	big	synonym	large			abstract
+synonym_one_edit	big	spelling_twin	bit			abstract
+synonym_one_edit	slight	anchor	slight			abstract
+synonym_one_edit	slight	synonym	minor			abstract
+synonym_one_edit	slight	spelling_twin	sight			abstract
+synonym_one_edit	wealth	anchor	wealth			abstract
+synonym_one_edit	wealth	synonym	prosperity			abstract
+synonym_one_edit	wealth	spelling_twin	health			abstract
+synonym_one_edit	icy	anchor	icy			abstract
+synonym_one_edit	icy	synonym	frosty			abstract
+synonym_one_edit	icy	spelling_twin	icc			abstract
+synonym_one_edit	valiant	anchor	valiant			abstract
+synonym_one_edit	valiant	synonym	fearless			abstract
+synonym_one_edit	valiant	spelling_twin	variant			abstract
+synonym_one_edit	bravely	anchor	bravely			abstract
+synonym_one_edit	bravely	synonym	boldly			abstract
+synonym_one_edit	bravely	spelling_twin	gravely			abstract
+synonym_one_edit	real	anchor	real			abstract
+synonym_one_edit	real	synonym	actual			abstract
+synonym_one_edit	real	spelling_twin	deal			abstract
+synonym_one_edit	extensive	anchor	extensive			abstract
+synonym_one_edit	extensive	synonym	widespread			abstract
+synonym_one_edit	extensive	spelling_twin	expensive			abstract
+synonym_one_edit	heed	anchor	heed			abstract
+synonym_one_edit	heed	synonym	attention			abstract
+synonym_one_edit	heed	spelling_twin	held			abstract
+synonym_one_edit	fame	anchor	fame			abstract
+synonym_one_edit	fame	synonym	renown			abstract
+synonym_one_edit	fame	spelling_twin	tame			abstract
+synonym_one_edit	rank	anchor	rank			abstract
+synonym_one_edit	rank	synonym	status			abstract
+synonym_one_edit	rank	spelling_twin	bank			abstract
+synonym_antonym	brave	anchor	brave			
+synonym_antonym	brave	synonym	bold			
+synonym_antonym	brave	antonym	cowardly			
+synonym_antonym	generous	anchor	generous			
+synonym_antonym	generous	synonym	giving			
+synonym_antonym	generous	antonym	stingy			
+synonym_antonym	kind	anchor	kind			
+synonym_antonym	kind	synonym	gentle			
+synonym_antonym	kind	antonym	cruel			
+synonym_antonym	patient	anchor	patient			
+synonym_antonym	patient	synonym	tolerant			
+synonym_antonym	patient	antonym	restless			
+synonym_antonym	humble	anchor	humble			
+synonym_antonym	humble	synonym	modest			
+synonym_antonym	humble	antonym	arrogant			
+synonym_antonym	polite	anchor	polite			
+synonym_antonym	polite	synonym	courteous			
+synonym_antonym	polite	antonym	rude			
+synonym_antonym	cautious	anchor	cautious			
+synonym_antonym	cautious	synonym	careful			
+synonym_antonym	cautious	antonym	reckless			
+synonym_antonym	confident	anchor	confident			
+synonym_antonym	confident	synonym	assured			
+synonym_antonym	confident	antonym	timid			
+synonym_antonym	orderly	anchor	orderly			
+synonym_antonym	orderly	synonym	neat			
+synonym_antonym	orderly	antonym	messy			
+synonym_antonym	important	anchor	important			
+synonym_antonym	important	synonym	vital			
+synonym_antonym	important	antonym	trivial			
+synonym_antonym	strong	anchor	strong			
+synonym_antonym	strong	synonym	mighty			
+synonym_antonym	strong	antonym	weak			
+synonym_antonym	sincere	anchor	sincere			
+synonym_antonym	sincere	synonym	genuine			
+synonym_antonym	sincere	antonym	fake			
+synonym_antonym	ambitious	anchor	ambitious			
+synonym_antonym	ambitious	synonym	driven			
+synonym_antonym	ambitious	antonym	complacent			
+synonym_antonym	eager	anchor	eager			
+synonym_antonym	eager	synonym	keen			
+synonym_antonym	eager	antonym	reluctant			
+synonym_antonym	serious	anchor	serious			
+synonym_antonym	serious	synonym	solemn			
+synonym_antonym	serious	antonym	playful			
+synonym_antonym	clumsy	anchor	clumsy			
+synonym_antonym	clumsy	synonym	awkward			
+synonym_antonym	clumsy	antonym	nimble			
+synonym_antonym	elegant	anchor	elegant			
+synonym_antonym	elegant	synonym	refined			
+synonym_antonym	elegant	antonym	crude			
+synonym_antonym	simple	anchor	simple			
+synonym_antonym	simple	synonym	basic			
+synonym_antonym	simple	antonym	complex			
+synonym_antonym	strict	anchor	strict			
+synonym_antonym	strict	synonym	rigid			
+synonym_antonym	strict	antonym	lenient			
+synonym_antonym	energetic	anchor	energetic			
+synonym_antonym	energetic	synonym	lively			
+synonym_antonym	energetic	antonym	sluggish			
+synonym_antonym	excited	anchor	excited			
+synonym_antonym	excited	synonym	thrilled			
+synonym_antonym	excited	antonym	bored			
+synonym_antonym	tough	anchor	tough			
+synonym_antonym	tough	synonym	resilient			
+synonym_antonym	tough	antonym	fragile			
+synonym_antonym	precise	anchor	precise			
+synonym_antonym	precise	synonym	exact			
+synonym_antonym	precise	antonym	sloppy			
+synonym_antonym	costly	anchor	costly			
+synonym_antonym	costly	synonym	pricey			
+synonym_antonym	costly	antonym	cheap			
+synonym_antonym	first	anchor	first			
+synonym_antonym	first	synonym	initial			
+synonym_antonym	first	antonym	last			
+synonym_antonym	prior	anchor	prior			
+synonym_antonym	prior	synonym	earlier			
+synonym_antonym	prior	antonym	later			
+synonym_antonym	crowded	anchor	crowded			
+synonym_antonym	crowded	synonym	packed			
+synonym_antonym	crowded	antonym	empty			
+synonym_antonym	tedious	anchor	tedious			
+synonym_antonym	tedious	synonym	boring			
+synonym_antonym	tedious	antonym	fun			
+synonym_antonym	fragrant	anchor	fragrant			
+synonym_antonym	fragrant	synonym	scented			
+synonym_antonym	fragrant	antonym	smelly			
+synonym_antonym	outdated	anchor	outdated			
+synonym_antonym	outdated	synonym	obsolete			
+synonym_antonym	outdated	antonym	current			
+synonym_antonym	ordinary	anchor	ordinary			
+synonym_antonym	ordinary	synonym	average			
+synonym_antonym	ordinary	antonym	special			
+synonym_antonym	sensible	anchor	sensible			
+synonym_antonym	sensible	synonym	rational			
+synonym_antonym	sensible	antonym	foolish			
+synonym_antonym	tasty	anchor	tasty			
+synonym_antonym	tasty	synonym	yummy			
+synonym_antonym	tasty	antonym	bland			
+synonym_antonym	abundant	anchor	abundant			
+synonym_antonym	abundant	synonym	ample			
+synonym_antonym	abundant	antonym	scarce			
+synonym_antonym	broken	anchor	broken			
+synonym_antonym	broken	synonym	damaged			
+synonym_antonym	broken	antonym	intact			
+synonym_antonym	worn	anchor	worn			
+synonym_antonym	worn	synonym	shabby			
+synonym_antonym	worn	antonym	flawless			
+synonym_antonym	brief	anchor	brief			
+synonym_antonym	brief	synonym	short			
+synonym_antonym	brief	antonym	lengthy			
+synonym_antonym	glossy	anchor	glossy			
+synonym_antonym	glossy	synonym	polished			
+synonym_antonym	glossy	antonym	matte			
+synonym_antonym	damp	anchor	damp			
+synonym_antonym	damp	synonym	humid			
+synonym_antonym	damp	antonym	arid			
+synonym_antonym	thorough	anchor	thorough			
+synonym_antonym	thorough	synonym	complete			
+synonym_antonym	thorough	antonym	careless			
+synonym_antonym	limited	anchor	limited			
+synonym_antonym	limited	synonym	finite			
+synonym_antonym	limited	antonym	endless			
+synonym_antonym	hot	anchor	hot			
+synonym_antonym	hot	synonym	scorching			
+synonym_antonym	hot	antonym	cold			
+synonym_antonym	huge	anchor	huge			
+synonym_antonym	huge	synonym	massive			
+synonym_antonym	huge	antonym	tiny			
+synonym_antonym	wide	anchor	wide			
+synonym_antonym	wide	synonym	broad			
+synonym_antonym	wide	antonym	narrow			
+synonym_antonym	bright	anchor	bright			
+synonym_antonym	bright	synonym	radiant			
+synonym_antonym	bright	antonym	dim			
+synonym_antonym	old	anchor	old			
+synonym_antonym	old	synonym	ancient			
+synonym_antonym	old	antonym	new			
+synonym_antonym	towering	anchor	towering			
+synonym_antonym	towering	synonym	elevated			
+synonym_antonym	towering	antonym	squat			
+synonym_antonym	luminous	anchor	luminous			
+synonym_antonym	luminous	synonym	glowing			
+synonym_antonym	luminous	antonym	murky			
+synonym_antonym	outlying	anchor	outlying			
+synonym_antonym	outlying	synonym	isolated			
+synonym_antonym	outlying	antonym	adjacent			
+synonym_antonym	scenic	anchor	scenic			
+synonym_antonym	scenic	synonym	pretty			
+synonym_antonym	scenic	antonym	dreary			
+synonym_negation	disappear	negation	disappear			
+synonym_negation	disappear	synonym	vanish			
+synonym_negation	disappear	base	appear			
+synonym_negation	disbelief	negation	disbelief			
+synonym_negation	disbelief	synonym	skepticism			
+synonym_negation	disbelief	base	belief			
+synonym_negation	disclosure	negation	disclosure			
+synonym_negation	disclosure	synonym	revealing			
+synonym_negation	disclosure	base	closure			
+synonym_negation	distract	negation	distract			
+synonym_negation	distract	synonym	deflect			
+synonym_negation	distract	base	tract			
+synonym_negation	harmless	negation	harmless			
+synonym_negation	harmless	synonym	benign			
+synonym_negation	harmless	base	harmful			
+synonym_negation	illogical	negation	illogical			
+synonym_negation	illogical	synonym	absurd			
+synonym_negation	illogical	base	logical			
+synonym_negation	immoral	negation	immoral			
+synonym_negation	immoral	synonym	wicked			
+synonym_negation	immoral	base	moral			
+synonym_negation	impartial	negation	impartial			
+synonym_negation	impartial	synonym	neutral			
+synonym_negation	impartial	base	partial			
+synonym_negation	impending	negation	impending			
+synonym_negation	impending	synonym	imminent			
+synonym_negation	impending	base	pending			
+synonym_negation	imperfect	negation	imperfect			
+synonym_negation	imperfect	synonym	flawed			
+synonym_negation	imperfect	base	perfect			
+synonym_negation	incorrect	negation	incorrect			
+synonym_negation	incorrect	synonym	mistaken			
+synonym_negation	incorrect	base	correct			
+synonym_negation	injury	negation	injury			
+synonym_negation	injury	synonym	harm			
+synonym_negation	injury	base	jury			
+synonym_negation	invaluable	negation	invaluable			
+synonym_negation	invaluable	synonym	priceless			
+synonym_negation	invaluable	base	valuable			
+synonym_negation	invent	negation	invent			
+synonym_negation	invent	synonym	formulate			
+synonym_negation	invent	base	vent			
+synonym_negation	irregular	negation	irregular			
+synonym_negation	irregular	synonym	erratic			
+synonym_negation	irregular	base	regular			
+synonym_negation	nonviolent	negation	nonviolent			
+synonym_negation	nonviolent	synonym	peaceful			
+synonym_negation	nonviolent	base	violent			
+synonym_negation	unaware	negation	unaware			
+synonym_negation	unaware	synonym	ignorant			
+synonym_negation	unaware	base	aware			
+synonym_negation	uncertain	negation	uncertain			
+synonym_negation	uncertain	synonym	hesitant			
+synonym_negation	uncertain	base	certain			
+synonym_negation	unclear	negation	unclear			
+synonym_negation	unclear	synonym	vague			
+synonym_negation	unclear	base	clear			
+synonym_negation	uncommon	negation	uncommon			
+synonym_negation	uncommon	synonym	rare			
+synonym_negation	uncommon	base	common			
+synonym_negation	unequal	negation	unequal			
+synonym_negation	unequal	synonym	disparate			
+synonym_negation	unequal	base	equal			
+synonym_negation	uneven	negation	uneven			
+synonym_negation	uneven	synonym	bumpy			
+synonym_negation	uneven	base	even			
+synonym_negation	unfriendly	negation	unfriendly			
+synonym_negation	unfriendly	synonym	hostile			
+synonym_negation	unfriendly	base	friendly			
+synonym_negation	unlikely	negation	unlikely			
+synonym_negation	unlikely	synonym	doubtful			
+synonym_negation	unlikely	base	likely			
+synonym_negation	unnatural	negation	unnatural			
+synonym_negation	unnatural	synonym	artificial			
+synonym_negation	unnatural	base	natural			
+synonym_negation	unpaid	negation	unpaid			
+synonym_negation	unpaid	synonym	voluntary			
+synonym_negation	unpaid	base	paid			
+synonym_negation	unpleasant	negation	unpleasant			
+synonym_negation	unpleasant	synonym	nasty			
+synonym_negation	unpleasant	base	pleasant			
+synonym_negation	unpopular	negation	unpopular			
+synonym_negation	unpopular	synonym	despised			
+synonym_negation	unpopular	base	popular			
+synonym_negation	unsafe	negation	unsafe			
+synonym_negation	unsafe	synonym	risky			
+synonym_negation	unsafe	base	safe			
+synonym_negation	unspoken	negation	unspoken			
+synonym_negation	unspoken	synonym	implicit			
+synonym_negation	unspoken	base	spoken			
+synonym_negation	unstable	negation	unstable			
+synonym_negation	unstable	synonym	shaky			
+synonym_negation	unstable	base	stable			
+synonym_negation	untrue	negation	untrue			
+synonym_negation	untrue	synonym	false			
+synonym_negation	untrue	base	true			
+synonym_negation	unused	negation	unused			
+synonym_negation	unused	synonym	idle			
+synonym_negation	unused	base	used			
+synonym_negation	unusually	negation	unusually			
+synonym_negation	unusually	synonym	remarkably			
+synonym_negation	unusually	base	usually			
+synonym_negation	unusual	negation	unusual			
+synonym_negation	unusual	synonym	weird			
+synonym_negation	unusual	base	usual			
+singular_plural	road	singular	road			
+singular_plural	road	plural	roads			
+singular_plural	eye	singular	eye			
+singular_plural	eye	plural	eyes			
+singular_plural	station	singular	station			
+singular_plural	station	plural	stations			
+singular_plural	leader	singular	leader			
+singular_plural	leader	plural	leaders			
+singular_plural	iron	singular	iron			
+singular_plural	iron	plural	irons			
+singular_plural	heaven	singular	heaven			
+singular_plural	heaven	plural	heavens			
+singular_plural	bone	singular	bone			
+singular_plural	bone	plural	bones			
+singular_plural	egg	singular	egg			
+singular_plural	egg	plural	eggs			
+singular_plural	clock	singular	clock			
+singular_plural	clock	plural	clocks			
+singular_plural	shoe	singular	shoe			
+singular_plural	shoe	plural	shoes			
+singular_plural	nerve	singular	nerve			
+singular_plural	nerve	plural	nerves			
+singular_plural	taxi	singular	taxi			
+singular_plural	taxi	plural	taxis			
+singular_plural	barrel	singular	barrel			
+singular_plural	barrel	plural	barrels			
+singular_plural	organ	singular	organ			
+singular_plural	organ	plural	organs			
+singular_plural	cow	singular	cow			
+singular_plural	cow	plural	cows			
+singular_plural	sweat	singular	sweat			
+singular_plural	sweat	plural	sweats			
+singular_plural	trunk	singular	trunk			
+singular_plural	trunk	plural	trunks			
+singular_plural	archive	singular	archive			
+singular_plural	archive	plural	archives			
+singular_plural	cord	singular	cord			
+singular_plural	cord	plural	cords			
+singular_plural	marble	singular	marble			
+singular_plural	marble	plural	marbles			
+singular_plural	mod	singular	mod			
+singular_plural	mod	plural	mods			
+singular_plural	peanut	singular	peanut			
+singular_plural	peanut	plural	peanuts			
+singular_plural	mechanic	singular	mechanic			
+singular_plural	mechanic	plural	mechanics			
+singular_plural	drawer	singular	drawer			
+singular_plural	drawer	plural	drawers			
+singular_plural	viewer	singular	viewer			
+singular_plural	viewer	plural	viewers			
+singular_plural	prop	singular	prop			
+singular_plural	prop	plural	props			
+singular_plural	strait	singular	strait			
+singular_plural	strait	plural	straits			
+singular_plural	breaker	singular	breaker			
+singular_plural	breaker	plural	breakers			
+singular_plural	trumpet	singular	trumpet			
+singular_plural	trumpet	plural	trumpets			
+singular_plural	bun	singular	bun			
+singular_plural	bun	plural	buns			
+singular_plural	follower	singular	follower			
+singular_plural	follower	plural	followers			
+singular_plural	bowel	singular	bowel			
+singular_plural	bowel	plural	bowels			
+singular_plural	ala	singular	ala			
+singular_plural	ala	plural	alas			
+singular_plural	cracker	singular	cracker			
+singular_plural	cracker	plural	crackers			
+singular_plural	bead	singular	bead			
+singular_plural	bead	plural	beads			
+singular_plural	diver	singular	diver			
+singular_plural	diver	plural	divers			
+singular_plural	hoop	singular	hoop			
+singular_plural	hoop	plural	hoops			
+singular_plural	hippie	singular	hippie			
+singular_plural	hippie	plural	hippies			
+singular_plural	stair	singular	stair			
+singular_plural	stair	plural	stairs			
+singular_plural	clam	singular	clam			
+singular_plural	clam	plural	clams			
+country_capital	italy	country	italy			
+country_capital	italy	capital	rome			
+country_capital	russia	country	russia			
+country_capital	russia	capital	moscow			
+country_capital	germany	country	germany			
+country_capital	germany	capital	berlin			
+country_capital	spain	country	spain			
+country_capital	spain	capital	madrid			
+country_capital	india	country	india			
+country_capital	india	capital	delhi			
+country_capital	japan	country	japan			
+country_capital	japan	capital	tokyo			
+country_capital	china	country	china			
+country_capital	china	capital	beijing			
+country_capital	ireland	country	ireland			
+country_capital	ireland	capital	dublin			
+country_capital	belgium	country	belgium			
+country_capital	belgium	capital	brussels			
+country_capital	austria	country	austria			
+country_capital	austria	capital	vienna			
+country_capital	korea	country	korea			
+country_capital	korea	capital	seoul			
+country_capital	greece	country	greece			
+country_capital	greece	capital	athens			
+country_capital	thailand	country	thailand			
+country_capital	thailand	capital	bangkok			
+country_capital	egypt	country	egypt			
+country_capital	egypt	capital	cairo			
+country_capital	sweden	country	sweden			
+country_capital	sweden	capital	stockholm			
+country_capital	indonesia	country	indonesia			
+country_capital	indonesia	capital	jakarta			
+country_capital	poland	country	poland			
+country_capital	poland	capital	warsaw			
+country_capital	chile	country	chile			
+country_capital	chile	capital	santiago			
+country_capital	portugal	country	portugal			
+country_capital	portugal	capital	lisbon			
+country_capital	iraq	country	iraq			
+country_capital	iraq	capital	baghdad			
+country_capital	syria	country	syria			
+country_capital	syria	capital	damascus			
+country_capital	peru	country	peru			
+country_capital	peru	capital	lima			
+country_capital	guyana	country	guyana			
+country_capital	guyana	capital	georgetown			
+country_capital	lebanon	country	lebanon			
+country_capital	lebanon	capital	beirut			
+country_capital	hungary	country	hungary			
+country_capital	hungary	capital	budapest			
+country_capital	kenya	country	kenya			
+country_capital	kenya	capital	nairobi			
+country_capital	cuba	country	cuba			
+country_capital	cuba	capital	havana			
+country_capital	norway	country	norway			
+country_capital	norway	capital	oslo			
+country_capital	vietnam	country	vietnam			
+country_capital	vietnam	capital	hanoi			
+country_capital	turkey	country	turkey			
+country_capital	turkey	capital	ankara			
+country_capital	finland	country	finland			
+country_capital	finland	capital	helsinki			
+country_capital	serbia	country	serbia			
+country_capital	serbia	capital	belgrade			
+country_capital	pakistan	country	pakistan			
+country_capital	pakistan	capital	islamabad			
+country_capital	bahamas	country	bahamas			
+country_capital	bahamas	capital	nassau			
+country_capital	venezuela	country	venezuela			
+country_capital	venezuela	capital	caracas			
+country_capital	libya	country	libya			
+country_capital	libya	capital	tripoli			
+country_capital	bangladesh	country	bangladesh			
+country_capital	bangladesh	capital	dhaka			
+country_capital	romania	country	romania			
+country_capital	romania	capital	bucharest			
+country_capital	qatar	country	qatar			
+country_capital	qatar	capital	doha			
+country_capital	nigeria	country	nigeria			
+country_capital	nigeria	capital	abuja			
+country_capital	belarus	country	belarus			
+country_capital	belarus	capital	minsk			
+country_capital	nepal	country	nepal			
+country_capital	nepal	capital	kathmandu			
+country_capital	bosnia	country	bosnia			
+country_capital	bosnia	capital	sarajevo			
+country_capital	ukraine	country	ukraine			
+country_capital	ukraine	capital	kyiv			
+country_capital	ghana	country	ghana			
+country_capital	ghana	capital	accra			
+country_capital	sudan	country	sudan			
+country_capital	sudan	capital	khartoum			
+country_capital	azerbaijan	country	azerbaijan			
+country_capital	azerbaijan	capital	baku			
+country_capital	senegal	country	senegal			
+country_capital	senegal	capital	dakar			
+country_capital	latvia	country	latvia			
+country_capital	latvia	capital	riga			
+country_capital	oman	country	oman			
+country_capital	oman	capital	muscat			
+country_capital	croatia	country	croatia			
+country_capital	croatia	capital	zagreb			
+country_capital	uganda	country	uganda			
+country_capital	uganda	capital	kampala			
+country_capital	somalia	country	somalia			
+country_capital	somalia	capital	mogadishu			
+country_capital	colombia	country	colombia			
+country_capital	colombia	capital	bogota			
+country_capital	zimbabwe	country	zimbabwe			
+country_capital	zimbabwe	capital	harare			
+country_capital	lithuania	country	lithuania			
+country_capital	lithuania	capital	vilnius			
+country_capital	ecuador	country	ecuador			
+country_capital	ecuador	capital	quito			
+country_capital	liberia	country	liberia			
+country_capital	liberia	capital	monrovia			
+country_capital	iceland	country	iceland			
+country_capital	iceland	capital	reykjavik			
+country_capital	slovakia	country	slovakia			
+country_capital	slovakia	capital	bratislava			
+common_nouns	ant	category	ant	animal	0	
+common_nouns	egret	category	egret	animal	0	
+common_nouns	elephant	category	elephant	animal	0	
+common_nouns	ferret	category	ferret	animal	0	
+common_nouns	filly	category	filly	animal	0	
+common_nouns	gosling	category	gosling	animal	0	
+common_nouns	hornet	category	hornet	animal	0	
+common_nouns	husky	category	husky	animal	0	
+common_nouns	ibis	category	ibis	animal	0	
+common_nouns	jellyfish	category	jellyfish	animal	0	
+common_nouns	lizard	category	lizard	animal	0	
+common_nouns	locust	category	locust	animal	0	
+common_nouns	newt	category	newt	animal	0	
+common_nouns	ocelot	category	ocelot	animal	0	
+common_nouns	pheasant	category	pheasant	animal	0	
+common_nouns	piglet	category	piglet	animal	0	
+common_nouns	aardvark	category	aardvark	animal	1	
+common_nouns	bobcat	category	bobcat	animal	1	
+common_nouns	condor	category	condor	animal	1	
+common_nouns	deer	category	deer	animal	1	
+common_nouns	gander	category	gander	animal	1	
+common_nouns	gerbil	category	gerbil	animal	1	
+common_nouns	hamster	category	hamster	animal	1	
+common_nouns	narwhal	category	narwhal	animal	1	
+common_nouns	oyster	category	oyster	animal	1	
+common_nouns	retriever	category	retriever	animal	1	
+common_nouns	rooster	category	rooster	animal	1	
+common_nouns	rottweiler	category	rottweiler	animal	1	
+common_nouns	spider	category	spider	animal	1	
+common_nouns	terrier	category	terrier	animal	1	
+common_nouns	vole	category	vole	animal	1	
+common_nouns	weevil	category	weevil	animal	1	
+common_nouns	barracuda	category	barracuda	animal	2	
+common_nouns	chickadee	category	chickadee	animal	2	
+common_nouns	corgi	category	corgi	animal	2	
+common_nouns	coyote	category	coyote	animal	2	
+common_nouns	crocodile	category	crocodile	animal	2	
+common_nouns	gator	category	gator	animal	2	
+common_nouns	iguana	category	iguana	animal	2	
+common_nouns	jackal	category	jackal	animal	2	
+common_nouns	macaque	category	macaque	animal	2	
+common_nouns	manatee	category	manatee	animal	2	
+common_nouns	mare	category	mare	animal	2	
+common_nouns	mule	category	mule	animal	2	
+common_nouns	racehorse	category	racehorse	animal	2	
+common_nouns	stork	category	stork	animal	2	
+common_nouns	tadpole	category	tadpole	animal	2	
+common_nouns	tortoise	category	tortoise	animal	2	
+common_nouns	dingo	category	dingo	animal	3	
+common_nouns	dinosaur	category	dinosaur	animal	3	
+common_nouns	dolphin	category	dolphin	animal	3	
+common_nouns	flamingo	category	flamingo	animal	3	
+common_nouns	hyena	category	hyena	animal	3	
+common_nouns	koala	category	koala	animal	3	
+common_nouns	krill	category	krill	animal	3	
+common_nouns	llama	category	llama	animal	3	
+common_nouns	minnow	category	minnow	animal	3	
+common_nouns	owl	category	owl	animal	3	
+common_nouns	penguin	category	penguin	animal	3	
+common_nouns	puffin	category	puffin	animal	3	
+common_nouns	rhino	category	rhino	animal	3	
+common_nouns	snail	category	snail	animal	3	
+common_nouns	spaniel	category	spaniel	animal	3	
+common_nouns	stingray	category	stingray	animal	3	
+common_nouns	accordion	category	accordion	device	0	
+common_nouns	brake	category	brake	device	0	
+common_nouns	chainsaw	category	chainsaw	device	0	
+common_nouns	clarinet	category	clarinet	device	0	
+common_nouns	gasket	category	gasket	device	0	
+common_nouns	headset	category	headset	device	0	
+common_nouns	helm	category	helm	device	0	
+common_nouns	laptop	category	laptop	device	0	
+common_nouns	lightbulb	category	lightbulb	device	0	
+common_nouns	magnet	category	magnet	device	0	
+common_nouns	mandolin	category	mandolin	device	0	
+common_nouns	periscope	category	periscope	device	0	
+common_nouns	robot	category	robot	device	0	
+common_nouns	saxophone	category	saxophone	device	0	
+common_nouns	seatbelt	category	seatbelt	device	0	
+common_nouns	videotape	category	videotape	device	0	
+common_nouns	barometer	category	barometer	device	1	
+common_nouns	binder	category	binder	device	1	
+common_nouns	buzzer	category	buzzer	device	1	
+common_nouns	caliper	category	caliper	device	1	
+common_nouns	clipper	category	clipper	device	1	
+common_nouns	colander	category	colander	device	1	
+common_nouns	computer	category	computer	device	1	
+common_nouns	converter	category	converter	device	1	
+common_nouns	crusher	category	crusher	device	1	
+common_nouns	laser	category	laser	device	1	
+common_nouns	rudder	category	rudder	device	1	
+common_nouns	sprinkler	category	sprinkler	device	1	
+common_nouns	stapler	category	stapler	device	1	
+common_nouns	timer	category	timer	device	1	
+common_nouns	typewriter	category	typewriter	device	1	
+common_nouns	zipper	category	zipper	device	1	
+common_nouns	capacitor	category	capacitor	device	2	
+common_nouns	compressor	category	compressor	device	2	
+common_nouns	dredge	category	dredge	device	2	
+common_nouns	keyboard	category	keyboard	device	2	
+common_nouns	microscope	category	microscope	device	2	
+common_nouns	oboe	category	oboe	device	2	
+common_nouns	reactor	category	reactor	device	2	
+common_nouns	reflector	category	reflector	device	2	
+common_nouns	resistor	category	resistor	device	2	
+common_nouns	rotor	category	rotor	device	2	
+common_nouns	simulator	category	simulator	device	2	
+common_nouns	telescope	category	telescope	device	2	
+common_nouns	transistor	category	transistor	device	2	
+common_nouns	tripod	category	tripod	device	2	
+common_nouns	vise	category	vise	device	2	
+common_nouns	xylophone	category	xylophone	device	2	
+common_nouns	antenna	category	antenna	device	3	
+common_nouns	banjo	category	banjo	device	3	
+common_nouns	buckle	category	buckle	device	3	
+common_nouns	cymbal	category	cymbal	device	3	
+common_nouns	dowel	category	dowel	device	3	
+common_nouns	dynamo	category	dynamo	device	3	
+common_nouns	engine	category	engine	device	3	
+common_nouns	jigsaw	category	jigsaw	device	3	
+common_nouns	paintbrush	category	paintbrush	device	3	
+common_nouns	sitar	category	sitar	device	3	
+common_nouns	spool	category	spool	device	3	
+common_nouns	sundial	category	sundial	device	3	
+common_nouns	treadmill	category	treadmill	device	3	
+common_nouns	trombone	category	trombone	device	3	
+common_nouns	winch	category	winch	device	3	
+common_nouns	windmill	category	windmill	device	3	
+common_nouns	apple	category	apple	food	0	
+common_nouns	biscuit	category	biscuit	food	0	
+common_nouns	blackberry	category	blackberry	food	0	
+common_nouns	brisket	category	brisket	food	0	
+common_nouns	donut	category	donut	food	0	
+common_nouns	fillet	category	fillet	food	0	
+common_nouns	halibut	category	halibut	food	0	
+common_nouns	limpet	category	limpet	food	0	
+common_nouns	mullet	category	mullet	food	0	
+common_nouns	pear	category	pear	food	0	
+common_nouns	penne	category	penne	food	0	
+common_nouns	romaine	category	romaine	food	0	
+common_nouns	sardine	category	sardine	food	0	
+common_nouns	smelt	category	smelt	food	0	
+common_nouns	trout	category	trout	food	0	
+common_nouns	yogurt	category	yogurt	food	0	
+common_nouns	anchovy	category	anchovy	food	1	
+common_nouns	baguette	category	baguette	food	1	
+common_nouns	grape	category	grape	food	1	
+common_nouns	grouper	category	grouper	food	1	
+common_nouns	lobster	category	lobster	food	1	
+common_nouns	mackerel	category	mackerel	food	1	
+common_nouns	meatloaf	category	meatloaf	food	1	
+common_nouns	mussel	category	mussel	food	1	
+common_nouns	pea	category	pea	food	1	
+common_nouns	pepperoni	category	pepperoni	food	1	
+common_nouns	polenta	category	polenta	food	1	
+common_nouns	rhubarb	category	rhubarb	food	1	
+common_nouns	squid	category	squid	food	1	
+common_nouns	steak	category	steak	food	1	
+common_nouns	swordfish	category	swordfish	food	1	
+common_nouns	waffle	category	waffle	food	1	
+common_nouns	carp	category	carp	food	2	
+common_nouns	cheese	category	cheese	food	2	
+common_nouns	chipotle	category	chipotle	food	2	
+common_nouns	choc	category	choc	food	2	
+common_nouns	chorizo	category	chorizo	food	2	
+common_nouns	cornbread	category	cornbread	food	2	
+common_nouns	cupcake	category	cupcake	food	2	
+common_nouns	ghee	category	ghee	food	2	
+common_nouns	hake	category	hake	food	2	
+common_nouns	noodle	category	noodle	food	2	
+common_nouns	partridge	category	partridge	food	2	
+common_nouns	pork	category	pork	food	2	
+common_nouns	potato	category	potato	food	2	
+common_nouns	scone	category	scone	food	2	
+common_nouns	shortbread	category	shortbread	food	2	
+common_nouns	tomato	category	tomato	food	2	
+common_nouns	crayfish	category	crayfish	food	3	
+common_nouns	dumpling	category	dumpling	food	3	
+common_nouns	eel	category	eel	food	3	
+common_nouns	granola	category	granola	food	3	
+common_nouns	herring	category	herring	food	3	
+common_nouns	pancake	category	pancake	food	3	
+common_nouns	pastrami	category	pastrami	food	3	
+common_nouns	pita	category	pita	food	3	
+common_nouns	radish	category	radish	food	3	
+common_nouns	raisin	category	raisin	food	3	
+common_nouns	ravioli	category	ravioli	food	3	
+common_nouns	salami	category	salami	food	3	
+common_nouns	sirloin	category	sirloin	food	3	
+common_nouns	strawberry	category	strawberry	food	3	
+common_nouns	strudel	category	strudel	food	3	
+common_nouns	whitefish	category	whitefish	food	3	
+common_nouns	activist	category	activist	person	0	
+common_nouns	botanist	category	botanist	person	0	
+common_nouns	cadet	category	cadet	person	0	
+common_nouns	dentist	category	dentist	person	0	
+common_nouns	economist	category	economist	person	0	
+common_nouns	evangelist	category	evangelist	person	0	
+common_nouns	historian	category	historian	person	0	
+common_nouns	knight	category	knight	person	0	
+common_nouns	parent	category	parent	person	0	
+common_nouns	pharmacist	category	pharmacist	person	0	
+common_nouns	podiatrist	category	podiatrist	person	0	
+common_nouns	president	category	president	person	0	
+common_nouns	scientist	category	scientist	person	0	
+common_nouns	servant	category	servant	person	0	
+common_nouns	tourist	category	tourist	person	0	
+common_nouns	zoologist	category	zoologist	person	0	
+common_nouns	blogger	category	blogger	person	1	
+common_nouns	designer	category	designer	person	1	
+common_nouns	developer	category	developer	person	1	
+common_nouns	elder	category	elder	person	1	
+common_nouns	messenger	category	messenger	person	1	
+common_nouns	peeler	category	peeler	person	1	
+common_nouns	reader	category	reader	person	1	
+common_nouns	reporter	category	reporter	person	1	
+common_nouns	rider	category	rider	person	1	
+common_nouns	roofer	category	roofer	person	1	
+common_nouns	snapper	category	snapper	person	1	
+common_nouns	tiger	category	tiger	person	1	
+common_nouns	trapper	category	trapper	person	1	
+common_nouns	voter	category	voter	person	1	
+common_nouns	weaver	category	weaver	person	1	
+common_nouns	welder	category	welder	person	1	
+common_nouns	actor	category	actor	person	2	
+common_nouns	bricklayer	category	bricklayer	person	2	
+common_nouns	collector	category	collector	person	2	
+common_nouns	competitor	category	competitor	person	2	
+common_nouns	composer	category	composer	person	2	
+common_nouns	conductor	category	conductor	person	2	
+common_nouns	critic	category	critic	person	2	
+common_nouns	curator	category	curator	person	2	
+common_nouns	dancer	category	dancer	person	2	
+common_nouns	editor	category	editor	person	2	
+common_nouns	emperor	category	emperor	person	2	
+common_nouns	masher	category	masher	person	2	
+common_nouns	navigator	category	navigator	person	2	
+common_nouns	treasurer	category	treasurer	person	2	
+common_nouns	vicar	category	vicar	person	2	
+common_nouns	visitor	category	visitor	person	2	
+common_nouns	admiral	category	admiral	person	3	
+common_nouns	appraiser	category	appraiser	person	3	
+common_nouns	astronomer	category	astronomer	person	3	
+common_nouns	bailiff	category	bailiff	person	3	
+common_nouns	banker	category	banker	person	3	
+common_nouns	candidate	category	candidate	person	3	
+common_nouns	carpenter	category	carpenter	person	3	
+common_nouns	cleric	category	cleric	person	3	
+common_nouns	dressmaker	category	dressmaker	person	3	
+common_nouns	fisher	category	fisher	person	3	
+common_nouns	fishmonger	category	fishmonger	person	3	
+common_nouns	geographer	category	geographer	person	3	
+common_nouns	magistrate	category	magistrate	person	3	
+common_nouns	senator	category	senator	person	3	
+common_nouns	teammate	category	teammate	person	3	
+common_nouns	translator	category	translator	person	3	
+common_nouns	beet	category	beet	plant	0	
+common_nouns	bergamot	category	bergamot	plant	0	
+common_nouns	carnation	category	carnation	plant	0	
+common_nouns	edelweiss	category	edelweiss	plant	0	
+common_nouns	elm	category	elm	plant	0	
+common_nouns	hazelnut	category	hazelnut	plant	0	
+common_nouns	hibiscus	category	hibiscus	plant	0	
+common_nouns	mesquite	category	mesquite	plant	0	
+common_nouns	nutmeg	category	nutmeg	plant	0	
+common_nouns	phlox	category	phlox	plant	0	
+common_nouns	pine	category	pine	plant	0	
+common_nouns	pinwheel	category	pinwheel	plant	0	
+common_nouns	privet	category	privet	plant	0	
+common_nouns	sedge	category	sedge	plant	0	
+common_nouns	tumbleweed	category	tumbleweed	plant	0	
+common_nouns	wheat	category	wheat	plant	0	
+common_nouns	aster	category	aster	plant	1	
+common_nouns	baobab	category	baobab	plant	1	
+common_nouns	buttercup	category	buttercup	plant	1	
+common_nouns	cactus	category	cactus	plant	1	
+common_nouns	cardamom	category	cardamom	plant	1	
+common_nouns	clover	category	clover	plant	1	
+common_nouns	coriander	category	coriander	plant	1	
+common_nouns	cucumber	category	cucumber	plant	1	
+common_nouns	grapefruit	category	grapefruit	plant	1	
+common_nouns	hydrangea	category	hydrangea	plant	1	
+common_nouns	lavender	category	lavender	plant	1	
+common_nouns	lotus	category	lotus	plant	1	
+common_nouns	mangrove	category	mangrove	plant	1	
+common_nouns	sagebrush	category	sagebrush	plant	1	
+common_nouns	sunflower	category	sunflower	plant	1	
+common_nouns	turmeric	category	turmeric	plant	1	
+common_nouns	artichoke	category	artichoke	plant	2	
+common_nouns	banana	category	banana	plant	2	
+common_nouns	catnip	category	catnip	plant	2	
+common_nouns	cedar	category	cedar	plant	2	
+common_nouns	chive	category	chive	plant	2	
+common_nouns	cottonwood	category	cottonwood	plant	2	
+common_nouns	garlic	category	garlic	plant	2	
+common_nouns	gorse	category	gorse	plant	2	
+common_nouns	licorice	category	licorice	plant	2	
+common_nouns	mallee	category	mallee	plant	2	
+common_nouns	medic	category	medic	plant	2	
+common_nouns	mustard	category	mustard	plant	2	
+common_nouns	saffron	category	saffron	plant	2	
+common_nouns	snapdragon	category	snapdragon	plant	2	
+common_nouns	thistle	category	thistle	plant	2	
+common_nouns	thyme	category	thyme	plant	2	
+common_nouns	aspen	category	aspen	plant	3	
+common_nouns	cumin	category	cumin	plant	3	
+common_nouns	daffodil	category	daffodil	plant	3	
+common_nouns	ginkgo	category	ginkgo	plant	3	
+common_nouns	kiwi	category	kiwi	plant	3	
+common_nouns	lupin	category	lupin	plant	3	
+common_nouns	pumpkin	category	pumpkin	plant	3	
+common_nouns	raspberry	category	raspberry	plant	3	
+common_nouns	sassafras	category	sassafras	plant	3	
+common_nouns	spinach	category	spinach	plant	3	
+common_nouns	tuna	category	tuna	plant	3	
+common_nouns	vanilla	category	vanilla	plant	3	
+common_nouns	verbena	category	verbena	plant	3	
+common_nouns	wasabi	category	wasabi	plant	3	
+common_nouns	yucca	category	yucca	plant	3	
+common_nouns	zucchini	category	zucchini	plant	3	
+common_nouns	cabaret	category	cabaret	structure	0	
+common_nouns	chalet	category	chalet	structure	0	
+common_nouns	convent	category	convent	structure	0	
+common_nouns	dugout	category	dugout	structure	0	
+common_nouns	embankment	category	embankment	structure	0	
+common_nouns	garage	category	garage	structure	0	
+common_nouns	jetty	category	jetty	structure	0	
+common_nouns	monument	category	monument	structure	0	
+common_nouns	mosque	category	mosque	structure	0	
+common_nouns	obelisk	category	obelisk	structure	0	
+common_nouns	parapet	category	parapet	structure	0	
+common_nouns	skylight	category	skylight	structure	0	
+common_nouns	tenement	category	tenement	structure	0	
+common_nouns	tent	category	tent	structure	0	
+common_nouns	viaduct	category	viaduct	structure	0	
+common_nouns	winery	category	winery	structure	0	
+common_nouns	ballroom	category	ballroom	structure	1	
+common_nouns	belfry	category	belfry	structure	1	
+common_nouns	cabin	category	cabin	structure	1	
+common_nouns	chamber	category	chamber	structure	1	
+common_nouns	condo	category	condo	structure	1	
+common_nouns	courtroom	category	courtroom	structure	1	
+common_nouns	dam	category	dam	structure	1	
+common_nouns	factory	category	factory	structure	1	
+common_nouns	kitchen	category	kitchen	structure	1	
+common_nouns	motel	category	motel	structure	1	
+common_nouns	nursery	category	nursery	structure	1	
+common_nouns	palisade	category	palisade	structure	1	
+common_nouns	pantry	category	pantry	structure	1	
+common_nouns	refinery	category	refinery	structure	1	
+common_nouns	smelter	category	smelter	structure	1	
+common_nouns	theatre	category	theatre	structure	1	
+common_nouns	boathouse	category	boathouse	structure	2	
+common_nouns	clubhouse	category	clubhouse	structure	2	
+common_nouns	consulate	category	consulate	structure	2	
+common_nouns	coop	category	coop	structure	2	
+common_nouns	cottage	category	cottage	structure	2	
+common_nouns	courthouse	category	courthouse	structure	2	
+common_nouns	courtyard	category	courtyard	structure	2	
+common_nouns	cubicle	category	cubicle	structure	2	
+common_nouns	farmhouse	category	farmhouse	structure	2	
+common_nouns	gate	category	gate	structure	2	
+common_nouns	gatehouse	category	gatehouse	structure	2	
+common_nouns	guesthouse	category	guesthouse	structure	2	
+common_nouns	manor	category	manor	structure	2	
+common_nouns	outhouse	category	outhouse	structure	2	
+common_nouns	statehouse	category	statehouse	structure	2	
+common_nouns	workhouse	category	workhouse	structure	2	
+common_nouns	auditorium	category	auditorium	structure	3	
+common_nouns	basilica	category	basilica	structure	3	
+common_nouns	bathhouse	category	bathhouse	structure	3	
+common_nouns	bullpen	category	bullpen	structure	3	
+common_nouns	chateau	category	chateau	structure	3	
+common_nouns	fountain	category	fountain	structure	3	
+common_nouns	hangar	category	hangar	structure	3	
+common_nouns	kennel	category	kennel	structure	3	
+common_nouns	pagoda	category	pagoda	structure	3	
+common_nouns	rectory	category	rectory	structure	3	
+common_nouns	rink	category	rink	structure	3	
+common_nouns	rotunda	category	rotunda	structure	3	
+common_nouns	sauna	category	sauna	structure	3	
+common_nouns	shrine	category	shrine	structure	3	
+common_nouns	smokehouse	category	smokehouse	structure	3	
+common_nouns	stockade	category	stockade	structure	3	
+brands	chivas	brand	chivas	beverage	0	
+brands	hennessy	brand	hennessy	beverage	0	
+brands	illy	brand	illy	beverage	0	
+brands	nespresso	brand	nespresso	beverage	0	
+brands	pabst	brand	pabst	beverage	0	
+brands	pepsi	brand	pepsi	beverage	0	
+brands	powerade	brand	powerade	beverage	0	
+brands	tropicana	brand	tropicana	beverage	0	
+brands	absolut	brand	absolut	beverage	1	
+brands	coors	brand	coors	beverage	1	
+brands	evian	brand	evian	beverage	1	
+brands	heineken	brand	heineken	beverage	1	
+brands	lipton	brand	lipton	beverage	1	
+brands	molson	brand	molson	beverage	1	
+brands	smirnoff	brand	smirnoff	beverage	1	
+brands	snapple	brand	snapple	beverage	1	
+brands	baileys	brand	baileys	beverage	2	
+brands	bollinger	brand	bollinger	beverage	2	
+brands	budweiser	brand	budweiser	beverage	2	
+brands	fanta	brand	fanta	beverage	2	
+brands	macallan	brand	macallan	beverage	2	
+brands	martell	brand	martell	beverage	2	
+brands	modelo	brand	modelo	beverage	2	
+brands	perrier	brand	perrier	beverage	2	
+brands	bacardi	brand	bacardi	beverage	3	
+brands	campari	brand	campari	beverage	3	
+brands	carlsberg	brand	carlsberg	beverage	3	
+brands	gatorade	brand	gatorade	beverage	3	
+brands	keurig	brand	keurig	beverage	3	
+brands	krug	brand	krug	beverage	3	
+brands	starbucks	brand	starbucks	beverage	3	
+brands	suntory	brand	suntory	beverage	3	
+brands	byd	brand	byd	carmaker	0	
+brands	chevrolet	brand	chevrolet	carmaker	0	
+brands	citroen	brand	citroen	carmaker	0	
+brands	lada	brand	lada	carmaker	0	
+brands	opel	brand	opel	carmaker	0	
+brands	porsche	brand	porsche	carmaker	0	
+brands	volkswagen	brand	volkswagen	carmaker	0	
+brands	volvo	brand	volvo	carmaker	0	
+brands	hino	brand	hino	carmaker	1	
+brands	hyundai	brand	hyundai	carmaker	1	
+brands	infiniti	brand	infiniti	carmaker	1	
+brands	mclaren	brand	mclaren	carmaker	1	
+brands	nio	brand	nio	carmaker	1	
+brands	nissan	brand	nissan	carmaker	1	
+brands	renault	brand	renault	carmaker	1	
+brands	saab	brand	saab	carmaker	1	
+brands	chrysler	brand	chrysler	carmaker	2	
+brands	ferrari	brand	ferrari	carmaker	2	
+brands	isuzu	brand	isuzu	carmaker	2	
+brands	mahindra	brand	mahindra	carmaker	2	
+brands	maserati	brand	maserati	carmaker	2	
+brands	maybach	brand	maybach	carmaker	2	
+brands	mazda	brand	mazda	carmaker	2	
+brands	vauxhall	brand	vauxhall	carmaker	2	
+brands	acura	brand	acura	carmaker	3	
+brands	audi	brand	audi	carmaker	3	
+brands	bugatti	brand	bugatti	carmaker	3	
+brands	cadillac	brand	cadillac	carmaker	3	
+brands	daewoo	brand	daewoo	carmaker	3	
+brands	subaru	brand	subaru	carmaker	3	
+brands	suzuki	brand	suzuki	carmaker	3	
+brands	toyota	brand	toyota	carmaker	3	
+brands	electrolux	brand	electrolux	electronics	0	
+brands	gopro	brand	gopro	electronics	0	
+brands	lenovo	brand	lenovo	electronics	0	
+brands	motorola	brand	motorola	electronics	0	
+brands	oppo	brand	oppo	electronics	0	
+brands	polaroid	brand	polaroid	electronics	0	
+brands	roku	brand	roku	electronics	0	
+brands	sony	brand	sony	electronics	0	
+brands	belkin	brand	belkin	electronics	1	
+brands	denon	brand	denon	electronics	1	
+brands	dyson	brand	dyson	electronics	1	
+brands	epson	brand	epson	electronics	1	
+brands	garmin	brand	garmin	electronics	1	
+brands	nikon	brand	nikon	electronics	1	
+brands	nokia	brand	nokia	electronics	1	
+brands	nvidia	brand	nvidia	electronics	1	
+brands	anker	brand	anker	electronics	2	
+brands	fitbit	brand	fitbit	electronics	2	
+brands	fujifilm	brand	fujifilm	electronics	2	
+brands	logitech	brand	logitech	electronics	2	
+brands	miele	brand	miele	electronics	2	
+brands	philips	brand	philips	electronics	2	
+brands	razer	brand	razer	electronics	2	
+brands	sandisk	brand	sandisk	electronics	2	
+brands	asus	brand	asus	electronics	3	
+brands	huawei	brand	huawei	electronics	3	
+brands	oneplus	brand	oneplus	electronics	3	
+brands	panasonic	brand	panasonic	electronics	3	
+brands	ricoh	brand	ricoh	electronics	3	
+brands	samsung	brand	samsung	electronics	3	
+brands	wacom	brand	wacom	electronics	3	
+brands	xiaomi	brand	xiaomi	electronics	3	
+brands	cloudflare	brand	cloudflare	internet and software	0	
+brands	dropbox	brand	dropbox	internet and software	0	
+brands	netflix	brand	netflix	internet and software	0	
+brands	netscape	brand	netscape	internet and software	0	
+brands	paypal	brand	paypal	internet and software	0	
+brands	shopify	brand	shopify	internet and software	0	
+brands	skype	brand	skype	internet and software	0	
+brands	spotify	brand	spotify	internet and software	0	
+brands	coinbase	brand	coinbase	internet and software	1	
+brands	expedia	brand	expedia	internet and software	1	
+brands	google	brand	google	internet and software	1	
+brands	icloud	brand	icloud	internet and software	1	
+brands	linkedin	brand	linkedin	internet and software	1	
+brands	salesforce	brand	salesforce	internet and software	1	
+brands	tiktok	brand	tiktok	internet and software	1	
+brands	wikipedia	brand	wikipedia	internet and software	1	
+brands	deezer	brand	deezer	internet and software	2	
+brands	fiverr	brand	fiverr	internet and software	2	
+brands	gmail	brand	gmail	internet and software	2	
+brands	kaspersky	brand	kaspersky	internet and software	2	
+brands	myspace	brand	myspace	internet and software	2	
+brands	napster	brand	napster	internet and software	2	
+brands	twitter	brand	twitter	internet and software	2	
+brands	yandex	brand	yandex	internet and software	2	
+brands	airbnb	brand	airbnb	internet and software	3	
+brands	autodesk	brand	autodesk	internet and software	3	
+brands	facebook	brand	facebook	internet and software	3	
+brands	instagram	brand	instagram	internet and software	3	
+brands	snapchat	brand	snapchat	internet and software	3	
+brands	wechat	brand	wechat	internet and software	3	
+brands	whatsapp	brand	whatsapp	internet and software	3	
+brands	youtube	brand	youtube	internet and software	3	
+brands	etsy	brand	etsy	retail chain	0	
+brands	lidl	brand	lidl	retail chain	0	
+brands	nordstrom	brand	nordstrom	retail chain	0	
+brands	publix	brand	publix	retail chain	0	
+brands	sephora	brand	sephora	retail chain	0	
+brands	taobao	brand	taobao	retail chain	0	
+brands	waitrose	brand	waitrose	retail chain	0	
+brands	zappos	brand	zappos	retail chain	0	
+brands	costco	brand	costco	retail chain	1	
+brands	debenhams	brand	debenhams	retail chain	1	
+brands	groupon	brand	groupon	retail chain	1	
+brands	lululemon	brand	lululemon	retail chain	1	
+brands	menards	brand	menards	retail chain	1	
+brands	petsmart	brand	petsmart	retail chain	1	
+brands	rakuten	brand	rakuten	retail chain	1	
+brands	tesco	brand	tesco	retail chain	1	
+brands	homebase	brand	homebase	retail chain	2	
+brands	kmart	brand	kmart	retail chain	2	
+brands	kroger	brand	kroger	retail chain	2	
+brands	meijer	brand	meijer	retail chain	2	
+brands	myer	brand	myer	retail chain	2	
+brands	radioshack	brand	radioshack	retail chain	2	
+brands	selfridges	brand	selfridges	retail chain	2	
+brands	wegmans	brand	wegmans	retail chain	2	
+brands	aldi	brand	aldi	retail chain	3	
+brands	autozone	brand	autozone	retail chain	3	
+brands	carrefour	brand	carrefour	retail chain	3	
+brands	gamestop	brand	gamestop	retail chain	3	
+brands	ulta	brand	ulta	retail chain	3	
+brands	walgreens	brand	walgreens	retail chain	3	
+brands	walmart	brand	walmart	retail chain	3	
+brands	wickes	brand	wickes	retail chain	3	
+brands	bioshock	brand	bioshock	video game	0	
+brands	capcom	brand	capcom	video game	0	
+brands	metroid	brand	metroid	video game	0	
+brands	roblox	brand	roblox	video game	0	
+brands	spyro	brand	spyro	video game	0	
+brands	wario	brand	wario	video game	0	
+brands	xbox	brand	xbox	video game	0	
+brands	xenoblade	brand	xenoblade	video game	0	
+brands	activision	brand	activision	video game	1	
+brands	digimon	brand	digimon	video game	1	
+brands	konami	brand	konami	video game	1	
+brands	niantic	brand	niantic	video game	1	
+brands	nintendo	brand	nintendo	video game	1	
+brands	pokemon	brand	pokemon	video game	1	
+brands	splatoon	brand	splatoon	video game	1	
+brands	tekken	brand	tekken	video game	1	
+brands	atlus	brand	atlus	video game	2	
+brands	fortnite	brand	fortnite	video game	2	
+brands	maxis	brand	maxis	video game	2	
+brands	myst	brand	myst	video game	2	
+brands	rayman	brand	rayman	video game	2	
+brands	skylanders	brand	skylanders	video game	2	
+brands	tamagotchi	brand	tamagotchi	video game	2	
+brands	undertale	brand	undertale	video game	2	
+brands	atari	brand	atari	video game	3	
+brands	gamecube	brand	gamecube	video game	3	
+brands	sega	brand	sega	video game	3	
+brands	starcraft	brand	starcraft	video game	3	
+brands	warcraft	brand	warcraft	video game	3	
+brands	warframe	brand	warframe	video game	3	
+brands	wii	brand	wii	video game	3	
+brands	zynga	brand	zynga	video game	3	
+pseudowords	beack	pseudoword	beack			
+pseudowords	blork	pseudoword	blork			
+pseudowords	bludshu	pseudoword	bludshu			
+pseudowords	breag	pseudoword	breag			
+pseudowords	broalk	pseudoword	broalk			
+pseudowords	chosh	pseudoword	chosh			
+pseudowords	claislar	pseudoword	claislar			
+pseudowords	clelt	pseudoword	clelt			
+pseudowords	clolfusk	pseudoword	clolfusk			
+pseudowords	crild	pseudoword	crild			
+pseudowords	darshur	pseudoword	darshur			
+pseudowords	derdeesk	pseudoword	derdeesk			
+pseudowords	dralnird	pseudoword	dralnird			
+pseudowords	drerk	pseudoword	drerk			
+pseudowords	drith	pseudoword	drith			
+pseudowords	droon	pseudoword	droon			
+pseudowords	drup	pseudoword	drup			
+pseudowords	drupseg	pseudoword	drupseg			
+pseudowords	dusfeg	pseudoword	dusfeg			
+pseudowords	dusposk	pseudoword	dusposk			
+pseudowords	fealvub	pseudoword	fealvub			
+pseudowords	flalk	pseudoword	flalk			
+pseudowords	fleng	pseudoword	fleng			
+pseudowords	flibnoom	pseudoword	flibnoom			
+pseudowords	foogmes	pseudoword	foogmes			
+pseudowords	fornoolt	pseudoword	fornoolt			
+pseudowords	frarlo	pseudoword	frarlo			
+pseudowords	frord	pseudoword	frord			
+pseudowords	gegrosk	pseudoword	gegrosk			
+pseudowords	gloa	pseudoword	gloa			
+pseudowords	glosdoo	pseudoword	glosdoo			
+pseudowords	gomp	pseudoword	gomp			
+pseudowords	graisk	pseudoword	graisk			
+pseudowords	groork	pseudoword	groork			
+pseudowords	hoadtast	pseudoword	hoadtast			
+pseudowords	hoaldoap	pseudoword	hoaldoap			
+pseudowords	jisbont	pseudoword	jisbont			
+pseudowords	joanbick	pseudoword	joanbick			
+pseudowords	jonvilt	pseudoword	jonvilt			
+pseudowords	joosk	pseudoword	joosk			
+pseudowords	keeth	pseudoword	keeth			
+pseudowords	kemdom	pseudoword	kemdom			
+pseudowords	koolt	pseudoword	koolt			
+pseudowords	meskock	pseudoword	meskock			
+pseudowords	naisgeag	pseudoword	naisgeag			
+pseudowords	nedrish	pseudoword	nedrish			
+pseudowords	nenshoab	pseudoword	nenshoab			
+pseudowords	paig	pseudoword	paig			
+pseudowords	poompisk	pseudoword	poompisk			
+pseudowords	pooth	pseudoword	pooth			
+pseudowords	reand	pseudoword	reand			
+pseudowords	saibvoal	pseudoword	saibvoal			
+pseudowords	sheank	pseudoword	sheank			
+pseudowords	shesvuth	pseudoword	shesvuth			
+pseudowords	slaib	pseudoword	slaib			
+pseudowords	slibgeal	pseudoword	slibgeal			
+pseudowords	slish	pseudoword	slish			
+pseudowords	sloappam	pseudoword	sloappam			
+pseudowords	snoock	pseudoword	snoock			
+pseudowords	snuld	pseudoword	snuld			
+pseudowords	spoost	pseudoword	spoost			
+pseudowords	stast	pseudoword	stast			
+pseudowords	swemp	pseudoword	swemp			
+pseudowords	swisfoab	pseudoword	swisfoab			
+pseudowords	swoald	pseudoword	swoald			
+pseudowords	swoamkal	pseudoword	swoamkal			
+pseudowords	swusk	pseudoword	swusk			
+pseudowords	temthe	pseudoword	temthe			
+pseudowords	thebchos	pseudoword	thebchos			
+pseudowords	tisraig	pseudoword	tisraig			
+pseudowords	trint	pseudoword	trint			
+pseudowords	valnup	pseudoword	valnup			
+pseudowords	vemmea	pseudoword	vemmea			
+pseudowords	vemtud	pseudoword	vemtud			
+pseudowords	vesh	pseudoword	vesh			
+pseudowords	voog	pseudoword	voog			
+pseudowords	voorkes	pseudoword	voorkes			
+pseudowords	wapfoock	pseudoword	wapfoock			
+pseudowords	wirreg	pseudoword	wirreg			
+pseudowords	woagdoot	pseudoword	woagdoot			

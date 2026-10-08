@@ -1,4 +1,4 @@
-"""Check the class names of ``lexicon/concepts.tsv`` and write the class-name tables.
+"""Check the class names of ``lexicon/class_names.tsv`` and write the class-name tables.
 
 Every rule that can be recomputed from the table is checked again: form,
 uniqueness, the class each word names, frequency, blocked words and fit at the
@@ -162,7 +162,7 @@ def main() -> None:
     print(counts[["gate", "value"]].to_string(index=False))
 
     if ((report.status == "FAIL") & report.blocking).any():
-        raise SystemExit("blocking gates are failing; fix lexicon/concepts.tsv")
+        raise SystemExit("blocking gates are failing; fix lexicon/class_names.tsv")
 
     words = kept.copy()
     words["zipf"] = [zipf_frequency(w, "en") for w in words.word]

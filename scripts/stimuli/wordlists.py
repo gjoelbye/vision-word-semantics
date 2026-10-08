@@ -1,10 +1,10 @@
-"""Read the word set from ``lexicon/block*.txt`` and write the word, pair and audit tables.
+"""Read the word set from ``lexicon/vocabulary.tsv`` and write the word, pair and audit tables.
 
 Writes ``lexicon/words.parquet`` (one row per word with its role, frequency and
 form metrics), ``lexicon/pairs.parquet`` (the pairs of ``src.lexicon.PAIRS``)
 and ``lexicon/audit.parquet`` (the checks on the word set). Stops if a word
-appears twice, a word does not fit the crop-safe window, or a blocking gate
-fails.
+does not fit the crop-safe window or a blocking gate fails. With ``--readme``
+it only writes the committed ``lexicon/README.md`` from the committed lists.
 """
 from __future__ import annotations
 
@@ -14,62 +14,57 @@ import pandas as pd
 from wordfreq import zipf_frequency
 
 from src import audit
-from src.config import LEXICON, ensure_dirs
-from src.lexicon import (PAIRS, add_form_metrics, crossing_passes,
-                         crossing_report, read_block)
+from src.concepts import concept_words
+from src.config import LEXICON, VOCABULARY_TSV, ensure_dirs
+from src.lexicon import (LISTS, PAIRS, add_form_metrics, crossing_passes,
+                         crossing_report, pair_table, read_vocabulary,
+                         readme_markdown)
+
+README = VOCABULARY_TSV.parent / "README.md"
+
+# The relation and relation kind each word carries in ``words.parquet``. A
+# word takes its list's relation, except the two roles that complete a
+# spelling pair.
+LIST_RELATION = {"synonym_one_edit": "synonym", "synonym_antonym": "antonym",
+                 "synonym_negation": "negation", "singular_plural": "singular_plural",
+                 "country_capital": "country_capital", "common_nouns": "category",
+                 "brands": "brand", "pseudowords": "pseudoword"}
+ROLE_RELATION = {"spelling_twin": "spelling_twin", "base": "negation_base"}
+RELATION_KIND = {relation: kind for _, _, _, relation, kind in PAIRS}
 
 
 def main() -> None:
-    argparse.ArgumentParser(description=__doc__).parse_args()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--readme", action="store_true",
+                        help="write lexicon/README.md and stop")
+    args = parser.parse_args()
+    vocabulary = read_vocabulary()
+    readme = readme_markdown(vocabulary, concept_words())
+    if args.readme:
+        README.write_text(readme)
+        print("wrote lexicon/README.md")
+        return
+    if not README.exists() or README.read_text() != readme:
+        print("lexicon/README.md is out of date; run with --readme to refresh it")
     ensure_dirs()
-    blocks = {n: read_block(n) for n in
-              [f"block{i}.txt" for i in range(1, 9)]}
-    for n, rows in blocks.items():
-        print(f"  {n}  {len(rows):4d} items")
+    for slug, *_ in LISTS:
+        print(f"  {slug:<17} {vocabulary.item[vocabulary.list == slug].nunique():4d} items")
 
     # --- one row per rendered word ------------------------------------------
-    rows = []
-
-    def add(word, role, relation, kind, item, category=None, ortho=None, cls=None):
-        # ``item_role`` is the part the word plays inside its own item.
-        rows.append(dict(word=word, role=role, relation=relation,
-                         relation_kind=kind, item_role=item, category=category,
-                         ortho=ortho, picturability=cls))
-    for r in blocks["block1.txt"]:
-        add(r["anchor"], "pair", "synonym", "meaning", "anchor", cls=r["class"])
-        add(r["synonym"], "pair", "synonym", "meaning", "synonym", cls=r["class"])
-        add(r["spelling_twin"], "pair", "spelling_twin", "spelling",
-            "spelling_twin", cls=r["class"])
-    for r in blocks["block2.txt"]:
-        add(r["anchor"], "pair", "antonym", "meaning", "anchor")
-        add(r["synonym"], "pair", "antonym", "meaning", "synonym")
-        add(r["antonym"], "pair", "antonym", "meaning", "antonym")
-    for r in blocks["block3.txt"]:
-        add(r["negation"], "pair", "negation", "meaning", "negation")
-        add(r["synonym"], "pair", "negation", "meaning", "synonym")
-        add(r["base"], "pair", "negation_base", "spelling", "base")
-    for r in blocks["block4.txt"]:
-        add(r["singular"], "pair", "singular_plural", "spelling", "singular")
-        add(r["plural"], "pair", "singular_plural", "spelling", "plural")
-    for r in blocks["block5.txt"]:
-        add(r["country"], "pair", "country_capital", "meaning", "country")
-        add(r["capital"], "pair", "country_capital", "meaning", "capital")
-    for r in blocks["block6.txt"]:
-        add(r["word"], "category", "category", "category", "category",
-            category=r["category"], ortho=int(r["ortho"]))
-    for r in blocks["block7.txt"]:
-        add(r["pseudoword"], "pseudoword", "pseudoword", "pseudoword", "pseudoword")
-    # Brands are a separate role from the nouns: their categories are industries.
-    for r in blocks["block8.txt"]:
-        add(r["word"], "brand", "brand", "brand", "brand",
-            category=r["category"], ortho=int(r["ortho"]))
-
-    words = pd.DataFrame(rows)
-    dupes = words.word[words.word.duplicated()].tolist()
-    if dupes:
-        raise SystemExit(f"a word appears twice across the blocks: {dupes[:10]}")
-    # Nullable integer: ortho, the spelling cluster, exists only for nouns and brands.
-    words["ortho"] = words.ortho.astype("Int64")
+    # ``role`` is ``pair`` for the five relation lists; ``item_role`` is the
+    # part the word plays inside its own item.
+    relation = vocabulary.item_role.map(ROLE_RELATION).fillna(
+        vocabulary.list.map(LIST_RELATION))
+    words = pd.DataFrame(dict(
+        word=vocabulary.word,
+        role=vocabulary.item_role.where(
+            ~vocabulary.list.isin([slug for slug, *_ in PAIRS]), "pair"),
+        relation=relation,
+        relation_kind=relation.map(RELATION_KIND).fillna(relation),
+        item_role=vocabulary.item_role,
+        category=vocabulary.category,
+        ortho=vocabulary.ortho,
+        picturability=vocabulary.picturability))
     # Zipf floor: 3.0 for pair words, 2.2 for nouns and brands, none for pseudowords.
     words["zipf_floor"] = words.role.map(
         {"category": 2.2, "brand": 2.2}).fillna(3.0).where(
@@ -82,15 +77,7 @@ def main() -> None:
         raise SystemExit(f"does not fit the crop-safe window: "
                          f"{words.loc[~words.fits, 'word'].tolist()}")
 
-    # --- the pair table -----------------------------------------------------
-    pairs = []
-    for f, ca, cb, relation, kind in PAIRS:
-        for r in blocks[f]:
-            if r.get(ca) and r.get(cb):
-                pairs.append(dict(item=f"pair/{relation}/{r[ca]}",
-                                  relation=relation, kind=kind,
-                                  a=r[ca], b=r[cb]))
-    pairs = pd.DataFrame(pairs)
+    pairs = pair_table(vocabulary)
 
     # --- deterministic gates ------------------------------------------------
     cats = words[words.role == "category"]

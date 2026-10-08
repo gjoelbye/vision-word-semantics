@@ -1,6 +1,6 @@
 """Validate, lay out and render the two-clue items.
 
-Reads ``lexicon/composition_pilot.tsv`` and ``lexicon/composition_confirmatory.tsv``,
+Reads ``lexicon/two_clue_pilot.tsv`` and ``lexicon/two_clue_confirmatory.tsv``,
 records the layout and manifest under ``composition/``, and renders the six
 conditions of every item on the 96 slots into ``composition/renders/``.
 Rendering resumes where it stopped. ``scripts/features/embed.py --manifest
