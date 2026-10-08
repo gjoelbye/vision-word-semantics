@@ -15,6 +15,7 @@ import numpy as np
 import pandas as pd
 
 from .config import EMBEDDINGS, LEXICON
+from .features.image import cache_paths
 from .stimuli.imagenet import IMAGE_MANIFEST, RENDER_MANIFEST
 from .stimuli.render import CLEAN, fingerprint
 from .stimuli.typography import split_halves
@@ -81,8 +82,8 @@ def load_cache(key: str, *,
     """
     import json
 
-    meta_f = ds.embeddings / f"{key}.meta.json"
-    arr_f = ds.embeddings / f"{key}.cls.npy"
+    paths = cache_paths(key, ds.embeddings)
+    meta_f, arr_f = paths["meta"], paths["cls"]
     run = ds.rebuild
     if not meta_f.exists():
         raise FileNotFoundError(

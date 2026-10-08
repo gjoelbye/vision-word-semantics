@@ -16,23 +16,23 @@ import time
 import numpy as np
 import pandas as pd
 
-from src import wordspeech, wordtext
 from src.config import SIMILARITY, ensure_dirs
+from src.features import speech, text
 from src.models import DEFAULT_SWEEP
 from src.stimuli.render import fingerprint
 from src.tau import HEADLINE, estimator, manifest, rownorm, word_order
 
 #: Every matrix, in index order: the image models, the text encoders, the
 #: speech encoder.
-MODELS = DEFAULT_SWEEP + wordtext.TEXT_MODELS + wordspeech.SPEECH_MODELS
+MODELS = DEFAULT_SWEEP + text.TEXT_MODELS + speech.SPEECH_MODELS
 
 INDEX = SIMILARITY / "index.parquet"
 
 
 def kind_of(key: str) -> str:
-    if key in wordtext.TEXT_MODELS:
+    if key in text.TEXT_MODELS:
         return "text"
-    if key in wordspeech.SPEECH_MODELS:
+    if key in speech.SPEECH_MODELS:
         return "speech"
     return "vision"
 
@@ -42,7 +42,7 @@ def directions(key: str, words: list[str]) -> np.ndarray:
     kind = kind_of(key)
     if kind == "vision":
         return estimator(HEADLINE)(key, -1)
-    loader = wordspeech if kind == "speech" else wordtext
+    loader = speech if kind == "speech" else text
     vectors = loader.load(key, words)
     return vectors - vectors.mean(0, keepdims=True)
 
@@ -52,7 +52,7 @@ def main() -> None:
     ensure_dirs()
 
     words = list(word_order())
-    word_sha = wordtext.fingerprint(words)
+    word_sha = text.fingerprint(words)
     manifest_sha = fingerprint(manifest())
     print(f"{len(words):,} words | word set {word_sha[:12]} | "
           f"manifest {manifest_sha[:12]}")

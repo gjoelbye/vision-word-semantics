@@ -22,8 +22,8 @@ from scipy.stats import fisher_exact
 
 from src import categories as CAT
 from src import neighbors as NB
-from src import wordspeech, wordtext
 from src.config import LEXICON, RESULTS, SIMILARITY, ensure_dirs
+from src.features import speech, text
 from src.items import build_items, sign_test, vocabulary_spread
 from src.models import DEFAULT_SWEEP
 from src.stats import binomial_se, holm
@@ -32,7 +32,7 @@ from src.tau import (HEADLINE, DegenerateTau, estimator, load_cache, manifest,
                      rownorm, shared_mean_share, word_order)
 
 #: The encoders in table order: the three text encoders, then the speech encoder.
-ENCODERS = wordtext.TEXT_MODELS + wordspeech.SPEECH_MODELS
+ENCODERS = text.TEXT_MODELS + speech.SPEECH_MODELS
 #: The estimator each kind of encoder is indexed under in ``similarity/index.parquet``.
 ESTIMATOR_OF = {"text": "carrier_mean_96", "speech": "rendition_mean_96"}
 #: Table 1's plural-or-base column pools these relations over their summed pairs.
@@ -313,7 +313,7 @@ def encoder_rows(key: str, index_row: pd.Series,
 
     # Nearest-centroid accuracy needs the centered, unit-length vectors the
     # matrix was built from.
-    loader = wordspeech if kind == "speech" else wordtext
+    loader = speech if kind == "speech" else text
     vectors = loader.load(key, vocab)
     unit = rownorm(np.asarray(vectors - vectors.mean(0, keepdims=True),
                               np.float32))
@@ -359,7 +359,7 @@ def main() -> None:
             group.sign_p.fillna(1.0).to_numpy(float))
     tables["items"] = items
 
-    word_sha = wordtext.fingerprint(lex.vocab)
+    word_sha = text.fingerprint(lex.vocab)
     index = pd.read_parquet(SIMILARITY / "index.parquet").set_index("model")
     encoders = []
     for key in ENCODERS:

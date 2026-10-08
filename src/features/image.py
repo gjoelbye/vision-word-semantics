@@ -19,9 +19,9 @@ import torch
 from PIL import Image
 from tqdm import tqdm
 
-from .config import EMBEDDINGS, local_path
-from .models import free, has_class_token, hidden_size, load, select_layer_indices
-from .stimuli.render import fingerprint
+from ..config import EMBEDDINGS, local_path
+from ..models import free, has_class_token, hidden_size, load, select_layer_indices
+from ..stimuli.render import fingerprint
 
 N_LAYERS_SWEEP = 10
 
@@ -51,13 +51,14 @@ def _forward(model, proc, images: list[Image.Image], layers: list[int],
     return cls.float().cpu().numpy()
 
 
-def _paths(key: str, output_dir: Path = EMBEDDINGS) -> dict[str, Path]:
+def cache_paths(key: str, output_dir: Path = EMBEDDINGS) -> dict[str, Path]:
+    """The ``.cls.npy`` features and the ``.meta.json`` sidecar of one model's cache."""
     return {"cls": output_dir / f"{key}.cls.npy",
             "meta": output_dir / f"{key}.meta.json"}
 
 
 def _read_meta(key: str, output_dir: Path = EMBEDDINGS) -> dict | None:
-    f = _paths(key, output_dir)["meta"]
+    f = cache_paths(key, output_dir)["meta"]
     if not f.exists():
         return None
     try:
@@ -81,7 +82,7 @@ def embed_manifest(key: str, manifest: pd.DataFrame, *, batch_size: int = 128,
         raise ValueError("layer_mode must be 'sweep' or 'final'")
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
-    paths = _paths(key, output_dir)
+    paths = cache_paths(key, output_dir)
     sha = fingerprint(manifest) if manifest_sha is None else manifest_sha
     meta = _read_meta(key, output_dir)
     config_matches = bool(

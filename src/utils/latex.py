@@ -10,7 +10,8 @@ import re
 
 import pandas as pd
 
-from .. import wordspeech, wordtext
+from ..features.speech import SPEECH_MODELS
+from ..features.text import TEXT_MODELS
 from ..models import PRETTY
 
 #: Row groups of every model table, separated by white space: DINOv3, Web-DINO,
@@ -24,7 +25,7 @@ GROUPS = (("dinov3-b", "dinov3-l", "dinov3-h", "dinov3-7b"),
 
 #: The encoders printed under the models as references, with their table labels.
 REFERENCE = {key: PRETTY[key].replace(" ", "~")
-             for key in wordtext.TEXT_MODELS + wordspeech.SPEECH_MODELS}
+             for key in TEXT_MODELS + SPEECH_MODELS}
 
 #: The untrained network every model is read against.
 BASELINE = "vit-random-b"
@@ -189,8 +190,8 @@ def reference_rows(lines: list[str], printed: list, render, *,
     """
     lines.append("\\midrule")
     for model, label in REFERENCE.items():
-        speech = model in wordspeech.SPEECH_MODELS
-        if rule_before_speech and model == wordspeech.SPEECH_MODELS[0]:
+        speech = model in SPEECH_MODELS
+        if rule_before_speech and model == SPEECH_MODELS[0]:
             lines.append("\\midrule")
         cells = render(model)
         printed.append((label, cells))

@@ -5,7 +5,6 @@ averaged. Rows follow the vocabulary order of the word directions.
 """
 from __future__ import annotations
 
-import hashlib
 import json
 from pathlib import Path
 
@@ -13,8 +12,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from .config import WORD_TEXT
-from .models import ENCODERS
+from ..config import WORD_TEXT, line_fingerprint
+from ..models import ENCODERS
 
 #: Token length every carrier is padded to. :func:`embed` checks on every batch
 #: that a pad token survives, so no carrier is truncated.
@@ -89,13 +88,8 @@ CARRIER_FRAME = np.array([i for i, _ in enumerate(TEMPLATE_FRAMES)
 assert len(CARRIERS) == len(set(CARRIERS)) == 96, "carriers must be 96 distinct"
 
 
-def fingerprint(words) -> str:
-    """sha256 of the word list in order, recorded with every text and speech cache."""
-    h = hashlib.sha256()
-    for word in words:
-        h.update(str(word).encode())
-        h.update(b"\n")
-    return h.hexdigest()
+#: sha256 of the word list in order, recorded with every text and speech cache.
+fingerprint = line_fingerprint
 
 
 def cache_dir(key: str) -> Path:
@@ -170,7 +164,7 @@ def embed(key: str, words, *, device: str = "auto", batch_size: int = 64
                     raise ValueError(
                         f"a carrier filled the {CONTEXT}-token context and may "
                         f"have been truncated, which would make the averaging "
-                        f"weights word-dependent; raise wordtext.CONTEXT")
+                        f"weights word-dependent; raise text.CONTEXT")
                 batch = {k: v.to(where) for k, v in batch.items()}
                 with torch.no_grad():
                     out.append(tower(batch).float().cpu().numpy())

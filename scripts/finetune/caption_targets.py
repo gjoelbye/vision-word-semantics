@@ -22,9 +22,9 @@ import torch
 from tqdm import tqdm
 
 from src.config import CAPTIONS, CORPUS, DATA_ROOT, ensure_dirs
+from src.features.text import Qwen3Tower, tokenizer
 from src.finetune import corpus
 from src.models import ENCODERS
-from src.wordtext import Qwen3Tower, tokenizer
 
 TEXT_TOWER = "qwen3-0p6b-frozen"
 SPEECH_TOWER = "w2v-bert-2.0-frozen"

@@ -18,7 +18,7 @@ import json
 import pandas as pd
 
 from src.config import EMBEDDINGS, LEXICON, ensure_dirs
-from src.embed import embed_manifest
+from src.features.image import embed_manifest
 from src.models import DEFAULT_SWEEP, FINETUNES
 from src.stimuli import imagenet
 from src.stimuli import two_clue_render as two_clue

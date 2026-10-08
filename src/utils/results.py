@@ -9,8 +9,8 @@ from __future__ import annotations
 
 import pandas as pd
 
-from .. import wordtext
 from ..config import LEXICON, RESULTS
+from ..features import text
 from ..models import DEFAULT_SWEEP, PRETTY
 from ..stimuli.render import fingerprint
 from ..stimuli.two_clue_render import MANIFEST_PATH, load_curated_items, manifest_fingerprint
@@ -66,7 +66,7 @@ def read(name: str) -> pd.DataFrame:
             raise RuntimeError(f"results/{name}.parquet was computed from a "
                                f"different {_MANIFESTS[column].name} manifest")
     if "word_sha" in frame.columns and (
-            set(frame.word_sha) != {wordtext.fingerprint(word_order())}):
+            set(frame.word_sha) != {text.fingerprint(word_order())}):
         raise RuntimeError(f"results/{name}.parquet was computed for a "
                            f"different word set")
     return frame

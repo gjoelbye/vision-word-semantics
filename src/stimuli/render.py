@@ -14,7 +14,8 @@ import pandas as pd
 from PIL import Image
 from tqdm import tqdm
 
-from ..config import BACKGROUNDS, LEXICON, RENDERS, SEED, manifest_path
+from ..config import (BACKGROUNDS, LEXICON, RENDERS, SEED, line_fingerprint,
+                      manifest_path)
 from .typography import (box_at_centre, crop_safe_window, legible_centre,
                          render_overlay, render_scramble, slot_table,
                          text_extent)
@@ -24,11 +25,7 @@ CLEAN = "__clean__"
 
 def fingerprint(manifest: pd.DataFrame) -> str:
     """sha256 of the recorded ``image_path`` strings, in row order."""
-    h = hashlib.sha256()
-    for p in manifest["image_path"]:
-        h.update(str(p).encode())
-        h.update(b"\n")
-    return h.hexdigest()
+    return line_fingerprint(manifest["image_path"])
 
 
 def _background_path(index: int) -> Path:

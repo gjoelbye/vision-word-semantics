@@ -14,8 +14,8 @@ import numpy as np
 import pandas as pd
 from threadpoolctl import threadpool_limits
 
-from src import wordspeech, wordtext
 from src.config import LEXICON, RESULTS, SEED, SIMILARITY, ensure_dirs
+from src.features import speech, text
 from src.models import DEFAULT_SWEEP
 from src.stats import benjamini_hochberg
 from src.stimuli.render import fingerprint
@@ -36,7 +36,7 @@ MEASURE_NAMES = ("mutual_knn", "cka")
 
 LANGUAGE_SUPERVISED = ("clip-b", "siglip2-b")
 COLUMNS = [m for m in DEFAULT_SWEEP if m not in LANGUAGE_SUPERVISED]
-ROWS = [*LANGUAGE_SUPERVISED, *wordtext.TEXT_MODELS, *wordspeech.SPEECH_MODELS]
+ROWS = [*LANGUAGE_SUPERVISED, *text.TEXT_MODELS, *speech.SPEECH_MODELS]
 
 
 def nearest(matrix: np.ndarray, k: int = K_NEAREST) -> np.ndarray:
@@ -154,7 +154,7 @@ def main() -> None:
     words = (pd.DataFrame({"word": word_order()})
                .merge(pd.read_parquet(LEXICON / "words.parquet"),
                       on="word", how="left"))
-    word_sha = wordtext.fingerprint(words.word)
+    word_sha = text.fingerprint(words.word)
     manifest_sha = fingerprint(manifest())
     for model in COLUMNS + ROWS:
         if model not in index.index or index.word_sha[model] != word_sha:

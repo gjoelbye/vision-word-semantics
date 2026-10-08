@@ -12,8 +12,8 @@ from pathlib import Path
 
 import numpy as np
 
-from .config import WORD_SPEECH
-from .models import ENCODERS
+from ..config import WORD_SPEECH, line_fingerprint
+from ..models import ENCODERS
 
 #: The multi-speaker synthesizer. Its output is resampled to ``SAMPLE_RATE``.
 TTS_REPO = "kakao-enterprise/vits-vctk"
@@ -237,9 +237,7 @@ def load(key: str, words) -> np.ndarray:
         raise FileNotFoundError(
             f"no speech cache for {key}; run scripts/features/word_speech.py")
     meta = json.loads(meta_file.read_text())
-    from .wordtext import fingerprint
-
-    want = fingerprint(words)
+    want = line_fingerprint(words)
     if meta.get("word_sha") != want:
         raise RuntimeError(
             f"{key} was embedded for a different word set "

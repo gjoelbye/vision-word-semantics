@@ -8,6 +8,7 @@ committed, so they sit in the repository root.
 """
 from __future__ import annotations
 
+import hashlib
 import os
 from pathlib import Path, PurePosixPath
 
@@ -104,6 +105,20 @@ def manifest_path(local: str | Path) -> str:
     if not pure.is_relative_to(root):
         raise ValueError(f"not under the data root: {local}")
     return str(PurePosixPath(pure.relative_to(root)))
+
+
+def line_fingerprint(items) -> str:
+    """sha256 of the items in order, each as its string and a newline.
+
+    The manifest fingerprint hashes the recorded ``image_path`` strings this
+    way, and the word fingerprint of the text and speech caches hashes the word
+    list.
+    """
+    h = hashlib.sha256()
+    for item in items:
+        h.update(str(item).encode())
+        h.update(b"\n")
+    return h.hexdigest()
 
 
 def ensure_dirs() -> None:
