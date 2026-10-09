@@ -60,6 +60,21 @@ centered mean embedding of its ImageNet-1k validation images, and comparing it
 with the word direction of the class name tests whether a name points to the
 images it names.
 
+Each measure is computed in one place under `src/analysis/`:
+
+| Measure | Code |
+|---|---|
+| Word direction | `directions.word_directions` |
+| Visual direction | `directions.class_mean` |
+| Cosine similarity between word directions | `lexical.similarity` |
+| Partner retrieval | `lexical.retrieval`, from the ranks in `lexical.partner_rank` |
+| Neighbor purity and its permutation test | `lexical.knn_purity`, `lexical.purity_permutation` |
+| Comparisons within an item | `lexical.build_items`, scored by `items_rows` in `scripts/analysis/table1_models.py` |
+| Category accuracy | `lexical.nearest_centroid_accuracy` |
+| Matched cosine similarity | `word_class.class_alignment` |
+| Word-to-class and class-to-word retrieval | `word_class.class_retrieval` |
+| Two-clue margins | `two_clue.condition_vectors`, `two_clue.target_metrics` |
+
 ## Models
 
 | Training | Models |
