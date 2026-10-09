@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import functools
 import hashlib
-import io
 from pathlib import Path
 
 import pandas as pd
@@ -116,10 +115,6 @@ def read_validation(shard: Path):
     for record, label in zip(images, labels):
         payload = record["bytes"]
         yield image_key(payload), names[int(label)], payload
-
-
-def decode(payload: bytes) -> Image.Image:
-    return Image.open(io.BytesIO(payload)).convert("RGB")
 
 
 def image_path(wnid: str, key: str) -> Path:

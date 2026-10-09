@@ -228,7 +228,6 @@ def build_appearance_design(reps: int = 1, seed: int = 0,
     out = best.sort_values(list(FACTORS), kind="mergesort").reset_index(drop=True)
     out.insert(0, "appearance", np.arange(len(out)))
     out["monospace"] = out.font.isin(MONOSPACE_FAMILIES)
-    out.attrs["worst_inexact_association"] = best_score
     return out
 
 
@@ -273,8 +272,6 @@ def legible_centre(background: "Image.Image", color_group: str, size_band: str,
     tallest word, so every word fits at the chosen center. The horizontal
     position is the middle of the window.
     """
-    import numpy as np
-
     wx, wy, side = crop_safe_window(background.size[0])
     half_w = max(2, min(int(half_w), side // 2 - 1))
     half_h = max(2, min(int(half_h), side // 2 - 1))
@@ -422,22 +419,15 @@ REPLICATES = 4
 
 
 @functools.lru_cache(maxsize=None)
-def slot_table(n_backgrounds: int | None = None) -> pd.DataFrame:
+def slot_table() -> pd.DataFrame:
     """One row per slot: ``slot, appearance, replicate, background_index`` plus
     every appearance factor. Deterministic.
 
-    Backgrounds are assigned so that no two slots share one, and so that the
-    background a given appearance receives in replicate 0 is unrelated to the
-    one it receives in replicate 1.
+    Each slot has its own background, and the background a given appearance
+    receives in replicate 0 is unrelated to the one it receives in replicate 1.
     """
     appearance = build_appearance_design()
-    n_slots = len(appearance) * REPLICATES
-    if n_backgrounds is None:
-        n_backgrounds = n_slots
-    if n_backgrounds < n_slots:
-        raise ValueError(
-            f"{n_slots} slots need at least that many backgrounds, got {n_backgrounds}")
-    order = list(range(n_backgrounds))
+    order = list(range(len(appearance) * REPLICATES))
     random.Random(SEED).shuffle(order)
     rows = []
     for rep in range(REPLICATES):

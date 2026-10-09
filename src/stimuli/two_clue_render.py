@@ -180,21 +180,13 @@ def load_or_create_layout(items: pd.DataFrame,
     return layout, layout_sha
 
 
-def _equation_dir(row, root: Path) -> Path:
-    def value(name: str):
-        return row[name] if isinstance(row, dict) else getattr(row, name)
-    return root / str(value("split")) / str(value("family_id")) / str(
-        value("question_id"))
-
-
 def build_manifest(items: pd.DataFrame, layout: pd.DataFrame,
-                   dataset_sha: str, layout_sha: str,
-                   renders_root: Path = RENDERS_ROOT) -> pd.DataFrame:
+                   dataset_sha: str, layout_sha: str) -> pd.DataFrame:
     """The manifest, one row per item, slot and condition, built without rendering."""
     rows = []
     layout_records = layout.to_dict("records")
     for item in items.itertuples(index=False):
-        outdir = _equation_dir(item, renders_root)
+        outdir = RENDERS_ROOT / item.split / item.family_id / item.question_id
         for slot in layout_records:
             feature_seed = _seed(
                 dataset_sha, item.question_id, int(slot["slot"]), "feature")
@@ -300,8 +292,8 @@ def _render_job(job: dict) -> int:
     outdir.mkdir(parents=True, exist_ok=True)
     paths = {condition: outdir / f"{int(layout['slot']):03d}_{condition}.png"
              for condition in CONDITIONS}
-    needed = CONDITIONS if job["overwrite"] else tuple(
-        condition for condition in CONDITIONS if not paths[condition].exists())
+    needed = tuple(condition for condition in CONDITIONS
+                   if not paths[condition].exists())
     if not needed:
         return 0
 
@@ -375,8 +367,9 @@ def render_dataset(items: pd.DataFrame, layout: pd.DataFrame, dataset_sha: str,
     layout_records = layout.to_dict("records")
     jobs = [{
         "item": item, "layout": slot,
-        "outdir": str(_equation_dir(item, RENDERS_ROOT)),
-        "dataset_sha": dataset_sha, "overwrite": False,
+        "outdir": str(RENDERS_ROOT / item["split"] / item["family_id"]
+                      / item["question_id"]),
+        "dataset_sha": dataset_sha,
     } for item in item_records for slot in layout_records]
 
     written = processed = 0

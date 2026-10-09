@@ -10,6 +10,7 @@ and the text scan runs again on every photograph.
 from __future__ import annotations
 
 import argparse
+import io
 from concurrent.futures import ThreadPoolExecutor
 
 import pandas as pd
@@ -59,7 +60,8 @@ def images() -> pd.DataFrame:
             return manifest_path(out)
         out.parent.mkdir(parents=True, exist_ok=True)
         try:
-            imagenet.square_resize(imagenet.decode(payload), IMAGE_SIZE).save(out)
+            image = Image.open(io.BytesIO(payload)).convert("RGB")
+            imagenet.square_resize(image, IMAGE_SIZE).save(out)
         except Exception:                                     # noqa: BLE001
             return None
         return manifest_path(out)

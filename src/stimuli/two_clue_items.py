@@ -103,8 +103,8 @@ def add_question_ids(frame: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
-def _validate_split(frame: pd.DataFrame, split: str, expected_families: int,
-                    lexical_checks: bool) -> list[dict]:
+def _validate_split(frame: pd.DataFrame, split: str,
+                    expected_families: int) -> list[dict]:
     rows: list[dict] = []
     expected_rows = expected_families * ITEMS_PER_FAMILY
     _check(rows, split=split, check="row_count", value=len(frame),
@@ -200,7 +200,7 @@ def _validate_split(frame: pd.DataFrame, split: str, expected_families: int,
            value=len(exact_or_concat), requirement="0 shortcuts",
            ok=not exact_or_concat, detail=", ".join(exact_or_concat))
 
-    if lexical_checks and len(frame):
+    if len(frame):
         rows.extend(_lexical_checks(frame, split))
     return rows
 
@@ -279,26 +279,17 @@ def _lexical_checks(frame: pd.DataFrame, split: str) -> list[dict]:
     return rows
 
 
-def validate_datasets(pilot: pd.DataFrame, confirmatory: pd.DataFrame, *,
-                      expected_families: dict[str, int] | None = None,
-                      lexical_checks: bool = True
+def validate_datasets(pilot: pd.DataFrame, confirmatory: pd.DataFrame
                       ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Return canonical items with question IDs and a long validation report."""
-    expected_families = EXPECTED_FAMILIES if expected_families is None \
-        else expected_families
+    """Return canonical items with question IDs and a long validation report.
+
+    Both tables come from ``read_table``, which fixes their columns.
+    """
     frames = {"pilot": pilot.copy(), "confirmatory": confirmatory.copy()}
     rows = []
     for split in SPLITS:
-        frame = frames[split]
-        if "split" not in frame:
-            frame.insert(0, "split", split)
-        if set(COLUMNS) - set(frame.columns):
-            missing = sorted(set(COLUMNS) - set(frame.columns))
-            raise TwoClueValidationError(
-                f"{split} table is missing columns {missing}")
-        frames[split] = frame[["split", *COLUMNS]].copy()
         rows.extend(_validate_split(frames[split], split,
-                                    expected_families[split], lexical_checks))
+                                    EXPECTED_FAMILIES[split]))
 
     all_items = pd.concat([frames[s] for s in SPLITS], ignore_index=True)
     pilot_frame, confirm_frame = frames["pilot"], frames["confirmatory"]
