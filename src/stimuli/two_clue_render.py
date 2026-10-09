@@ -46,6 +46,7 @@ CONDITIONS = (
     "target_scrambled",
 )
 
+
 def load_curated_items() -> tuple[pd.DataFrame, pd.DataFrame, str]:
     """The pilot and confirmatory items, their check report and the dataset fingerprint.
 

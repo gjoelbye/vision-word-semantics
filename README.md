@@ -26,7 +26,7 @@ country-capital pairs in DINOv3-H.
 - Synonyms are harder. A word's synonym is among its ten nearest words for 6%
   of words in DINOv3-H and 10% in DINOv3-7B, against 20% in CLIP-B and 69% to
   74% in text encoders. For *petrol*, DINOv3-H ranks *gasoline* first, while
-  ten of the other thirteen models rank the look-alike *patrol* first.
+  ten of the other thirteen models rank the one-edit word *patrol* first.
 - DINOv3-L shows a weaker version of the same structure. The eight other
   self-supervised models, DINOv3-B, Web-DINO-1B and the DINOv2 and MAE models,
   do no better on these measures than an untrained ViT-B.
@@ -36,7 +36,8 @@ country-capital pairs in DINOv3-H.
   retrieval and category grouping in DINOv3-H, lowers its capital retrieval and
   changes the other finetuned models little.
 
-The numbers are from the paper.
+The numbers are from the paper, except the count of models that rank *patrol*
+first, which comes from `results/neighbours.parquet`.
 [From paper to code](#from-paper-to-code) lists the notebook, script and
 files behind each figure and table.
 
@@ -118,7 +119,7 @@ The ImageNet-1k validation images and SPEECH-COCO, which holds the COCO images
 with written and spoken captions, take about 166 GB together.
 [data/README.md](data/README.md) gives the download commands and lists what
 each stage writes under `data/`. To keep the data somewhere else, set
-`VIT_SEMANTIC_DATA`.
+`VIT_SEMANTIC_DATA` to an absolute path.
 
 ## Reproducing the paper
 
@@ -143,7 +144,11 @@ before them.
 Each figure and table comes from one notebook in `notebooks/`. Where an
 analysis script in `scripts/analysis/` computes its numbers first, the script
 writes the listed result tables to `results/`. Tables 3 and 11 to 15 are typed
-into the paper from what their notebook prints.
+into the paper from what their notebook prints. So are the numbers in the
+running text: those of Section 3 and Appendix A come from `table3_wordlists`,
+Section 4 and Appendix C from `table1_models`, Section 5 and Appendix D from
+`table2_class_names`, and Section 6 and Appendix E from
+`figure3_language_alignment` and `figure6_finetune`.
 
 | Paper | Notebook | Analysis script | Result tables | Output |
 |---|---|---|---|---|
@@ -196,10 +201,10 @@ table and the paper element each one feeds.
 | `scripts/` | The four stages, one folder each with the same names, and a `run_*.sh` script per stage |
 | `notebooks/` | One notebook per figure or table group of the paper, committed without outputs |
 | `results/` | The result tables the notebooks read; see [results/README.md](results/README.md) |
-| `figures/` | The six figures as PDF |
+| `figures/` | Figure 1b and Figures 2 to 6 as PDF |
 | `tables/` | The generated LaTeX of Figure 1a and Tables 1, 2 and 4 to 10 |
 | `data/` | Downloads and caches, not tracked; see [data/README.md](data/README.md) |
-| `tests/` | Checks of the manifest row order, the paired difference, the split halves, centering and the neighbor measures; run with `python -m pytest tests/ -q`. Two tests in `test_manifest_order.py` read the background photographs that `scripts/run_stimuli.sh` downloads |
+| `tests/` | Checks of the manifest row order, the paired difference, the split halves, centering and the neighbor measures; run with `python -m pytest tests/ -q`. Two tests in `test_manifest_order.py` read the 96 background photographs that `scripts/stimuli/backgrounds.py` selects, the first step of `scripts/run_stimuli.sh` |
 | `assets/` | The images in this README |
 
 ## Citation

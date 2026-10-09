@@ -53,7 +53,7 @@ def _install(monkeypatch, control: str | None):
     monkeypatch.setattr(directions, "word_order", lambda ds=None: tuple(WORDS))
 
 
-def test_uncentred_tau_is_dominated_by_what_the_words_share(monkeypatch):
+def test_uncentered_word_directions_are_dominated_by_what_the_words_share(monkeypatch):
     _install(monkeypatch, control="background")
     T = directions.word_directions("fake", layer=0, center=False)
     assert directions.shared_mean_share(T) > 0.9
@@ -62,7 +62,7 @@ def test_uncentred_tau_is_dominated_by_what_the_words_share(monkeypatch):
     assert off.min() > 0.9, "arbitrary words should look near-identical here"
 
 
-def test_centring_removes_it(monkeypatch):
+def test_centering_removes_it(monkeypatch):
     _install(monkeypatch, control="background")
     T = directions.word_directions("fake", layer=0, center=True)
     assert directions.shared_mean_share(T) < 1e-6

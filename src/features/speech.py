@@ -108,7 +108,6 @@ def synthesise(model, tokenizer, text: str, speaker: int, rate: float,
     edges = np.concatenate([[0], np.cumsum(per_token)])
 
     wave = out.waveform[0].float().cpu().numpy()
-    # The recovered durations must sum to the length of the returned waveform.
     if int(edges[-1]) != len(wave):
         raise RuntimeError(
             f"recovered durations sum to {int(edges[-1])} samples but the "

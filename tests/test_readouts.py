@@ -125,8 +125,9 @@ def test_the_p_value_cannot_be_exactly_zero():
 
 def test_purity_interval_brackets_its_own_point_estimate():
     """The interval contains its own point estimate. A bootstrap would place it
-    below the estimate by duplicating words, and an uncorrected subsample would
-    too, because a smaller pool lowers purity."""
+    above the estimate, because a duplicated word is its own nearest neighbor,
+    and an uncorrected subsample would place it below, because a smaller pool
+    lowers purity."""
     for seed in range(6):
         T, labels = _blocked(seed=seed, sep=0.45, n_per=30)
         S = lexical.similarity(T)

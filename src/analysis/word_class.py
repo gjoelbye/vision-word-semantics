@@ -1,4 +1,4 @@
-"""The word-class readouts of Section 5: class-name word directions against visual directions.
+"""The word-class measures of Section 5: class-name word directions against visual directions.
 
 `scripts/analysis/table2_class_names.py` runs them for every model. Matched
 cosine similarity averages the cosine between each name's word direction and

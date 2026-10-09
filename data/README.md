@@ -2,8 +2,8 @@
 
 This folder is the data root. It holds the two downloaded datasets and
 everything the stimulus, feature and finetuning stages generate. Git tracks
-only this file and `.gitkeep`. Set `VIT_SEMANTIC_DATA` to use another
-directory; the code reads every path below relative to it.
+only this file and `.gitkeep`. Set `VIT_SEMANTIC_DATA` to an absolute path to
+use another directory; the code reads every path below relative to it.
 
 The analysis outputs the paper reads are small and committed elsewhere: result
 tables in `results/`, figures in `figures/` and LaTeX tables in `tables/`, all
@@ -44,8 +44,8 @@ writes. Together they come to about 420 GB, and with the downloads to about
 | Folder | Written by | Content | Size |
 |---|---|---|---|
 | `backgrounds/` | `scripts/stimuli/backgrounds.py` | The 96 background photographs and `backgrounds.parquet` | 13 MB |
-| `lexicon/` | `scripts/stimuli/vocabulary.py`, `render.py`, `class_names.py` | The word, pair and audit tables, the vocabulary manifest and text centres, and the class-name tables | 1.6 MB |
-| `renders/` | `scripts/stimuli/render.py`, `class_images.py` | Each vocabulary word and class name on the 96 slots, and its scrambled control | 46 GB |
+| `lexicon/` | `scripts/stimuli/vocabulary.py`, `render.py`, `class_names.py` | The word, pair and audit tables, the vocabulary manifest and text centers, and the class-name tables | 1.6 MB |
+| `renders/` | `scripts/stimuli/render.py`, `class_images.py` | Each vocabulary word and class name on the 96 backgrounds, and its scrambled control | 46 GB |
 | `concepts/` | `scripts/stimuli/class_images.py` | The class-name manifest, the ImageNet validation photographs cropped to 256 pixels, their list and their text scan | 6.1 GB |
 | `composition/` | `scripts/stimuli/two_clue.py` | The two-clue layout, manifest and renders | 11 GB |
 | `embeddings/` | `scripts/features/embed.py` | Class-token caches of the 14 image models at ten depths for the vocabulary | 104 GB |

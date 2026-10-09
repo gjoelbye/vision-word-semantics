@@ -11,7 +11,7 @@ fingerprints differ from those of the current inputs.
 
 | File | Written by | Paper | One row per | Columns |
 |---|---|---|---|---|
-| `neighbours.parquet` | `figure1_neighbours.py` | Figure 1a | model, query word and neighbour rank | `model`, `pool`, `query`, `rank`, `neighbour`, `cosine`, `semantic_partner`, `same_category`, `manifest_sha` |
+| `neighbours.parquet` | `figure1_neighbours.py` | Figure 1a | model, query word and neighbor rank | `model`, `pool`, `query`, `rank`, `neighbour`, `cosine`, `semantic_partner`, `same_category`, `manifest_sha` |
 | `relation_offsets.parquet` | `figure1_neighbours.py` | Offset values printed by `figure1_neighbours` | model | `model`, `relation`, `n_pairs`, `first_without_offset`, `first_with_offset`, `alignment_mean`, `alignment_mean_null_mean`, `alignment_mean_null_p`, `n_folds`, `n_perm`, `manifest_sha` |
 | `figure1b_projection.parquet` | `figure1_neighbours.py` | Figure 1b | plotted word of DINOv3-H, plus one diagnostic row | `record_type`, `model`, `selected_pairwise_cosine`, `all_pairwise_cosine`, `n_display`, `n_undisplayed`, `pair_index`, `source`, `target`, `endpoint`, `word`, `x`, `y`, `manifest_sha` |
 | `language_alignment.parquet` | `figure3_language_alignment.py` | Figure 3 | reference model or encoder, model and measure | `reference`, `model`, `measure`, `value`, `chance`, `length_null_mean`, `p`, `p_bh`, `n_perm`, `word_sha`, `manifest_sha` |

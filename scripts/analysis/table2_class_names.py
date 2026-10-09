@@ -1,4 +1,4 @@
-"""Readouts between class names and class photographs behind Tables 2, 8, 9 and 10.
+"""Measures between class names and class photographs behind Tables 2, 8, 9 and 10.
 
 Each of the 14 models is read at the final layer for the matched cosine
 similarity between each class name's word direction and the visual direction

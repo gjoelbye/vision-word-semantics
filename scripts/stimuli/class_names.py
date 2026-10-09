@@ -165,8 +165,8 @@ def main() -> None:
     words["n_slots"] = len(slot_table())
     words.to_parquet(LEXICON / "concepts.parquet")
     report.to_parquet(LEXICON / "concepts_audit.parquet")
-    print(f"\nwrote lexicon/concepts.parquet ({len(words)} words)")
-    print("wrote lexicon/concepts_audit.parquet")
+    print(f"\nwrote {LEXICON / 'concepts.parquet'} ({len(words)} words)")
+    print(f"wrote {LEXICON / 'concepts_audit.parquet'}")
 
 
 if __name__ == "__main__":

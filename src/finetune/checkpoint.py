@@ -11,8 +11,7 @@ from pathlib import Path
 
 import torch
 
-# Weights belonging to the image backbone. Everything without this prefix
-# (`image_proj.weight`, `logit_scale`) is part of the contrastive head.
+# Prefix of the image backbone's weights in a checkpoint.
 _PREFIX = "image_backbone."
 
 # The contrastive head: the projection into the tower's space and the learned

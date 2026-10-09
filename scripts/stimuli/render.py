@@ -35,7 +35,7 @@ def main() -> None:
 
     man = build_manifest(words, workers=WORKERS)
     man.to_parquet(LEXICON / "manifest.parquet")
-    print(f"wrote lexicon/manifest.parquet: {len(man):,} rows")
+    print(f"wrote {LEXICON / 'manifest.parquet'}: {len(man):,} rows")
     print(f"manifest fingerprint {fingerprint(man)[:16]}")
 
 

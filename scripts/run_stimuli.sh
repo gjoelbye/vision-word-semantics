@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Stimuli: the 96 background photographs, the word, pair and audit tables,
-# every word rendered on the 96 slots with its scrambled control, the class
-# names and the class photographs, and the two-clue renders. Everything is
-# written under the data root, VIT_SEMANTIC_DATA or data/ by default.
+# every word rendered on the 96 backgrounds with its scrambled control, the
+# class names and the class photographs, and the two-clue renders. Everything
+# is written under the data root, VIT_SEMANTIC_DATA or data/ by default.
 #
 # Hardware: CPU. The OCR and CLIP steps of backgrounds.py and the text scan of
 #   class_images.py use a GPU when one is present.
