@@ -154,9 +154,12 @@ def summarize(families: pd.DataFrame, models: list[str]) -> pd.DataFrame:
                        "base_axis_gain_over_feature"):
             row[f"{metric}_p_greater"] = exact_sign_flip_p(
                 frame[metric].to_numpy(float))
-        # The interaction margin has no predicted sign, so its test is two-sided.
+        # The residual (interaction) margin has no predicted sign, so its test
+        # is two-sided.
         row["interaction_margin_p_two_sided"] = exact_sign_flip_p(
             frame["interaction_margin"].to_numpy(float), alternative="two-sided")
+        # Both clues must contribute: the smaller gain, tested by the larger of
+        # the two p-values (an intersection-union test).
         row["structured_iut_effect"] = min(
             row["feature_axis_gain_over_base"],
             row["base_axis_gain_over_feature"])

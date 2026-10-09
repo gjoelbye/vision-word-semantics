@@ -1,6 +1,6 @@
 """The registry of image models and frozen encoders, and the loader every stage uses.
 
-The paper measures fourteen pretrained image models: the DINOv3, DINOv2 and MAE
+The paper measures fourteen image models: the DINOv3, DINOv2 and MAE
 series, Web-DINO-1B, CLIP-B, SigLIP2-B and an untrained ViT-B. Ten of them are
 also finetuned twice on SPEECH-COCO, once against a frozen text encoder and
 once against a frozen speech encoder, and each finetune is registered under its
@@ -48,7 +48,8 @@ _SPECS = [
     ModelSpec("vit-random-b", "google/vit-base-patch16-224", "random", "Untrained", 86),
 ]
 
-# The fourteen pretrained backbones, in the row order of the tables.
+# The fourteen image models, the untrained ViT-B last, in the row order of the
+# tables.
 DEFAULT_SWEEP = ("dinov3-b", "dinov3-l", "dinov3-h", "dinov3-7b",
                  "webssl-dino-1b",
                  "dinov2-b", "dinov2-l", "dinov2-g",

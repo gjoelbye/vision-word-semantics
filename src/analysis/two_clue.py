@@ -5,6 +5,12 @@ them here; the tests are in `src.stats`. The unit of inference is the clue grid
 of eight items. Embedding differences are averaged over the 96 slots before
 any cosine is taken. The manifest records an item as an equation
 (`equation_id`) and a clue grid as a family (`family_id`).
+
+The recorded names predate the paper's. `feature` is the broad clue and `base`
+the narrow clue, `joint` is the vector with both clues intact, and
+`interaction`, `joint - feature - base`, is the paper's residual.
+`feature_axis_gain_over_base` is the broad-clue gain and
+`base_axis_gain_over_feature` the narrow-clue gain.
 """
 from __future__ import annotations
 

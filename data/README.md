@@ -78,8 +78,8 @@ their renders.
 
 The vocabulary and two-clue manifests record the absolute path of every image
 on the rendering machine, such as `<prefix>/renders/...`, and the fingerprint
-covers them. The
-fingerprints are therefore specific to the machine that rendered the images.
+covers them. The fingerprints are therefore specific to the machine that
+rendered the images.
 A fresh run of the stimulus stage elsewhere gives different `manifest_sha`
 values in the caches and result tables, even where every number is the same.
 `src/config.py` splits off the recorded prefix when it opens an image, so the

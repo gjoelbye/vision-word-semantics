@@ -60,7 +60,8 @@ centered mean embedding of its ImageNet-1k validation images, and comparing it
 with the word direction of the class name tests whether a name points to the
 images it names.
 
-Each measure is computed in one function, under `src/analysis/` unless a path is given:
+The functions below compute each measure. They live under `src/analysis/`
+unless a path is given:
 
 | Measure | Code |
 |---|---|
@@ -75,7 +76,7 @@ Each measure is computed in one function, under `src/analysis/` unless a path is
 | Split-half cosine | `directions.split_half_cosine` |
 | Matched cosine similarity | `word_class.class_alignment` |
 | Word-to-class and class-to-word retrieval | `word_class.class_retrieval` |
-| Two-clue margins | `two_clue.condition_vectors`, `two_clue.target_metrics` |
+| Clue gains (broad-clue and narrow-clue) | `two_clue.condition_vectors`, `two_clue.target_metrics` |
 
 ## Models
 
@@ -168,7 +169,7 @@ into the paper from what their notebook prints.
 | Table 15 | `figure6_finetune` | - | - | printed, from the checkpoint records |
 
 [results/README.md](results/README.md) lists the columns of every result
-table and the other values each notebook prints.
+table and the paper element each one feeds.
 
 ### Notes on exact reproduction
 
@@ -198,7 +199,7 @@ table and the other values each notebook prints.
 | `figures/` | The six figures as PDF |
 | `tables/` | The generated LaTeX of Figure 1a and Tables 1, 2 and 4 to 10 |
 | `data/` | Downloads and caches, not tracked; see [data/README.md](data/README.md) |
-| `tests/` | Checks of the manifest row order, the paired difference, the split halves, centering and the readouts; run with `python -m pytest tests/ -q` |
+| `tests/` | Checks of the manifest row order, the paired difference, the split halves, centering and the neighbor measures; run with `python -m pytest tests/ -q`. Two tests in `test_manifest_order.py` read the background photographs that `scripts/run_stimuli.sh` downloads |
 | `assets/` | The images in this README |
 
 ## Citation

@@ -122,7 +122,7 @@ def counts(kept: pd.DataFrame, table: pd.DataFrame) -> list[dict]:
     first = int((kept.sense_rank == 0).sum())
     count("kept_first_sense",
           "kept where the class is the word's first WordNet sense", first)
-    count("kept_adjudicated", "kept where it is not, so rule 4 decided it",
+    count("kept_adjudicated", "kept where it is not; the reason column says why",
           n - first)
     dropped = table[table.decision != "keep"]
     for reason, group in dropped.groupby(dropped.reason.str.slice(0, 46)):

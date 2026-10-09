@@ -187,11 +187,9 @@ def stroke_text(text, colour: str, linewidth: float) -> None:
     ])
 
 
-# The cut bold face is cached in `FONTS`. Matplotlib matches a face on the
-# weight in its OS/2 table and does not instance the weight axis of a variable
-# font, so a bold request on the installed variable sans gets the regular outline.
-
-
+# Matplotlib matches a face on the weight in its OS/2 table and does not
+# instance the weight axis of a variable font, so a bold request on the
+# installed variable sans gets the regular outline.
 def cut_static_face(weight: int = 700) -> Path:
     """The installed variable sans, instanced at `weight` and cached in `FONTS`."""
     from fontTools.ttLib import TTFont

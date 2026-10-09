@@ -213,7 +213,7 @@ def split_half_cosine(key: str, appearances, layer: int = -1) -> float:
     return float((ta * tb).sum(1).mean())
 
 
-# Photograph subsets a class direction can be built from: every photograph, or
+# Photograph subsets a visual direction can be built from: every photograph, or
 # those in which the text detector found no writing.
 SUBSETS = ("all", "text_free")
 
@@ -239,7 +239,7 @@ def retained(subset: str = "all") -> tuple[str, ...]:
 
 
 def class_mean(key: str, layer: int = -1, subset: str = "all") -> np.ndarray:
-    """`(n_classes, d)` class directions, rows aligned to `retained(subset)`.
+    """`(n_classes, d)` visual directions, rows aligned to `retained(subset)`.
 
     Each class is averaged over its photographs in `subset`, and the mean over
     the retained classes is subtracted.
