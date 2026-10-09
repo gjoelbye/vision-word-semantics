@@ -1,11 +1,11 @@
-"""Check the class names of ``lexicon/class_names.tsv`` and write the class-name tables.
+"""Check the class names of `lexicon/class_names.tsv` and write the class-name tables.
 
 Every rule that can be recomputed from the table is checked again: form,
 uniqueness, the class each word names, frequency, blocked words and fit at the
-recorded text centers. The recorded decisions are counted, not checked. Writes
-``lexicon/concepts.parquet`` and ``lexicon/concepts_audit.parquet``, and stops
-if a blocking gate fails. Run it after ``scripts/stimuli/render.py``, which
-records the text centers the names must fit.
+recorded text centers. The recorded decisions are counted, not checked.
+Writes `data/lexicon/concepts.parquet` and `data/lexicon/concepts_audit.parquet`,
+and stops if a blocking gate fails. Run it after `scripts/stimuli/render.py`,
+which records the text centers the names must fit.
 """
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ from src.stimuli.render import CENTRES_PATH, slot_centres
 from src.stimuli.typography import crop_safe_window, slot_table
 from src.stimuli.vocabulary import is_blocked
 
-#: Zipf floor, the same as for the pair words of the vocabulary.
+# Zipf floor, the same as for the pair words of the vocabulary.
 ZIPF_FLOOR = 3.0
 
 WORD_PATTERN = re.compile(rf"^[a-z]{{3,{MAX_WORD_LENGTH}}}$")

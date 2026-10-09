@@ -1,7 +1,7 @@
 """The image backbone joined to a cached caption tower, and the training objective.
 
-The backbone is built by :func:`src.models.load`, the loader the embeddings
-use, so the finetune differs from its twin in weights alone. Two
+The backbone is built by `src.models.load`, the loader the embeddings
+use, so the finetune differs from its pretrained backbone in weights alone. Two
 parameters join the two sides: a projection into the tower's space and a
 learned temperature. Both are dropped when the checkpoint is read back.
 
@@ -26,10 +26,10 @@ from ..models import has_class_token, hidden_size, load
 if TYPE_CHECKING:
     from .training import Recipe
 
-#: Starting temperature as a log scale, CLIP's 1/0.07; the value is learned.
+# Starting temperature as a log scale, CLIP's 1/0.07; the value is learned.
 INITIAL_LOGIT_SCALE = math.log(1 / 0.07)
 
-#: Ceiling on the learned log scale, so the scale is at most 100.
+# Ceiling on the learned log scale, so the scale is at most 100.
 MAX_LOGIT_SCALE = math.log(100.0)
 
 
@@ -93,7 +93,7 @@ def infonce(image: torch.Tensor, text: torch.Tensor,
             logit_scale: torch.Tensor) -> torch.Tensor:
     """Mean of the image-to-caption and caption-to-image cross-entropies.
 
-    ``image`` and ``text`` are L2-normalized ``(batch, dim)``; row ``i`` of each
+    `image` and `text` are L2-normalized `(batch, dim)`; row `i` of each
     is a true pair.
     """
     logits = logit_scale * image @ text.t()
@@ -116,7 +116,7 @@ class StepResult:
 
 
 def cached_step(model, batches) -> StepResult:
-    """One optimizer step's gradients over ``batches`` micro-batches.
+    """One optimizer step's gradients over `batches` micro-batches.
 
     The caption vectors come from a frozen cache and carry no gradient, so only
     the image side is re-encoded. The temperature receives its gradient from

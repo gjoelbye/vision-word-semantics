@@ -3,10 +3,10 @@
 A recipe holds everything that distinguishes one run from another and nothing
 about the machine. It is written into the checkpoint and its provenance.
 
-The loop resumes from a saved state. ``latest.pt`` holds the weights, optimizer
+The loop resumes from a saved state. `latest.pt` holds the weights, optimizer
 moments and random generator states at a fixed cadence, so an interrupted run
-continues the same trajectory. ``best.slim.pt`` holds the weights at the lowest
-validation loss and is the file :func:`src.models.load` reads for a finetuned
+continues the same trajectory. `best.slim.pt` holds the weights at the lowest
+validation loss and is the file `src.models.load` reads for a finetuned
 model. Both are written through a temporary file and renamed. The learning rate
 warms up linearly and then decays on a cosine.
 """
@@ -28,37 +28,37 @@ from ..models import ENCODERS, finetune_key
 from .checkpoint import _backbone_keys, backbone_state
 from .model import cached_step, infonce
 
-#: Images per forward pass for each backbone, the largest that fit a 32 GB card.
-#: The gradient does not depend on it.
+# Images per forward pass for each backbone, the largest that fit a 32 GB card.
+# The gradient does not depend on it.
 MICRO_BATCH: dict[str, int] = {
     "dinov3-b": 96, "dinov2-b": 96, "mae-b": 96,
     "dinov3-l": 48, "dinov2-l": 48, "mae-l": 48,
     "mae-h": 24, "dinov3-h": 16, "webssl-dino-1b": 12, "dinov2-g": 8,
 }
 
-#: Ceiling on optimizer steps, and on passes over the filtered corpus.
+# Ceiling on optimizer steps, and on passes over the filtered corpus.
 STEP_CEILING = 10_000
 MAX_EPOCHS = 3.0
 
-#: Ceiling on the warmup length and on the validation and checkpoint intervals.
+# Ceiling on the warmup length and on the validation and checkpoint intervals.
 CADENCE_CEILING = 500
 
-#: Validations without improvement before a run stops early.
+# Validations without improvement before a run stops early.
 PATIENCE = 3
 
-#: Images per optimizer step.
+# Images per optimizer step.
 BATCH = 1056
 
-#: Validation micro-batches scored at each validation.
+# Validation micro-batches scored at each validation.
 VALIDATE_BATCHES = 32
 
 
 def schedule(kept: int, batch: int = BATCH) -> dict[str, int]:
-    """Steps, warmup, validation interval and checkpoint interval for a corpus of ``kept`` samples.
+    """Steps, warmup, validation interval and checkpoint interval for a corpus of `kept` samples.
 
-    The run is ``MAX_EPOCHS`` passes, capped at ``STEP_CEILING`` steps; warmup
+    The run is `MAX_EPOCHS` passes, capped at `STEP_CEILING` steps; warmup
     is a tenth of it, validation every twelfth and a checkpoint every sixth,
-    each at most ``CADENCE_CEILING`` and at least 10 steps.
+    each at most `CADENCE_CEILING` and at least 10 steps.
     """
     steps = min(STEP_CEILING, max(1, int(MAX_EPOCHS * kept / batch)))
     return {"steps": steps,
@@ -112,7 +112,7 @@ class Recipe:
 
 
 def learning_rate_scale(step: int, warmup: int, total: int) -> float:
-    """Linear to one over ``warmup``, then cosine to zero at ``total``."""
+    """Linear to one over `warmup`, then cosine to zero at `total`."""
     if step < warmup:
         return (step + 1) / max(1, warmup)
     progress = (step - warmup) / max(1, total - warmup)
@@ -153,7 +153,7 @@ def save(payload: dict, path: Path) -> None:
 def _payload(model, optimizer, recipe, step: int, best_loss: float,
              best_step: int, *, slim: bool) -> dict:
     """The checkpoint: weights and the run record, plus optimizer and
-    generator states unless ``slim``."""
+    generator states unless `slim`."""
     payload = {"model": backbone_state(model), "step": int(step),
                "best_step": int(best_step), "best_val_loss": float(best_loss),
                "cfg": recipe.to_dict() | {"backbone_repo": model.spec.repo,
@@ -165,7 +165,7 @@ def _payload(model, optimizer, recipe, step: int, best_loss: float,
 
 @torch.no_grad()
 def validate(model, loader) -> float:
-    """Mean InfoNCE loss over the first ``VALIDATE_BATCHES`` validation
+    """Mean InfoNCE loss over the first `VALIDATE_BATCHES` validation
     micro-batches, each scored against its own negatives only."""
     model.eval()
     total, seen = 0.0, 0
@@ -185,11 +185,11 @@ def validate(model, loader) -> float:
 def run(model, recipe, train_loader, val_loader, *, out: Path,
         checkpoint_every: int, validate_every: int,
         patience: int) -> tuple[Path, str]:
-    """Train ``model`` and return the path of ``best.slim.pt`` and why the run ended.
+    """Train `model` and return the path of `best.slim.pt` and why the run ended.
 
-    The run resumes from ``latest.pt`` in ``out`` when one exists, and SIGTERM
+    The run resumes from `latest.pt` in `out` when one exists, and SIGTERM
     or SIGINT saves it and returns an outcome starting with "interrupted". The
-    run stops early once ``patience`` validations in a row fail to improve on
+    run stops early once `patience` validations in a row fail to improve on
     the best; zero runs the whole schedule.
     """
     out.mkdir(parents=True, exist_ok=True)

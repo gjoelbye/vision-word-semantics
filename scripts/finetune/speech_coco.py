@@ -1,12 +1,12 @@
 """Rewrite SPEECH-COCO as webdataset shards and exclude the photographs with text.
 
-``--shards`` reads the parquet export under ``spokencoco_hf/data/`` and writes
-one train and one validation tar per parquet file under ``spokencoco-wds-288/``,
+`--shards` reads the parquet export under `data/spokencoco_hf/data/` and writes
+one train and one validation tar per parquet file under `data/spokencoco-wds-288/`,
 images resized to a short side of 288, two percent of the photographs held out
-for validation. It also writes ``corpus/speech-coco_manifest.parquet`` and
-``corpus/speech-coco_provenance.json``. ``--scan`` runs the CRAFT detector once
-per photograph and writes ``corpus/speech-coco_text_scan.jsonl`` and
-``corpus/speech-coco_excluded_keys.txt``, which lists every sample of a
+for validation. It also writes `data/corpus/speech-coco_manifest.parquet` and
+`data/corpus/speech-coco_provenance.json`. `--scan` runs the CRAFT detector once
+per photograph and writes `data/corpus/speech-coco_text_scan.jsonl` and
+`data/corpus/speech-coco_excluded_keys.txt`, which lists every sample of a
 photograph with any detected text. With no flag both stages run.
 """
 from __future__ import annotations
@@ -30,11 +30,11 @@ from src.finetune.data import (SHARDS, SOURCE, SPEECH_COCO_EXCLUDED,
                                SPEECH_COCO_MANIFEST, SPEECH_COCO_PROVENANCE,
                                SPEECH_COCO_SCAN, shards)
 
-#: Short side of the written images; training crops 224 from it.
+# Short side of the written images; training crops 224 from it.
 SHORT_SIDE = 288
 
-#: Share of photographs held out for validation, chosen by photograph so that
-#: the five captions of one photograph fall on one side.
+# Share of photographs held out for validation, chosen by photograph so that
+# the five captions of one photograph fall on one side.
 VAL_PERCENT = 2
 
 WORKERS = 12
@@ -58,7 +58,7 @@ def source_shards() -> list[Path]:
 
 
 def resize(image: Image.Image) -> Image.Image:
-    """Short side to ``SHORT_SIDE``, aspect kept, bicubic."""
+    """Short side to `SHORT_SIDE`, aspect kept, bicubic."""
     w, h = image.size
     scale = SHORT_SIDE / min(w, h)
     return image.resize((max(1, round(w * scale)), max(1, round(h * scale))),

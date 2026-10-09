@@ -3,8 +3,8 @@
 The written captions are embedded with Qwen3-Embedding-0.6B, pooled at the last
 token of a 77-token left-padded context. The spoken captions are embedded with
 w2v-BERT 2.0, averaged over the unpadded encoder frames of each recording. Each
-cache is written under ``captions/speech-coco/<tower>/`` as float16
-``vectors.npy``, ``keys.txt`` (sample keys) and ``meta.json``. A finished cache
+cache is written under `data/captions/speech-coco/<tower>/` as float16
+`vectors.npy`, `keys.txt` (sample keys) and `meta.json`. A finished cache
 is skipped, and the speech pass resumes after the last finished parquet shard.
 """
 from __future__ import annotations
@@ -29,11 +29,11 @@ from src.models import ENCODERS
 TEXT_TOWER = "qwen3-0p6b-frozen"
 SPEECH_TOWER = "w2v-bert-2.0-frozen"
 
-#: Token context of the written captions.
+# Token context of the written captions.
 CAPTION_CONTEXT = 77
 TEXT_BATCH = 256
 
-#: Recordings per forward pass, and their sampling rate.
+# Recordings per forward pass, and their sampling rate.
 SPEECH_BATCH = 32
 SAMPLE_RATE = 16000
 
@@ -98,7 +98,7 @@ def written(device: str) -> None:
 
 
 def audio_rows(source: Path):
-    """``(caption_id, waveform)`` for each decodable recording of one parquet shard, at 16 kHz in float32."""
+    """`(caption_id, waveform)` for each decodable recording of one parquet shard, at 16 kHz in float32."""
     from scipy.io import wavfile
 
     frame = pq.read_table(source, columns=["id", "audio"]).to_pandas()

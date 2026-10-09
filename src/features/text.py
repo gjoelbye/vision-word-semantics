@@ -1,7 +1,10 @@
-"""The word set read as text by frozen Qwen3 embedding models.
+"""The lexical vocabulary read as text by the frozen Qwen3 embedding models.
 
 Each word is embedded inside the same 96 written carriers and the vectors are
 averaged. Rows follow the vocabulary order of the word directions.
+`scripts/features/word_text.py` writes one cache per encoder, and the
+similarity script and the analysis read it through `load`. The finetuning code
+reuses `Qwen3Tower` and `tokenizer` for its caption targets.
 """
 from __future__ import annotations
 
@@ -15,16 +18,16 @@ import torch.nn as nn
 from ..config import WORD_TEXT, line_fingerprint
 from ..models import ENCODERS
 
-#: Token length every carrier is padded to. :func:`embed` checks on every batch
-#: that a pad token survives, so no carrier is truncated.
+# Token length every carrier is padded to. `embed` checks on every batch
+# that a pad token survives, so no carrier is truncated.
 CONTEXT = 48
 
-#: The text encoders, by size.
+# The text encoders, by size.
 TEXT_MODELS = ("qwen3-0p6b-frozen", "qwen3-4b-frozen", "qwen3-8b-frozen")
 
-#: The 96 shared carriers, as 24 frames crossed with 4 surface variants.
-#: Every target slot is a quoted, named or otherwise permissive position, so
-#: each carrier is grammatical for every word in the vocabulary.
+# The 96 shared carriers, as 24 frames crossed with 4 surface variants.
+# Every target slot is a quoted, named or otherwise permissive position, so
+# each carrier is grammatical for every word in the vocabulary.
 TEMPLATE_FRAMES = (
     ("bare", ("{w}", "{w}.", "{w}!", "{w}?")),
     ("bare", ('"{w}"', "'{w}'", "({w})", "[{w}]")),
@@ -76,19 +79,19 @@ TEMPLATE_FRAMES = (
                  "Printed on it: {w}.", "Written there: {w}.")),
 )
 
-#: Variants per frame.
+# Variants per frame.
 VARIANTS = 4
 
 CARRIERS = tuple(carrier for _, group in TEMPLATE_FRAMES for carrier in group)
 
-#: Frame index of each carrier.
+# Frame index of each carrier.
 CARRIER_FRAME = np.array([i for i, _ in enumerate(TEMPLATE_FRAMES)
                           for _ in range(VARIANTS)])
 
 assert len(CARRIERS) == len(set(CARRIERS)) == 96, "carriers must be 96 distinct"
 
 
-#: sha256 of the word list in order, recorded with every text and speech cache.
+# sha256 of the word list in order, recorded with every text and speech cache.
 fingerprint = line_fingerprint
 
 
@@ -124,7 +127,7 @@ class Qwen3Tower(nn.Module):
 
 
 def tokenizer(key: str, context: int):
-    """Text to left-padded token tensors of length ``context`` for a Qwen3 encoder."""
+    """Text to left-padded token tensors of length `context` for a Qwen3 encoder."""
     repo, _, kind = ENCODERS[key]
     if kind != "qwen3":
         raise KeyError(f"encoder kind {kind!r} does not tokenise text")
@@ -140,9 +143,9 @@ def tokenizer(key: str, context: int):
 
 def embed(key: str, words, *, device: str = "auto", batch_size: int = 64
           ) -> tuple[np.ndarray, str]:
-    """``(per-carrier vectors, device used)``, shaped ``(words, 96, width)``.
+    """`(per-carrier vectors, device used)`, shaped `(words, 96, width)`.
 
-    The mean over axis 1 is the word's vector. ``device`` of ``auto`` uses the
+    The mean over axis 1 is the word's vector. `device` of `auto` uses the
     GPU and falls back to the CPU when the weights do not fit.
     """
     words = list(words)
@@ -188,7 +191,7 @@ def embed(key: str, words, *, device: str = "auto", batch_size: int = 64
 
 
 def crossing_gap(per_carrier: np.ndarray) -> tuple[float, float]:
-    """``(within-frame, between-frame)`` mean similarity of carrier signatures.
+    """`(within-frame, between-frame)` mean similarity of carrier signatures.
 
     A carrier's signature is the mean of its word vectors, centered over
     carriers. Variants of one frame are expected to be more alike than variants

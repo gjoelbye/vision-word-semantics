@@ -2,7 +2,7 @@
 from src.stimuli import typography as S
 from src.stimuli.typography import FACTORS, build_appearance_design
 
-#: Appearance tuples for the subset case, as a measurement on fewer images draws them.
+# Appearance tuples for the subset case, as a measurement on fewer images draws them.
 SUBSET = (0, 5, 11, 17)
 
 

@@ -1,8 +1,8 @@
 """Embed every word as text with the three frozen Qwen3 embedding models.
 
 Each word is embedded inside the 96 neutral contexts of
-``src.features.text.CARRIERS`` and the vectors are averaged. Writes
-``word_text/<encoder>/vectors.npy`` and ``meta.json``. An encoder whose cache
+`src.features.text.CARRIERS` and the vectors are averaged. Writes
+`data/word_text/<encoder>/vectors.npy` and `meta.json`. An encoder whose cache
 matches the current words and contexts is skipped.
 """
 from __future__ import annotations

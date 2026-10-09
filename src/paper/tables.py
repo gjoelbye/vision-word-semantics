@@ -1,7 +1,8 @@
-"""One builder per generated LaTeX table.
+"""One builder per generated LaTeX table in `tables/`.
 
-A builder takes the result frames it prints, as :func:`src.paper.results.read`
-returns them, and returns a :class:`Table` holding the printed cells as a
+The notebooks call these builders and write the result with `Table.write`. A
+builder takes the result frames it prints, as `src.paper.results.read`
+returns them, and returns a `Table` holding the printed cells as a
 DataFrame and the LaTeX file. A column's largest value is bold and a value more
 than two standard errors of the difference above the untrained ViT-B is
 underlined; the encoder rows are references and take neither mark.
@@ -31,7 +32,7 @@ class Table:
     tex: str
 
     def write(self) -> Path:
-        """Write ``tables/<name>.tex`` and return its path."""
+        """Write `tables/<name>.tex` and return its path."""
         TABLES.mkdir(parents=True, exist_ok=True)
         path = TABLES / f"{self.name}.tex"
         path.write_text(self.tex)
@@ -40,7 +41,7 @@ class Table:
 
 
 def _fingerprint(*frames: pd.DataFrame, column: str = "manifest_sha") -> str:
-    """The one fingerprint recorded in ``column`` of every frame."""
+    """The one fingerprint recorded in `column` of every frame."""
     values = set().union(*(set(frame[column]) for frame in frames))
     if len(values) != 1:
         raise RuntimeError(f"the inputs record {len(values)} values of {column}")
@@ -72,13 +73,13 @@ def _check_groups() -> None:
         raise RuntimeError(f"GROUPS {listed} is not the sweep {DEFAULT_SWEEP}")
 
 
-# --- Figure 1a ---------------------------------------------------------------
+# Figure 1a.
 
-#: The models and the three queries of Figure 1a.
+# The models and the three queries of Figure 1a.
 PANEL_MODELS = ("dinov3-h", "dinov3-7b", "webssl-dino-1b", "dinov2-g", "clip-b")
 PANEL_QUERIES = (("germany", "Capital"), ("petrol", "Synonym"),
                  ("porsche", "Category"))
-#: Nearest words printed per query.
+# Nearest words printed per query.
 PANEL_DEPTH = 3
 
 
@@ -138,10 +139,10 @@ def figure1a_neighbours(neighbours: pd.DataFrame) -> Table:
                   index_name="Model and rank")
 
 
-# --- Table 1 -----------------------------------------------------------------
+# Table 1.
 
-#: Table 1's columns: the two purity lists, then the top-10 relations; the last
-#: pools two relations over their summed pairs.
+# Table 1's columns: the two purity lists, then the top-10 relations; the last
+# pools two relations over their summed pairs.
 TABLE1_COLUMNS = (("category",), ("brand",), ("country_capital",), ("synonym",),
                   ("spelling_twin",), ("negation_base", "singular_plural"))
 
@@ -217,9 +218,9 @@ def table1_models(purity: pd.DataFrame, retrieval: pd.DataFrame,
                    "One-edit word", "Plural or base"])
 
 
-# --- Table 4 -----------------------------------------------------------------
+# Table 4.
 
-#: Relations of Table 4 and their column heads.
+# Relations of Table 4 and their column heads.
 TABLE4_RELATIONS = (("country_capital", "Capital"),
                     ("synonym", "Synonym"),
                     ("antonym_synonym", "\\shortstack{Synonym\\\\(antonym\\\\list)}"),
@@ -228,7 +229,7 @@ TABLE4_RELATIONS = (("country_capital", "Capital"),
                     ("spelling_twin", "\\shortstack{One-edit\\\\word}"),
                     ("singular_plural", "Plural"),
                     ("negation_base", "Base"))
-#: Type size of Table 4's standard errors.
+# Type size of Table 4's standard errors.
 TABLE4_SE_SIZE = "\\tiny"
 
 
@@ -302,7 +303,7 @@ def table4_lexical_retrieval(retrieval: pd.DataFrame,
                   index_name="Direction: model")
 
 
-# --- Table 5 -----------------------------------------------------------------
+# Table 5.
 
 def table5_items(items: pd.DataFrame, retrieval: pd.DataFrame,
                  encoder_lexical: pd.DataFrame) -> Table:
@@ -423,7 +424,7 @@ def table5_items(items: pd.DataFrame, retrieval: pd.DataFrame,
                    "Abstract top-10 hits"])
 
 
-# --- Table 6 -----------------------------------------------------------------
+# Table 6.
 
 def table6_category(purity: pd.DataFrame, latent_categories: pd.DataFrame,
                     encoder_lexical: pd.DataFrame) -> Table:
@@ -513,9 +514,9 @@ def table6_category(purity: pd.DataFrame, latent_categories: pd.DataFrame,
                    "Brands accuracy", "Brands accuracy p"])
 
 
-# --- Table 7 -----------------------------------------------------------------
+# Table 7.
 
-#: Type size of Table 7's standard errors.
+# Type size of Table 7's standard errors.
 TABLE7_SE_SIZE = "\\tiny"
 
 
@@ -626,7 +627,7 @@ def table7_lexical_depth(depth: pd.DataFrame, purity: pd.DataFrame,
                   [f"{d:.2f}" for d in labels], index_name="Block and model")
 
 
-# --- Tables 2, 8, 9 and 10 ---------------------------------------------------
+# Tables 2, 8, 9 and 10.
 
 def _chance(retr: pd.DataFrame, subset: str, direction: str,
             column: str) -> float:

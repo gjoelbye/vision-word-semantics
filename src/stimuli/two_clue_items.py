@@ -1,9 +1,11 @@
 """Reading and validating the two-clue item tables.
 
-A clue grid crosses two broad clues (``feature``) with four narrow clues
-(``base``), with one target per cell. The pilot and confirmatory tables are
-recorded inputs. The checks cover the shape of every clue grid and the
-measurable properties of its words.
+A clue grid crosses two broad clues (`feature`) with four narrow clues
+(`base`), with one target per cell. The pilot and confirmatory tables are
+committed inputs in `lexicon/`. The checks cover the shape of every clue grid
+and the measurable properties of its words. `dataset_fingerprint` hashes the
+cells and column names, and the renderer seeds the layout and the scrambles
+from it, so an edited table means rendering again.
 """
 from __future__ import annotations
 
@@ -85,7 +87,7 @@ def _family_payload(group: pd.DataFrame) -> str:
 
 
 def add_question_ids(frame: pd.DataFrame) -> pd.DataFrame:
-    """Add ``question_id``, a hash of the row and of its whole clue grid.
+    """Add `question_id`, a hash of the row and of its whole clue grid.
 
     A changed target, source or grid member changes every ID in that grid.
     """
@@ -283,7 +285,7 @@ def validate_datasets(pilot: pd.DataFrame, confirmatory: pd.DataFrame
                       ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Return canonical items with question IDs and a long validation report.
 
-    Both tables come from ``read_table``, which fixes their columns.
+    Both tables come from `read_table`, which fixes their columns.
     """
     frames = {"pilot": pilot.copy(), "confirmatory": confirmatory.copy()}
     rows = []

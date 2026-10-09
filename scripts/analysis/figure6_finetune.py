@@ -3,12 +3,12 @@
 The models are the ten finetuned backbones, their twenty SPEECH-COCO finetunes
 and CLIP-B. Word directions come from 4 images per word, the four backgrounds
 of one typography setting drawn at random five times, and from all 96. For each
-model and image count, ``results/finetune_effect.parquet`` holds the mean
-(``value``) and standard deviation (``spread``) over the draws of three
-readouts: noun purity among the 10 nearest nouns (``purity``, ``common_noun``);
+model and image count, `results/finetune_effect.parquet` holds the mean
+(`value`) and standard deviation (`spread`) over the draws of three
+readouts: noun purity among the 10 nearest nouns (`purity`, `common_noun`);
 top-10 accuracy for country-capital and for synonym pairs, each pair queried in
-both directions (``retrieval``, with the relation as task); and the split-half
-cosine (``reliability``, ``tau``, k 0). ``results/finetune_draws.parquet``
+both directions (`retrieval`, with the relation as task); and the split-half
+cosine (`reliability`, `tau`, k 0). `results/finetune_draws.parquet`
 lists the typography setting of every draw.
 """
 from __future__ import annotations
@@ -25,20 +25,20 @@ from src.models import FINETUNES, TWIN_OF
 from src.stimuli.render import fingerprint
 from src.stimuli.typography import FACTORS, REPLICATES, slot_table, slots_for
 
-#: The ten finetuned backbones, their finetunes, and CLIP-B for reference.
+# The ten finetuned backbones, their finetunes, and CLIP-B for reference.
 MODELS = tuple(dict.fromkeys(TWIN_OF[k] for k in FINETUNES)) + FINETUNES + ("clip-b",)
 
-#: Word images per word: one typography setting, and all 96.
+# Word images per word: one typography setting, and all 96.
 IMAGE_COUNTS = (4, 96)
 
-#: Random draws of the typography settings; the full set needs one.
+# Random draws of the typography settings; the full set needs one.
 DRAWS = 5
 SEED = 0
 
-#: Neighbors counted for retrieval and purity.
+# Neighbors counted for retrieval and purity.
 K = 10
 
-#: The retrieval relations.
+# The retrieval relations.
 RELATIONS = ("country_capital", "synonym")
 
 

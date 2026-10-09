@@ -1,10 +1,12 @@
 """Class-token features of every image in a manifest, at ten depths or at the final block.
 
-A backbone without a class token (SigLIP2) gives the mean over its patches
-instead. Each cache is a float16 ``.cls.npy`` memory map with a ``.meta.json`` sidecar
-that records the sha of the manifest it was built against, the layers kept and
-how far the run got. ``src.analysis.directions`` refuses a cache whose sha is not the
-current manifest's.
+`scripts/features/embed.py` runs this for the vocabulary renders, the
+class-name renders and photographs, the two-clue renders and the finetuned
+models. A backbone without a class token (SigLIP2) gives the mean over its
+patches instead. Each cache is a float16 `.cls.npy` memory map with a
+`.meta.json` sidecar that records the sha of the manifest it was built against,
+the layers kept and how far the run got. `src.analysis.directions` refuses a
+cache whose sha is not the current manifest's.
 """
 from __future__ import annotations
 
@@ -25,16 +27,16 @@ from ..stimuli.render import fingerprint
 
 N_LAYERS_SWEEP = 10
 
-#: Batches between two writes of the resume cursor.
+# Batches between two writes of the resume cursor.
 _CHECKPOINT_EVERY = 200
 
-#: Threads decoding the next batch of PNGs while the current one runs.
+# Threads decoding the next batch of PNGs while the current one runs.
 _DECODE_WORKERS = 8
 
 
 def _forward(model, proc, images: list[Image.Image], layers: list[int],
              device: str, class_token: bool, *, final_only: bool) -> np.ndarray:
-    """``(images, layers, width)`` summary vectors.
+    """`(images, layers, width)` summary vectors.
 
     The summary is the class token, or the mean over all patches for a backbone
     that has none (SigLIP2).
@@ -52,7 +54,7 @@ def _forward(model, proc, images: list[Image.Image], layers: list[int],
 
 
 def cache_paths(key: str, output_dir: Path = EMBEDDINGS) -> dict[str, Path]:
-    """The ``.cls.npy`` features and the ``.meta.json`` sidecar of one model's cache."""
+    """The `.cls.npy` features and the `.meta.json` sidecar of one model's cache."""
     return {"cls": output_dir / f"{key}.cls.npy",
             "meta": output_dir / f"{key}.meta.json"}
 
@@ -71,12 +73,12 @@ def embed_manifest(key: str, manifest: pd.DataFrame, *, batch_size: int = 128,
                    output_dir: Path = EMBEDDINGS, layer_mode: str = "sweep",
                    manifest_sha: str | None = None,
                    refuse_stale: bool = False) -> Path:
-    """Embed every manifest row with model ``key`` and cache the class tokens.
+    """Embed every manifest row with model `key` and cache the class tokens.
 
-    ``layer_mode`` is ``"sweep"`` (ten depths) or ``"final"`` (last block
+    `layer_mode` is `"sweep"` (ten depths) or `"final"` (last block
     only). A cache whose sidecar matches the manifest sha and layer mode is
     reused or resumed at its recorded cursor; any other cache is rebuilt, or
-    raises when ``refuse_stale`` is set.
+    raises when `refuse_stale` is set.
     """
     if layer_mode not in {"sweep", "final"}:
         raise ValueError("layer_mode must be 'sweep' or 'final'")

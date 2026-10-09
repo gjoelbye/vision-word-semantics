@@ -1,8 +1,12 @@
-"""The committed word set: the vocabulary reader, the lists and pairs, form measures and checks.
+"""The lexical vocabulary: its reader, its eight lists and pairs, form measures and checks.
 
-A word's rendered width is measured from the fonts and sizes the slot table
-uses, in ems so it is comparable across size bands and in pixels for the fit
-check. Two words are compared by edit distance and by letter overlap.
+`read_vocabulary` reads `lexicon/vocabulary.tsv`, the committed record of the
+eight lists. `scripts/stimuli/vocabulary.py` builds the word, pair and audit
+tables under `data/lexicon/` from it, and writes `lexicon/README.md` from
+`readme_markdown`. A word's rendered width is measured from the fonts and sizes
+the slot table uses, in ems so it is comparable across size bands and in pixels
+for the fit check. Two words are compared by edit distance and by letter
+overlap.
 """
 from __future__ import annotations
 
@@ -20,7 +24,7 @@ REFERENCE_PX = 100          # font size at which advance widths are measured
 
 @lru_cache(maxsize=None)
 def _advance_widths(family: str) -> dict[str, float]:
-    """Per-character advance width at ``REFERENCE_PX``."""
+    """Per-character advance width at `REFERENCE_PX`."""
     font = load_font(family, REFERENCE_PX)
     return {c: float(font.getlength(c)) for c in "abcdefghijklmnopqrstuvwxyz"}
 
@@ -32,7 +36,7 @@ def rendered_width_em(word: str, family: str) -> float:
 
 
 def max_rendered_px(word: str, size_band: str) -> float:
-    """Largest advance width of ``word`` in pixels, over every font at ``size_band``."""
+    """Largest advance width of `word` in pixels, over every font at `size_band`."""
     return max(rendered_width_em(word, f) * font_px(size_band)
                for f in FONT_FAMILIES)
 
@@ -44,8 +48,8 @@ def fits_everywhere(word: str) -> bool:
 
 
 def add_fit(words: pd.DataFrame) -> pd.DataFrame:
-    """A copy of a word table with ``max_px``, the widest rendering at the
-    largest size band, and ``fits``, whether that is inside the crop-safe window."""
+    """A copy of a word table with `max_px`, the widest rendering at the
+    largest size band, and `fits`, whether that is inside the crop-safe window."""
     out = words.copy()
     out["max_px"] = [max_rendered_px(w, "large") for w in out.word]
     _, _, side = crop_safe_window()
@@ -67,10 +71,10 @@ def edit_distance(a: str, b: str) -> int:
     return prev[-1]
 
 
-#: The eight lists of ``vocabulary.tsv`` in the paper's order, with brands
-#: before pseudowords: ``(slug, title, roles, example, purpose)``. ``roles``
-#: are the item roles of one item, in table order. ``example`` is the first
-#: word of the item Appendix A quotes, and ``purpose`` is what the list tests.
+# The eight lists of `vocabulary.tsv` in the paper's order, with brands
+# before pseudowords: `(slug, title, roles, example, purpose)`. `roles`
+# are the item roles of one item, in table order. `example` is the first
+# word of the item Appendix A quotes, and `purpose` is what the list tests.
 LISTS = (
     ("synonym_one_edit", "Synonym and one-edit comparison",
      ("anchor", "synonym", "spelling_twin"), "torch", "meaning and spelling"),
@@ -89,8 +93,8 @@ LISTS = (
 )
 ROLES = {slug: roles for slug, _, roles, _, _ in LISTS}
 
-#: The pair table: ``(list, role a, role b, relation, kind)``. Meaning pairs
-#: carry the claim; spelling pairs are the control.
+# The pair table: `(list, role a, role b, relation, kind)`. Meaning pairs
+# carry the claim; spelling pairs are the control.
 PAIRS = (
     ("synonym_one_edit", "anchor", "synonym",       "synonym",         "meaning"),
     ("synonym_one_edit", "anchor", "spelling_twin", "spelling_twin",   "spelling"),
@@ -107,11 +111,11 @@ COLUMNS = ("list", "item", "item_role", "word", "category", "spelling_cluster",
 
 
 def read_vocabulary(path=VOCABULARY_TSV) -> pd.DataFrame:
-    """``lexicon/vocabulary.tsv``, one row per word in file order.
+    """`lexicon/vocabulary.tsv`, one row per word in file order.
 
-    Blank cells become missing values. ``spelling_cluster`` becomes the integer
-    column ``ortho`` and ``concreteness`` becomes ``picturability``, the names
-    the derived tables use. A file that breaks the schema raises ``ValueError``
+    Blank cells become missing values. `spelling_cluster` becomes the integer
+    column `ortho` and `concreteness` becomes `picturability`, the names
+    the derived tables use. A file that breaks the schema raises `ValueError`
     naming the rows, counted from the header as line 1.
     """
     table = pd.read_csv(path, sep="\t", dtype=str, keep_default_na=False)
@@ -154,7 +158,7 @@ def item_table(vocabulary: pd.DataFrame, slug: str) -> pd.DataFrame:
 
 
 def pair_table(vocabulary: pd.DataFrame) -> pd.DataFrame:
-    """The pairs of ``PAIRS``, relation by relation and in item order within one.
+    """The pairs of `PAIRS`, relation by relation and in item order within one.
 
     The order is part of the result: the letter-overlap audit draws its random
     words pair by pair.
@@ -201,9 +205,9 @@ def _markdown_table(header, rows) -> str:
 
 
 def readme_markdown(vocabulary: pd.DataFrame, class_names: pd.DataFrame) -> str:
-    """The text of ``lexicon/README.md``, a readable view of the committed lists.
+    """The text of `lexicon/README.md`, a readable view of the committed lists.
 
-    ``class_names`` is the kept rows of ``class_names.tsv``.
+    `class_names` is the kept rows of `class_names.tsv`.
     """
     heading = {"spelling_twin": "One-edit word"}
     titles = {slug: title for slug, title, *_ in LISTS}
@@ -310,9 +314,12 @@ def readme_markdown(vocabulary: pd.DataFrame, class_names: pd.DataFrame) -> str:
     return "\n".join(out) + "\n"
 
 
-# --- the crossed grids ---------------------------------------------------------
-
 def crossing_report(words: pd.DataFrame) -> dict:
+    """How far the category by spelling-cluster counts are from a full crossing.
+
+    The noun and brand lists put equal counts in every cell, so cluster
+    membership alone cannot predict a category and Cramer's V is zero.
+    """
     table = pd.crosstab(words.category, words.ortho).to_numpy(float)
     n = table.sum()
     expected = table.sum(1, keepdims=True) * table.sum(0, keepdims=True) / n
@@ -339,8 +346,7 @@ def crossing_passes(report: dict, max_cramers_v: float = 0.01) -> bool:
                 and report["cramers_v"] <= max_cramers_v)
 
 
-# --- vocabulary checks ---------------------------------------------------------
-
+# Checks on single words and on meaning pairs.
 BLOCKED_USAGE_DOMAINS = frozenset({
     "vulgarism.n.01", "obscenity.n.02", "ethnic_slur.n.01", "slur.n.01",
     "profanity.n.01", "swearword.n.01", "expletive.n.01",
@@ -420,8 +426,6 @@ def orthographic_relatives(pairs: pd.DataFrame) -> pd.DataFrame:
         columns=["relation", "a", "b"])
 
 
-# --- letter overlap ----------------------------------------------------------
-
 def letter_overlap(pairs: list[tuple[str, str]], vocab: list[str],
                    n_random: int = 2000, seed: int = 0) -> dict:
     """Mean letter-set Jaccard within the pairs, against length-matched random word pairs.
@@ -454,16 +458,15 @@ def letter_overlap(pairs: list[tuple[str, str]], vocab: list[str],
                 if within and between else float("nan"))
 
 
-# --- the audit ---------------------------------------------------------------
 # Deterministic checks on the word set, run before it is rendered. A failed
 # blocking check stops rendering.
 
-#: Largest allowed excess of letter overlap within a meaning relation over
-#: length-matched random word pairs.
+# Largest allowed excess of letter overlap within a meaning relation over
+# length-matched random word pairs.
 GATE_MAX_LETTER_EXCESS = 0.05
 
-#: Largest allowed Cramer's V between category and spelling cluster; the
-#: crossing makes it zero by construction.
+# Largest allowed Cramer's V between category and spelling cluster; the
+# crossing makes it zero by construction.
 GATE_MAX_CRAMERS_V = 0.01
 
 
@@ -500,7 +503,7 @@ def audit_pairs_orthography(pairs: pd.DataFrame,
                             vocab: list[str]) -> list[dict]:
     """Rows checking that no meaning pair joins two forms of one word, and that no
     meaning relation exceeds length-matched random pairs in letter overlap by
-    more than ``GATE_MAX_LETTER_EXCESS``."""
+    more than `GATE_MAX_LETTER_EXCESS`."""
     out = []
     relatives = orthographic_relatives(pairs)
     out.append(gate(

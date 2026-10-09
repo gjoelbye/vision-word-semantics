@@ -1,13 +1,13 @@
 """Cache the class-token features of every rendered image.
 
 By default the 14 image models embed the vocabulary manifest,
-``lexicon/manifest.parquet``, at ten depths into ``embeddings/``.
-``--finetuned`` embeds it with the 20 SPEECH-COCO finetunes instead.
-``--manifest concepts`` embeds the class-name renders and the class photographs
-with the 14 models, into ``embeddings/concepts/renders/`` and
-``embeddings/concepts/images/``. ``--manifest two_clue`` embeds the two-clue
+`data/lexicon/manifest.parquet`, at ten depths into `data/embeddings/`.
+`--finetuned` embeds it with the 20 SPEECH-COCO finetunes instead.
+`--manifest concepts` embeds the class-name renders and the class photographs
+with the 14 models, into `data/embeddings/concepts/renders/` and
+`data/embeddings/concepts/images/`. `--manifest two_clue` embeds the two-clue
 renders with the 14 models at the final layer only, into
-``composition/embeddings/``. A finished cache is skipped and an unfinished one
+`data/composition/embeddings/`. A finished cache is skipped and an unfinished one
 resumes.
 """
 from __future__ import annotations
@@ -23,10 +23,10 @@ from src.models import DEFAULT_SWEEP, FINETUNES
 from src.stimuli import imagenet
 from src.stimuli import two_clue_render as two_clue
 
-#: Images per forward pass, halved on an out-of-memory error.
+# Images per forward pass, halved on an out-of-memory error.
 BATCH_SIZE = 128
 
-#: The script that writes each manifest.
+# The script that writes each manifest.
 PRODUCED_BY = {"main": "scripts/stimuli/render.py",
                "concepts": "scripts/stimuli/class_images.py",
                "two_clue": "scripts/stimuli/two_clue.py"}

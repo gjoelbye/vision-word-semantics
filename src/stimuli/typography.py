@@ -1,9 +1,12 @@
 """Fonts, the 24 typography settings, the drawing primitives and the 96 slots.
 
-Every word is drawn on the same (background, typography) slots, so both cancel
-in a comparison between two words. :func:`build_appearance_design` builds the
-settings so that the factors are balanced against each other, and
-:func:`balance_report` says which factor pairs are exactly balanced.
+A slot is one background with one typography setting. Every word is drawn on
+the same slots, so background and typography cancel in a comparison between
+two words. `build_appearance_design` builds the settings so that the factors
+are balanced against each other, and `balance_report` says which factor pairs
+are exactly balanced. The word renderer, the class-name renderer and the
+two-clue renderer all draw through this module, and the analysis takes its
+matched-appearance split halves from `split_halves`.
 """
 from __future__ import annotations
 
@@ -16,8 +19,6 @@ import pandas as pd
 from PIL import Image, ImageDraw, ImageFont
 
 from ..config import CROP_SAFE_FRAC, IMAGE_SIZE, SEED
-
-# --- factors ---------------------------------------------------------------
 
 # Six families of different letterform construction: two sans of different
 # width, two serifs of different origin, one monospace, and one geometric face
@@ -56,10 +57,10 @@ COLOR_GROUPS: tuple[tuple[str, tuple[int, int, int]], ...] = (
 COLOR_GROUP_NAMES: tuple[str, ...] = tuple(n for n, _ in COLOR_GROUPS)
 COLOR_GROUP_TO_RGB: dict[str, tuple[int, int, int]] = dict(COLOR_GROUPS)
 
-#: Which of four vertical bands of the crop-safe window holds the text center.
-#: A designed factor, balanced against the others; the center is chosen for
-#: legibility within the band. The horizontal position is always the middle of
-#: the window, because the widest word nearly fills it.
+# Which of four vertical bands of the crop-safe window holds the text center.
+# A designed factor, balanced against the others; the center is chosen for
+# legibility within the band. The horizontal position is always the middle of
+# the window, because the widest word nearly fills it.
 PLACEMENTS: tuple[str, ...] = ("top", "upper_middle", "lower_middle", "bottom")
 
 # Whether a translucent panel sits behind the text.
@@ -67,12 +68,9 @@ BOX_STYLES: tuple[str, ...] = ("panel", "bare")
 
 FACTORS: tuple[str, ...] = ("font", "size", "color", "placement", "box")
 
-
-# --- font resolution -------------------------------------------------------
-
 @functools.lru_cache(maxsize=None)
 def font_path_for(family: str) -> str:
-    """Absolute path to a TrueType file for ``family``.
+    """Absolute path to a TrueType file for `family`.
 
     Resolved through matplotlib's font manager, which has already indexed the
     system fonts. A family that is not installed raises LookupError, so no
@@ -97,9 +95,6 @@ def load_font(family: str, px: int) -> ImageFont.FreeTypeFont:
 def font_px(size_band: str, image_size: int = IMAGE_SIZE) -> int:
     """Pixel size for a band. Depends on the slot only, never on the word."""
     return max(10, int(round(SIZE_BAND_TO_FRAC[size_band] * image_size)))
-
-
-# --- the appearance design -------------------------------------------------
 
 def _cramers_v(a: pd.Series, b: pd.Series) -> float:
     """Association between two categorical columns, 0 (independent) to 1."""
@@ -130,8 +125,8 @@ def balance_report(design: pd.DataFrame) -> pd.DataFrame:
 
 
 def _latin_rectangle(rows: int, cols: int, rng: random.Random) -> list[list[int]]:
-    """A ``rows`` x ``cols`` array whose every row is a permutation of
-    ``range(cols)`` and whose every column holds ``rows`` distinct values."""
+    """A `rows` x `cols` array whose every row is a permutation of
+    `range(cols)` and whose every column holds `rows` distinct values."""
     for _ in range(2000):
         out, ok = [], True
         for r in range(rows):
@@ -151,8 +146,8 @@ def _latin_rectangle(rows: int, cols: int, rng: random.Random) -> list[list[int]
 
 def _degree_constrained(n_rows: int, n_cols: int, per_row: int,
                         col_total: int, rng: random.Random) -> np.ndarray:
-    """A binary ``n_rows`` x ``n_cols`` matrix with ``per_row`` ones in each
-    row and ``col_total`` ones in each column. Used to balance a two-level
+    """A binary `n_rows` x `n_cols` matrix with `per_row` ones in each
+    row and `col_total` ones in each column. Used to balance a two-level
     factor against a six-level one exactly."""
     for _ in range(4000):
         m = np.zeros((n_rows, n_cols), int)
@@ -230,18 +225,15 @@ def build_appearance_design(reps: int = 1, seed: int = 0,
     out["monospace"] = out.font.isin(MONOSPACE_FAMILIES)
     return out
 
-
-# --- geometry --------------------------------------------------------------
-
 def crop_safe_window(size: int = IMAGE_SIZE,
                      frac: float = CROP_SAFE_FRAC) -> tuple[int, int, int]:
-    """``(x0, y0, side)`` of the centered square that survives a center crop."""
+    """`(x0, y0, side)` of the centered square that survives a center crop."""
     side = int(round(frac * size))
     return (size - side) // 2, (size - side) // 2, side
 
 
 def text_extent(family: str, size_band: str, text: str) -> tuple[int, int]:
-    """``(width, height)`` of the text box: ink width, and the font's ascent
+    """`(width, height)` of the text box: ink width, and the font's ascent
     plus descent, so every word in a slot has the same height and baseline."""
     f = load_font(family, font_px(size_band))
     x0, _, x1, _ = f.getbbox(text)
@@ -266,9 +258,9 @@ def legible_centre(background: "Image.Image", color_group: str, size_band: str,
                    clutter_weight: float = 0.6) -> tuple[int, int]:
     """The text center for one slot, shared by every word drawn there.
 
-    Candidate centers on a vertical grid within ``band`` are scored on the
+    Candidate centers on a vertical grid within `band` are scored on the
     contrast between the ink color and the local background minus a clutter
-    penalty. ``half_w`` and ``half_h`` are half the extent of the widest and
+    penalty. `half_w` and `half_h` are half the extent of the widest and
     tallest word, so every word fits at the chosen center. The horizontal
     position is the middle of the window.
     """
@@ -316,9 +308,6 @@ class Box:
     w: int
     h: int
 
-
-# --- drawing ---------------------------------------------------------------
-
 def _draw_panel(draw: ImageDraw.ImageDraw, box: Box, pad: int | None = None,
                 fill: tuple[int, int, int, int] = (255, 255, 255, 140)) -> None:
     """Translucent panel behind the text, padded by a sixth of the box height (at least 3 px)."""
@@ -339,7 +328,7 @@ def panel_fill(color_group: str) -> tuple[int, int, int, int]:
 def render_overlay(background: Image.Image, text: str, box: Box,
                    family: str, size_band: str, *,
                    color_group: str, box_style: str) -> Image.Image:
-    """Draw ``text`` onto a copy of ``background`` and return it."""
+    """Draw `text` onto a copy of `background` and return it."""
     base = background.convert("RGBA")
     layer = Image.new("RGBA", base.size, (0, 0, 0, 0))
     draw = ImageDraw.Draw(layer)
@@ -356,7 +345,7 @@ def render_overlay(background: Image.Image, text: str, box: Box,
 
 def text_inkmap(family: str, size_band: str, text: str,
                 w: int, h: int) -> np.ndarray:
-    """Grayscale ink coverage of the word inside a ``w`` by ``h`` box."""
+    """Grayscale ink coverage of the word inside a `w` by `h` box."""
     font = load_font(family, font_px(size_band))
     canvas = Image.new("L", (max(1, w), max(1, h)), 0)
     bx = font.getbbox(text)
@@ -380,7 +369,7 @@ def phase_scramble(ink: np.ndarray, seed: int) -> np.ndarray:
 def render_scramble(background: Image.Image, text: str, box: Box, family: str,
                     size_band: str, *, color_group: str, box_style: str,
                     seed: int) -> Image.Image:
-    """Draw the phase-scrambled counterpart of ``text`` in the same box."""
+    """Draw the phase-scrambled counterpart of `text` in the same box."""
     ink = phase_scramble(text_inkmap(family, size_band, text, box.w, box.h), seed)
     base = background.convert("RGBA")
     layer = Image.new("RGBA", base.size, (0, 0, 0, 0))
@@ -392,13 +381,10 @@ def render_scramble(background: Image.Image, text: str, box: Box, family: str,
     rgba[..., 3] = (ink * 255).round().astype(np.uint8)
     layer.alpha_composite(Image.fromarray(rgba, "RGBA"), (box.x, box.y))
     return Image.alpha_composite(base, layer).convert("RGB")
-
-
-# --- the slot table ----------------------------------------------------------
 # A slot is one background paired with one typography setting. Every word is
 # drawn on all of them, so background and typography cancel in any comparison
-# between words. Each typography setting is used on ``REPLICATES`` different
-# backgrounds, and ``split_halves`` puts half of the replicates on each side, so
+# between words. Each typography setting is used on `REPLICATES` different
+# backgrounds, and `split_halves` puts half of the replicates on each side, so
 # the two halves carry the same typography and differ only in the photographs.
 
 # Backgrounds each appearance tuple is drawn on. Four gives 96 slots from 24
@@ -409,7 +395,7 @@ REPLICATES = 4
 
 @functools.lru_cache(maxsize=None)
 def slot_table() -> pd.DataFrame:
-    """One row per slot: ``slot, appearance, replicate, background_index`` plus
+    """One row per slot: `slot, appearance, replicate, background_index` plus
     every appearance factor. Deterministic.
 
     Each slot has its own background, and the background a given appearance
@@ -443,8 +429,8 @@ def split_halves(appearances=None) -> tuple[tuple[int, ...], tuple[int, ...]]:
     """Matched-appearance halves: replicates {0, 1} against {2, 3}.
 
     Each half carries every appearance tuple twice, and the halves differ only
-    in which photographs they were drawn on. ``appearances`` restricts both
-    halves to those appearance tuples; ``None`` keeps all of them. Slots are
+    in which photographs they were drawn on. `appearances` restricts both
+    halves to those appearance tuples; `None` keeps all of them. Slots are
     returned in ascending order.
     """
     t = slot_table()

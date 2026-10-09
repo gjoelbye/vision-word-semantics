@@ -110,7 +110,7 @@ def test_degenerate_layer_raises_instead_of_scoring_zero(monkeypatch):
 
 def test_the_untrained_floor_is_reproducible():
     """The untrained ViT-B is built from a fixed seed, so two loads return the
-    same weights. Unseeded, ``AutoModel.from_config`` would build a different
+    same weights. Unseeded, `AutoModel.from_config` would build a different
     network on every call, and the untrained baseline would change between
     runs."""
     from src.models import load

@@ -1,7 +1,7 @@
 """How much writing the CRAFT text detector finds in a photograph.
 
 Only detection runs, no recognition. A scan records the box count and the share
-of the frame the boxes cover, and :func:`is_excluded` decides from that record
+of the frame the boxes cover, and `is_excluded` decides from that record
 whether a photograph is excluded. The class photographs and the SPEECH-COCO
 photographs are scanned this way.
 """
@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import numpy as np
 
-#: Detection thresholds, set low so that faint writing is found.
+# Detection thresholds, set low so that faint writing is found.
 TEXT_THRESHOLD = 0.25
 LOW_TEXT = 0.15
 LINK_THRESHOLD = 0.15
@@ -23,7 +23,7 @@ def reader(gpu: bool = True):
 
 
 def text_density(detector, image) -> dict:
-    """``n_boxes``, ``text_area_ratio``, ``width`` and ``height`` for one image,
+    """`n_boxes`, `text_area_ratio`, `width` and `height` for one image,
     from one detection pass without rotations."""
     array = np.asarray(image.convert("RGB")) if hasattr(image, "convert") else image
     height, width = array.shape[:2]

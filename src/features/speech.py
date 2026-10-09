@@ -1,9 +1,10 @@
-"""The word set spoken by a synthesizer and heard by a frozen speech encoder.
+"""The lexical vocabulary spoken by a synthesizer and heard by a frozen speech encoder.
 
 Each word is spoken in 96 renditions, eight voices by three speaking rates by
 four carrier sentences, with the synthesizer's noise scales at zero. The
 encoder's frames that cover the target word are pooled into four relative
-bins, and the 96 vectors are averaged.
+bins, and the 96 vectors are averaged. `scripts/features/word_speech.py` writes
+the cache, and the similarity script and the analysis read it through `load`.
 """
 from __future__ import annotations
 
@@ -15,19 +16,18 @@ import numpy as np
 from ..config import WORD_SPEECH, line_fingerprint
 from ..models import ENCODERS
 
-#: The multi-speaker synthesizer. Its output is resampled to ``SAMPLE_RATE``.
+# The multi-speaker synthesizer. Its output is resampled to `SAMPLE_RATE`.
 TTS_REPO = "kakao-enterprise/vits-vctk"
 
 SAMPLE_RATE = 16000
 
-#: The speech encoder.
 SPEECH_MODELS = ("w2v-bert-2.0-frozen",)
 
-#: Relative-position bins the target's frames are pooled into, then
-#: concatenated, so a cached vector is ``BINS`` times the encoder's width.
+# Relative-position bins the target's frames are pooled into, then
+# concatenated, so a cached vector is `BINS` times the encoder's width.
 BINS = 4
 
-#: The four spoken carriers. The target sits first, in the middle or last.
+# The four spoken carriers. The target sits first, in the middle or last.
 CARRIERS = (
     "{w} was written there.",
     "They wrote {w} on it.",
@@ -35,7 +35,7 @@ CARRIERS = (
     "The label reads {w}.",
 )
 
-#: Eight VCTK voices and three speaking rates.
+# Eight VCTK voices and three speaking rates.
 SPEAKERS = (0, 13, 27, 40, 54, 67, 81, 94)
 RATES = (0.9, 1.0, 1.1)
 
@@ -43,7 +43,7 @@ assert len(SPEAKERS) * len(RATES) * len(CARRIERS) == 96, "grid must be 96"
 
 
 def grid() -> list[tuple[str, int, float]]:
-    """The 96 renditions as ``(carrier, speaker, rate)``, in a fixed order."""
+    """The 96 renditions as `(carrier, speaker, rate)`, in a fixed order."""
     return [(carrier, speaker, rate) for speaker in SPEAKERS for rate in RATES
             for carrier in CARRIERS]
 
@@ -53,10 +53,10 @@ def cache_dir(key: str) -> Path:
 
 
 def token_span(tokenizer, carrier: str, word: str) -> tuple[int, int]:
-    """The token indices covering ``word`` inside ``carrier.format(w=word)``.
+    """The token indices covering `word` inside `carrier.format(w=word)`.
 
     The tokenizer phonemizes and then interleaves a blank between every phoneme,
-    so token ``2i + 1`` carries phoneme character ``i``. The target is located
+    so token `2i + 1` carries phoneme character `i`. The target is located
     as the run of its own phonemes inside the carrier's phonemes.
     """
     def phonemes(text: str) -> str:
@@ -75,7 +75,7 @@ def token_span(tokenizer, carrier: str, word: str) -> tuple[int, int]:
 
 def synthesise(model, tokenizer, text: str, speaker: int, rate: float,
                span: tuple[int, int], device: str):
-    """``(waveform at 16 kHz, sample range of the target)``.
+    """`(waveform at 16 kHz, sample range of the target)`.
 
     The per-token durations are read from the duration predictor through a
     forward hook, and they place the target inside the waveform.
@@ -125,7 +125,7 @@ def synthesise(model, tokenizer, text: str, speaker: int, rate: float,
 
 def pool_span(hidden: np.ndarray, wave_length: int,
               span: tuple[int, int]) -> np.ndarray:
-    """The target's frames, averaged within ``BINS`` consecutive bins and concatenated."""
+    """The target's frames, averaged within `BINS` consecutive bins and concatenated."""
     frames = len(hidden)
     lo = int(round(frames * span[0] / wave_length))
     hi = int(round(frames * span[1] / wave_length))
@@ -178,15 +178,15 @@ def alignment_score(tokenizer, tts, features, tower, probe, device) -> float:
     return float((rank == 0).mean())
 
 
-#: Words whose cut-outs are checked against each other before the full run.
+# Words whose cut-outs are checked against each other before the full run.
 PROBE_WORDS = 24
 
 
 def build(words, *, device: str) -> np.ndarray:
-    """Vectors of every rendition, shaped ``(words, 96, BINS * width)``.
+    """Vectors of every rendition, shaped `(words, 96, BINS * width)`.
 
     The mean over axis 1 is the word's vector. The span arithmetic is checked
-    on ``PROBE_WORDS`` words first.
+    on `PROBE_WORDS` words first.
     """
     from transformers import AutoFeatureExtractor, AutoModel, AutoTokenizer, VitsModel
 

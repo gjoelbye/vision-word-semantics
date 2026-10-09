@@ -1,7 +1,9 @@
-"""Difference vectors, margins and tests for the two-clue items.
+"""Difference vectors and margins for the two-clue analysis of Appendix D and Figure 5.
 
-The unit of inference is the clue grid of eight items. Embedding differences
-are averaged over the 96 slots before any cosine is taken.
+`scripts/analysis/figure5_two_clue.py` reads the two-clue caches and scores
+them here; the tests are in `src.stats`. The unit of inference is the clue grid
+of eight items. Embedding differences are averaged over the 96 slots before
+any cosine is taken.
 """
 from __future__ import annotations
 
@@ -12,7 +14,7 @@ import pandas as pd
 
 from ..stimuli.two_clue_render import CONDITIONS
 
-#: The difference vectors that are scored against the targets.
+# The difference vectors that are scored against the targets.
 READOUTS = ("joint", "feature", "base", "interaction")
 
 BLOCK_FIELDS = (
@@ -24,10 +26,10 @@ BLOCK_FIELDS = (
 
 def validate_dense_blocks(manifest: pd.DataFrame, *, n_equations: int,
                           n_slots: int) -> None:
-    """Raise unless the rows reshape to ``(equation, slot, condition)`` blocks.
+    """Raise unless the rows reshape to `(equation, slot, condition)` blocks.
 
-    Within a block the conditions follow ``CONDITIONS`` and every field of
-    ``BLOCK_FIELDS`` is constant, and each equation holds every slot once.
+    Within a block the conditions follow `CONDITIONS` and every field of
+    `BLOCK_FIELDS` is constant, and each equation holds every slot once.
     """
     required = set((*BLOCK_FIELDS, "condition"))
     if missing := required - set(manifest):
@@ -74,12 +76,12 @@ def row_unit(values: np.ndarray) -> np.ndarray:
 
 
 def condition_vectors(block: np.ndarray) -> dict[str, np.ndarray]:
-    """Reduce ``(slot, condition, dimension)`` embeddings to five directions.
+    """Reduce `(slot, condition, dimension)` embeddings to five directions.
 
-    Within a slot and in float32, ``joint``, ``feature`` and ``base`` subtract
-    the image with both clues scrambled, and ``target`` subtracts the scrambled
-    target. Each is then averaged over slots, and ``interaction`` is
-    ``joint - feature - base``.
+    Within a slot and in float32, `joint`, `feature` and `base` subtract
+    the image with both clues scrambled, and `target` subtracts the scrambled
+    target. Each is then averaged over slots, and `interaction` is
+    `joint - feature - base`.
     """
     block = np.asarray(block, dtype=np.float32)
     if block.ndim != 3 or block.shape[1] != len(CONDITIONS):
@@ -105,9 +107,9 @@ def target_metrics(items: pd.DataFrame,
                    vectors: Mapping[str, np.ndarray]) -> pd.DataFrame:
     """Margins of every readout against its item's target, and the axis gains.
 
-    From the cosine with the target, ``*_margin`` subtracts the mean cosine with
-    the other seven targets of the grid, ``*_feature_axis_margin`` the cosine
-    with the one target sharing the base, and ``*_base_axis_margin`` the mean
+    From the cosine with the target, `*_margin` subtracts the mean cosine with
+    the other seven targets of the grid, `*_feature_axis_margin` the cosine
+    with the one target sharing the base, and `*_base_axis_margin` the mean
     cosine with the three sharing the feature.
     """
     missing = set((*READOUTS, "target")) - set(vectors)

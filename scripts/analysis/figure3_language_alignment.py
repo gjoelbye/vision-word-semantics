@@ -3,8 +3,8 @@
 The encoders are CLIP-B, SigLIP2-B, the three Qwen3 text encoders and w2v-BERT
 2.0, and each cell is tested against 1,000 relabelings of the encoder's words
 among words of the same length, with Benjamini-Hochberg adjustment within each
-measure. Reads the matrices of ``scripts/features/similarity.py`` and writes
-``results/language_alignment.parquet``.
+measure. Reads the matrices of `scripts/features/similarity.py` and writes
+`results/language_alignment.parquet`.
 """
 from __future__ import annotations
 
@@ -24,14 +24,14 @@ from src.stimuli.render import fingerprint
 INDEX = SIMILARITY / "index.parquet"
 OUT = RESULTS / "language_alignment.parquet"
 
-#: Neighbors per word in mutual k-NN alignment.
+# Neighbors per word in mutual k-NN alignment.
 K_NEAREST = 10
 
-#: Relabelings in the length-stratified null. The smallest attainable p is
-#: 1 / (N_PERM + 1).
+# Relabelings in the length-stratified null. The smallest attainable p is
+# 1 / (N_PERM + 1).
 N_PERM = 1000
 
-#: The two measures, in the order ``measure_cells`` returns them.
+# The two measures, in the order `measure_cells` returns them.
 MEASURE_NAMES = ("mutual_knn", "cka")
 
 LANGUAGE_SUPERVISED = ("clip-b", "siglip2-b")
@@ -40,21 +40,21 @@ ROWS = [*LANGUAGE_SUPERVISED, *text.TEXT_MODELS, *speech.SPEECH_MODELS]
 
 
 def nearest(matrix: np.ndarray, k: int = K_NEAREST) -> np.ndarray:
-    """Each string's ``k`` nearest other strings, as ``(n, k)`` indices."""
+    """Each string's `k` nearest other strings, as `(n, k)` indices."""
     ranked = np.array(matrix, np.float32)
     np.fill_diagonal(ranked, -np.inf)
     return np.argpartition(-ranked, k, axis=1)[:, :k]
 
 
 def adjacency(neighbors: np.ndarray) -> np.ndarray:
-    """``A[i, j]`` is true where ``j`` is among the nearest of ``i``."""
+    """`A[i, j]` is true where `j` is among the nearest of `i`."""
     out = np.zeros((len(neighbors), len(neighbors)), bool)
     out[np.arange(len(neighbors))[:, None], neighbors] = True
     return out
 
 
 def centred(matrix: np.ndarray) -> np.ndarray:
-    """``H S H`` scaled to unit Frobenius norm, in single precision."""
+    """`H S H` scaled to unit Frobenius norm, in single precision."""
     out = np.array(matrix, np.float64)
     out -= out.mean(0, keepdims=True)
     out -= out.mean(1, keepdims=True)

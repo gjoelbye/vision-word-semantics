@@ -37,8 +37,8 @@ country-capital pairs in DINOv3-H.
   changes the other finetuned models little.
 
 The numbers are from the paper.
-[Reproducing the paper](#reproducing-the-paper) lists the notebook behind each
-figure and table.
+[From paper to code](#from-paper-to-code) lists the notebook, script and
+files behind each figure and table.
 
 ## How it works
 
@@ -116,22 +116,42 @@ The four stages run in order, each reading what the one before wrote.
 Each `run_*.sh` script lists its inputs at the top and says which steps resume
 after an interruption. The analysis stage writes result tables to `results/`,
 then runs the notebooks, which write figures to `figures/` and LaTeX tables to
-`tables/`. All three folders are committed.
+`tables/`. All three folders are committed. The notebooks also read the
+manifests and word tables under `data/`, so they run only after the stages
+before them.
 
-### Notebooks
+### From paper to code
 
-| Notebook | Paper |
-|---|---|
-| `figure1_neighbours` | Figure 1 |
-| `figure2_datasets` | Figure 2 |
-| `figure3_language_alignment` | Figure 3 |
-| `figure4_rendering` | Figure 4 |
-| `figure5_two_clue` | Figure 5, Tables 11 and 12 |
-| `figure6_finetune` | Figure 6, Table 15 |
-| `table1_models` | Tables 1 and 4 to 7 |
-| `table2_class_names` | Tables 2 and 8 to 10 |
-| `table3_wordlists` | Table 3 |
-| `table13_feature_models` | Tables 13 and 14 |
+Each figure and table comes from one notebook in `notebooks/`. Where an
+analysis script in `scripts/analysis/` computes its numbers first, the script
+writes the listed result tables to `results/`. Tables 3 and 11 to 15 are typed
+into the paper from what their notebook prints.
+
+| Paper | Notebook | Analysis script | Result tables | Output |
+|---|---|---|---|---|
+| Figure 1a | `figure1_neighbours` | `figure1_neighbours.py` | `neighbours` | `tables/figure1a_neighbours.tex` |
+| Figure 1b | `figure1_neighbours` | `figure1_neighbours.py` | `figure1b_projection` | `figures/figure1b_pairs.pdf` |
+| Figure 2 | `figure2_datasets` | - | - | `figures/figure2_datasets.pdf` |
+| Figure 3 | `figure3_language_alignment` | `figure3_language_alignment.py` | `language_alignment` | `figures/figure3_language_alignment.pdf` |
+| Figure 4 | `figure4_rendering` | - | - | `figures/figure4_rendering.pdf` |
+| Figure 5 | `figure5_two_clue` | `figure5_two_clue.py` | `two_clue_summary` | `figures/figure5_two_clue.pdf` |
+| Figure 6 | `figure6_finetune` | `figure6_finetune.py` | `finetune_effect`, `finetune_draws` | `figures/figure6_finetune.pdf` |
+| Table 1 | `table1_models` | `table1_models.py` | `purity`, `retrieval`, `encoder_lexical` | `tables/table1_models.tex` |
+| Table 2 | `table2_class_names` | `table2_class_names.py` | `class_alignment`, `class_retrieval` | `tables/table2_class_names.tex` |
+| Table 3 | `table3_wordlists` | - | - | printed |
+| Table 4 | `table1_models` | `table1_models.py` | `retrieval`, `encoder_lexical` | `tables/table4_lexical_retrieval.tex` |
+| Table 5 | `table1_models` | `table1_models.py` | `items`, `retrieval`, `encoder_lexical` | `tables/table5_items.tex` |
+| Table 6 | `table1_models` | `table1_models.py` | `purity`, `latent_categories`, `encoder_lexical` | `tables/table6_category.tex` |
+| Table 7 | `table1_models` | `table1_models.py` | `depth`, `purity`, `retrieval` | `tables/table7_lexical_depth.tex` |
+| Table 8 | `table2_class_names` | `table2_class_names.py` | `class_alignment` | `tables/table8_class_alignment.tex` |
+| Table 9 | `table2_class_names` | `table2_class_names.py` | `class_retrieval` | `tables/table9_class_retrieval.tex` |
+| Table 10 | `table2_class_names` | `table2_class_names.py` | `class_depth` | `tables/table10_class_depth.tex` |
+| Tables 11 and 12 | `figure5_two_clue` | - | - | printed |
+| Tables 13 and 14 | `table13_feature_models` | - | - | printed |
+| Table 15 | `figure6_finetune` | - | - | printed, from the checkpoint records |
+
+[results/README.md](results/README.md) lists the columns of every result
+table and the other values each notebook prints.
 
 ### Notes on exact reproduction
 
@@ -153,12 +173,13 @@ then runs the notebooks, which write figures to `figures/` and LaTeX tables to
 
 | Directory | Contents |
 |---|---|
-| `lexicon/` | Eight word lists with 1,481 words and names plus 80 pseudowords, 200 ImageNet class names, and the two-clue items, pairs of words that together point to a third |
-| `src/` | Rendering, model loading, measurements and statistics |
-| `scripts/` | The four stages, one folder each, with a `run_*.sh` script per stage |
-| `notebooks/` | One notebook per figure or table group of the paper |
+| `lexicon/` | The word lists the paper uses: `vocabulary.tsv` with the eight lexical lists (1,481 words and names plus 80 pseudowords), `class_names.tsv` with the 384 candidate ImageNet-1k class names and the 200 kept, and the two-clue items, pairs of words that together point to a third; see [lexicon/README.md](lexicon/README.md) |
+| `src/` | Library code with one folder per stage, `stimuli/`, `features/`, `finetune/` and `analysis/`, and `paper/` for the figures and tables; the paths, the model registry, the statistics and the text detector sit at the top |
+| `scripts/` | The four stages, one folder each with the same names, and a `run_*.sh` script per stage |
+| `notebooks/` | One notebook per figure or table group of the paper, committed without outputs |
 | `results/` | The result tables the notebooks read; see [results/README.md](results/README.md) |
-| `figures/`, `tables/` | The paper's generated figures and LaTeX tables |
+| `figures/` | The six figures as PDF |
+| `tables/` | The generated LaTeX of Figure 1a and Tables 1, 2 and 4 to 10 |
 | `data/` | Downloads and caches, not tracked; see [data/README.md](data/README.md) |
 
 ## Citation

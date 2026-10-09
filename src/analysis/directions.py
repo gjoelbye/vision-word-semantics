@@ -1,12 +1,22 @@
-"""Word directions from the rendered words, and visual directions from the class photographs.
+"""Word directions and visual directions, as Section 3.3 of the paper defines them.
 
-For a word ``w``, the word direction is the mean over slots ``s`` of
-``f(background_s + w) - f(background_s + scramble_s(w))``. The estimator the
-results use, ``residual_centred``, also subtracts the mean over words. For a
-class ``c`` with photographs ``I_c``, the visual direction is the mean of
-``f(x_i)`` over ``I_c`` minus the mean of those class means over every retained
-class. Caches are checked against the manifest they were built from before they
-are read.
+`f` is a model's class token at one depth. For a word `w` rendered on the 96
+slots `s`, the uncentered word direction is the mean over slots of
+`f(x_s + w) - f(x_s + scrambled w)`. The control keeps the background,
+position, color and backing of the word image and replaces the letters with a
+phase-scrambled patch, so the difference is the response to intact lettering.
+The word direction `tau_w` subtracts the mean of the uncentered directions over
+the vocabulary, and the result tables record it as `residual_centred`. The
+vocabulary is the 1,561 words, names and pseudowords for `MAIN` and the 200
+class names for `CLASS_NAMES`, so a name in both has two word directions.
+
+For a class `c`, the uncentered visual direction is the mean of `f(x_i)` over
+its retained validation photographs. The visual direction `nu_c` subtracts the
+mean of those class means over every retained class, which is all 1,000 when
+every photograph is kept.
+
+Every analysis script reads the caches through `load_cache`, which refuses a
+cache not built, to the end, from the current manifest.
 """
 from __future__ import annotations
 
@@ -28,7 +38,7 @@ from ..stimuli.typography import split_halves
 class Dataset:
     """One rendered image set: the manifest that fixes its row order, and its cache directory.
 
-    ``produced_by`` and ``rebuild`` name the scripts that write the manifest and
+    `produced_by` and `rebuild` name the scripts that write the manifest and
     the caches.
     """
 
@@ -39,16 +49,16 @@ class Dataset:
     rebuild: str = "scripts/features/embed.py"
 
 
-#: The 1,561-word vocabulary.
+# The lexical vocabulary: 1,481 words and names and 80 pseudowords.
 MAIN = Dataset("main", LEXICON / "manifest.parquet", EMBEDDINGS)
 
-#: The 200 class names, rendered on the same slots.
+# The 200 class names, rendered on the same slots.
 CLASS_NAMES = Dataset("class_names", RENDER_MANIFEST,
                       EMBEDDINGS / "concepts" / "renders",
                       produced_by="scripts/stimuli/class_images.py",
                       rebuild="scripts/features/embed.py --manifest concepts")
 
-#: The ImageNet validation photographs of the classes.
+# The ImageNet validation photographs of the classes.
 CLASS_IMAGES = Dataset("class_images", IMAGE_MANIFEST,
                        EMBEDDINGS / "concepts" / "images",
                        produced_by="scripts/stimuli/class_images.py",
@@ -78,10 +88,10 @@ def manifest(ds: Dataset = MAIN) -> pd.DataFrame:
 @lru_cache(maxsize=8)
 def load_cache(key: str, *,
                ds: Dataset = MAIN) -> tuple[np.ndarray, np.ndarray, int]:
-    """Class-token ``(features, layer_indices, n_layers)`` of one model on one image set.
+    """Class-token `(features, layer_indices, n_layers)` of one model on one image set.
 
     Features come back as a read-only memory map. The cache is refused unless it
-    was built, to the end, from the current manifest of ``ds``.
+    was built, to the end, from the current manifest of `ds`.
     """
     import json
 
@@ -120,9 +130,9 @@ def word_directions(key: str, layer: int = -1,
     """Word directions: the mean over slots of f(background + word) - f(background + scrambled word).
 
     Rows follow word_order(), and the scrambled word keeps the word's ink and
-    spatial frequency but loses its glyph structure. ``slots`` restricts the mean,
-    ``center`` subtracts the mean over words, and DegenerateTau is raised where
-    every direction is zero. ``center`` has no default because the results use
+    spatial frequency but loses its glyph structure. `slots` restricts the mean,
+    `center` subtracts the mean over words, and DegenerateTau is raised where
+    every direction is zero. `center` has no default because the results use
     both: the centered directions everywhere, the uncentered ones to measure
     what centering removes.
     """
@@ -172,7 +182,7 @@ def word_directions(key: str, layer: int = -1,
 
 
 def shared_mean_share(T: np.ndarray) -> float:
-    """Squared norm of the mean row of ``T`` over the mean squared row norm.
+    """Squared norm of the mean row of `T` over the mean squared row norm.
 
     Near 1, every row points the same way and a cosine between two rows mostly
     reflects that shared direction.
@@ -181,8 +191,8 @@ def shared_mean_share(T: np.ndarray) -> float:
     return float(np.linalg.norm(T.mean(0)) ** 2 / (T ** 2).sum(1).mean())
 
 
-#: The name the result tables and the similarity index record for the centered
-#: word directions.
+# The name the result tables and the similarity index record for the centered
+# word directions.
 HEADLINE = "residual_centred"
 
 
@@ -194,7 +204,7 @@ def split_half_cosine(key: str, appearances, layer: int = -1) -> float:
     """Mean over words of the cosine between the two matched-appearance halves.
 
     Each half's centered word directions come from that half's slots,
-    restricted to ``appearances`` (``None`` keeps every appearance tuple).
+    restricted to `appearances` (`None` keeps every appearance tuple).
     """
     a, b = split_halves(appearances)
     ta = rownorm(word_directions(key, layer, tuple(a), center=True))
@@ -202,8 +212,8 @@ def split_half_cosine(key: str, appearances, layer: int = -1) -> float:
     return float((ta * tb).sum(1).mean())
 
 
-#: Photograph subsets a class direction can be built from: every photograph, or
-#: those in which the text detector found no writing.
+# Photograph subsets a class direction can be built from: every photograph, or
+# those in which the text detector found no writing.
 SUBSETS = ("all", "text_free")
 
 
@@ -222,15 +232,15 @@ def _rows(subset: str) -> pd.DataFrame:
 
 @lru_cache(maxsize=8)
 def retained(subset: str = "all") -> tuple[str, ...]:
-    """The classes with at least ``MIN_IMAGES`` photographs in ``subset``, sorted by class id."""
+    """The classes with at least `MIN_IMAGES` photographs in `subset`, sorted by class id."""
     counts = _rows(subset).groupby("wnid").size()
     return tuple(sorted(counts.index[counts >= MIN_IMAGES]))
 
 
 def class_mean(key: str, layer: int = -1, subset: str = "all") -> np.ndarray:
-    """``(n_classes, d)`` class directions, rows aligned to ``retained(subset)``.
+    """`(n_classes, d)` class directions, rows aligned to `retained(subset)`.
 
-    Each class is averaged over its photographs in ``subset``, and the mean over
+    Each class is averaged over its photographs in `subset`, and the mean over
     the retained classes is subtracted.
     """
     x, _, _ = load_cache(key, ds=CLASS_IMAGES)

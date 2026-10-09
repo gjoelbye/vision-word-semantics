@@ -1,8 +1,12 @@
 """Layout, manifest and rendering of the two-clue items.
 
-Each item is rendered in six conditions on the 96 slots of the main word set,
-under ``composition/``. The positions of the broad clue and of the target
-cross two by two over the four background replicates.
+`scripts/stimuli/two_clue.py` renders every item on the 96 slots of the
+lexical vocabulary, under `data/composition/`. An item is drawn in six
+conditions: both clues readable, only the broad clue readable, only the narrow
+clue readable, both clues scrambled, and the target alone, readable and
+scrambled. The positions of the broad clue and of the target cross two by two
+over the four background replicates. `manifest_fingerprint` lets the two-clue
+caches refuse a manifest they were not built from.
 """
 from __future__ import annotations
 
@@ -59,7 +63,7 @@ def load_curated_items() -> tuple[pd.DataFrame, pd.DataFrame, str]:
 
 
 def replicate_assignment(replicate: int) -> tuple[str, str]:
-    """Return ``(feature_position, target_position)`` for one replicate.
+    """Return `(feature_position, target_position)` for one replicate.
 
     All four combinations of upper and lower occur over the four replicates.
     """
@@ -70,7 +74,7 @@ def replicate_assignment(replicate: int) -> tuple[str, str]:
         3: ("lower", "upper"),
     }
     if replicate not in assignment:
-        raise ValueError(f"composition layout needs replicate 0-3, got {replicate}")
+        raise ValueError(f"two-clue layout needs replicate 0-3, got {replicate}")
     return assignment[replicate]
 
 
@@ -105,12 +109,12 @@ def _assert_pair_fits(upper: tuple[int, int], lower: tuple[int, int],
         if not (x0 >= wx and x1 <= wx + side
                 and y0 >= wy and y1 <= wy + side):
             raise ValueError(
-                f"composition box including panel leaves crop-safe window: "
+                f"two-clue box including panel leaves crop-safe window: "
                 f"{(x0, y0, x1, y1)} vs {(wx, wy, wx + side, wy + side)}")
     ub = box_at_centre(upper, max_width, height)
     lb = box_at_centre(lower, max_width, height)
     if _box_panel_bounds(ub, pad)[3] >= _box_panel_bounds(lb, pad)[1]:
-        raise ValueError("composition word panels overlap")
+        raise ValueError("two-clue word panels overlap")
 
 
 def build_layout(items: pd.DataFrame) -> pd.DataFrame:
@@ -160,12 +164,12 @@ def load_or_create_layout(items: pd.DataFrame,
         if (meta.get("dataset_sha") != dataset_sha
                 or meta.get("render_schema") != RENDER_SCHEMA_VERSION):
             raise RuntimeError(
-                "composition layout belongs to a different dataset or render "
+                "two-clue layout belongs to a different dataset or render "
                 "schema; delete composition/ to rebuild it")
         layout = pd.read_parquet(LAYOUT_PATH)
         got = _layout_fingerprint(layout, dataset_sha)
         if got != meta.get("layout_sha"):
-            raise RuntimeError("composition layout fingerprint does not match metadata")
+            raise RuntimeError("two-clue layout fingerprint does not match metadata")
         return layout, got
 
     layout = build_layout(items)
@@ -252,7 +256,7 @@ def _centre(layout: dict, position: str) -> tuple[int, int]:
 
 def _render_tokens(background: Image.Image, tokens: list[tuple[str, str, str, int]],
                    layout: dict) -> Image.Image:
-    """Draw ``(text, position, mode, seed)`` tokens onto one background."""
+    """Draw `(text, position, mode, seed)` tokens onto one background."""
     image = background
     for text, position, mode, seed in tokens:
         width, height = text_extent(layout["font"], layout["size"], text)
@@ -270,10 +274,10 @@ def _render_tokens(background: Image.Image, tokens: list[tuple[str, str, str, in
 
 
 def rendering_conditions(item) -> dict[str, tuple[tuple[str, str], ...]]:
-    """The words each condition draws for one item, as ``(word, mode)`` pairs.
+    """The words each condition draws for one item, as `(word, mode)` pairs.
 
-    Conditions follow ``CONDITIONS`` and words follow the drawing order of
-    ``_render_job``. ``item`` needs ``feature``, ``base`` and ``target``.
+    Conditions follow `CONDITIONS` and words follow the drawing order of
+    `_render_job`. `item` needs `feature`, `base` and `target`.
     """
     feature, base, target = item["feature"], item["base"], item["target"]
     return {
@@ -348,7 +352,7 @@ def render_dataset(items: pd.DataFrame, layout: pd.DataFrame, dataset_sha: str,
         }
         if any(previous.get(key) != value for key, value in expected.items()):
             raise RuntimeError(
-                "composition manifest belongs to a different dataset, layout, "
+                "two-clue manifest belongs to a different dataset, layout, "
                 "or render schema; delete composition/ to rebuild it")
     manifest.to_parquet(MANIFEST_PATH, index=False)
 
@@ -375,7 +379,7 @@ def render_dataset(items: pd.DataFrame, layout: pd.DataFrame, dataset_sha: str,
     written = processed = 0
     with ProcessPoolExecutor(max_workers=workers) as executor:
         results = executor.map(_render_job, jobs, chunksize=4)
-        with tqdm(total=len(jobs) * len(CONDITIONS), desc="render composition",
+        with tqdm(total=len(jobs) * len(CONDITIONS), desc="render two-clue",
                   unit="img", dynamic_ncols=True) as bar:
             for count in results:
                 processed += 1

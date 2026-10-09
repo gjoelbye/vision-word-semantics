@@ -1,10 +1,11 @@
-"""Read the word set from ``lexicon/vocabulary.tsv`` and write the word, pair and audit tables.
+"""Read the word set from `lexicon/vocabulary.tsv` and write the word, pair and audit tables.
 
-Writes ``lexicon/words.parquet`` (one row per word with its role, frequency and
-widest rendering), ``lexicon/pairs.parquet`` (the pairs of ``src.stimuli.vocabulary.PAIRS``)
-and ``lexicon/audit.parquet`` (the checks on the word set). Stops if a word
-does not fit the crop-safe window or a blocking gate fails. With ``--readme``
-it only writes the committed ``lexicon/README.md`` from the committed lists.
+Writes `data/lexicon/words.parquet` (one row per word with its role, frequency
+and widest rendering), `data/lexicon/pairs.parquet` (the pairs of
+`src.stimuli.vocabulary.PAIRS`) and `data/lexicon/audit.parquet` (the checks
+on the word set). Stops if a word
+does not fit the crop-safe window or a blocking gate fails. With `--readme`
+it only writes the committed `lexicon/README.md` from the committed lists.
 """
 from __future__ import annotations
 
@@ -40,8 +41,8 @@ def main() -> None:
     for slug, *_ in LISTS:
         print(f"  {slug:<17} {vocabulary.item[vocabulary.list == slug].nunique():4d} items")
 
-    # --- one row per rendered word ------------------------------------------
-    # ``role`` is ``pair`` for the five relation lists; ``item_role`` is the
+    # One row per rendered word.
+    # `role` is `pair` for the five relation lists; `item_role` is the
     # part the word plays inside its own item.
     words = pd.DataFrame(dict(
         word=vocabulary.word,
@@ -61,7 +62,7 @@ def main() -> None:
 
     pairs = pair_table(vocabulary)
 
-    # --- deterministic gates ------------------------------------------------
+    # Deterministic gates.
     cats = words[words.role == "category"]
     brands = words[words.role == "brand"]
     rows = (audit.audit_words(words)

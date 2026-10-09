@@ -1,6 +1,8 @@
 """Formatting primitives for the LaTeX tables: row groups, bands, marks, numbers and layout.
 
-A table body is written as a ``tabular*`` and rewritten by :func:`fit` into a
+`src.paper.tables` builds every table from these.
+
+A table body is written as a `tabular*` and rewritten by `fit` into a
 tabular that fills the line with its own column separation, so a gray band runs
 across a row without gaps.
 """
@@ -14,8 +16,8 @@ from ..features.speech import SPEECH_MODELS
 from ..features.text import TEXT_MODELS
 from ..models import PRETTY
 
-#: Row groups of every model table, separated by white space: DINOv3, Web-DINO,
-#: DINOv2, MAE, the caption-trained pair and the untrained network.
+# Row groups of every model table, separated by white space: DINOv3, Web-DINO,
+# DINOv2, MAE, the caption-trained pair and the untrained network.
 GROUPS = (("dinov3-b", "dinov3-l", "dinov3-h", "dinov3-7b"),
           ("webssl-dino-1b",),
           ("dinov2-b", "dinov2-l", "dinov2-g"),
@@ -23,35 +25,35 @@ GROUPS = (("dinov3-b", "dinov3-l", "dinov3-h", "dinov3-7b"),
           ("clip-b", "siglip2-b"),
           ("vit-random-b",))
 
-#: The encoders printed under the models as references, with their table labels.
+# The encoders printed under the models as references, with their table labels.
 REFERENCE = {key: PRETTY[key].replace(" ", "~")
              for key in TEXT_MODELS + SPEECH_MODELS}
 
-#: The untrained network every model is read against.
+# The untrained network every model is read against.
 BASELINE = "vit-random-b"
-#: Standard errors of the difference a value must exceed the baseline by to be underlined.
+# Standard errors of the difference a value must exceed the baseline by to be underlined.
 MARK_SIGMA = 2
 
 
 def above_baseline(value: float, se: float, base: float, base_se: float) -> bool:
-    """True where ``value`` exceeds ``base`` by more than MARK_SIGMA standard errors of the difference.
+    """True where `value` exceeds `base` by more than MARK_SIGMA standard errors of the difference.
 
-    The standard error of the difference is ``sqrt(se^2 + base_se^2)``, which
+    The standard error of the difference is `sqrt(se^2 + base_se^2)`, which
     treats the two estimates as independent.
     """
     return value - base > MARK_SIGMA * (se ** 2 + base_se ** 2) ** 0.5
 
 
-#: The color name and gray level of a banded row group.
+# The color name and gray level of a banded row group.
 BAND = ("tabband", 0.94)
 
-#: The sentence every table file adds to its note about the bands.
+# The sentence every table file adds to its note about the bands.
 BAND_NOTE = (" The rows are grouped by model family and every second group "
              "carries a gray band.")
 
 
 def band(index: int) -> str:
-    """The row fill of the ``index``-th row group: every even group is banded."""
+    """The row fill of the `index`-th row group: every even group is banded."""
     return f"\\rowcolor{{{BAND[0]}}}" if index % 2 == 0 else ""
 
 
@@ -63,7 +65,7 @@ def band_colour() -> str:
 def fitted(spec: str, body: list[str]) -> list[str]:
     """A tabular with column separation set so that it fills the line width.
 
-    The body is measured with no separation, and ``\\tabcolsep`` is set to share
+    The body is measured with no separation, and `\\tabcolsep` is set to share
     the remaining width evenly over the columns.
     """
     columns = sum(c in "lrc" for c in spec)
@@ -81,13 +83,13 @@ def fitted(spec: str, body: list[str]) -> list[str]:
             "\\endgroup"]
 
 
-#: A ``tabular*`` opening line, capturing its column specification.
+# A `tabular*` opening line, capturing its column specification.
 TABULAR = re.compile(r"\\begin\{tabular\*\}\{[^}]*\}"
                      r"\{@\{\\extracolsep\{\\fill\}\}(.*?)(?:@\{\})?\}$")
 
 
 def fit(lines: list[str]) -> list[str]:
-    """Every ``tabular*`` in ``lines`` rewritten by :func:`fitted`."""
+    """Every `tabular*` in `lines` rewritten by `fitted`."""
     out, i = [], 0
     while i < len(lines):
         match = TABULAR.match(lines[i])
@@ -101,12 +103,12 @@ def fit(lines: list[str]) -> list[str]:
     return out
 
 
-#: Type size of a standard error printed after its value.
+# Type size of a standard error printed after its value.
 SE_SIZE = "\\scriptsize"
 
 
 def without_zero(text: str) -> str:
-    """A number below one without its leading zero, as ``.034``."""
+    """A number below one without its leading zero, as `.034`."""
     return text[1:] if text.startswith("0.") else text
 
 
@@ -118,7 +120,7 @@ def se_text(se: float, digits: int = 3) -> str:
 
 
 def se_suffix(se: float, digits: int = 3, size: str = SE_SIZE) -> str:
-    """The small ``±.034`` printed after a value."""
+    """The small `±.034` printed after a value."""
     return f"\\,{{{size}$\\pm${se_text(se, digits)}}}"
 
 
@@ -130,7 +132,7 @@ def bare(text: str, digits: int = 3, size: str = SE_SIZE) -> str:
 def cell(value: float, bold: bool, mark: bool, se: float | None = None,
          digits: int = 3, se_size: str = SE_SIZE,
          strip_zero: bool = False) -> str:
-    """A value, bold if ``bold``, underlined if ``mark``, followed by its standard error."""
+    """A value, bold if `bold`, underlined if `mark`, followed by its standard error."""
     text = f"{value:.{digits}f}"
     if strip_zero:
         text = without_zero(text)
@@ -144,7 +146,7 @@ def cell(value: float, bold: bool, mark: bool, se: float | None = None,
 
 
 def pval(p: float) -> str:
-    """A p-value to three places, ``$<$0.001`` below 0.001, and a dash when missing."""
+    """A p-value to three places, `$<$0.001` below 0.001, and a dash when missing."""
     if p != p:
         return "-"
     if p < 0.001:
@@ -158,7 +160,7 @@ def rank_text(value: float) -> str:
 
 
 def zero(value: float, digits: int = 3) -> str:
-    """A value to ``digits`` places, with a negative zero printed as zero."""
+    """A value to `digits` places, with a negative zero printed as zero."""
     text = f"{value:.{digits}f}"
     return text.replace("-0." + "0" * digits, "0." + "0" * digits)
 
@@ -185,7 +187,7 @@ def reference_rows(lines: list[str], printed: list, render, *,
                    start: int = len(GROUPS)) -> None:
     """Append the encoder rows under a rule, continuing the bands of the model rows.
 
-    ``render`` returns the cells of one encoder. With ``rule_before_speech`` a
+    `render` returns the cells of one encoder. With `rule_before_speech` a
     second rule separates the speech encoder from the text encoders.
     """
     lines.append("\\midrule")
@@ -217,7 +219,7 @@ def model_rows(lines: list[str], printed: list, models, render) -> None:
 
 
 def _unwrap(text: str, macro: str, keep: bool) -> str:
-    """Replace every ``\\macro{...}`` by its argument, or remove it."""
+    """Replace every `\\macro{...}` by its argument, or remove it."""
     opening = f"\\{macro}{{"
     while (start := text.find(opening)) >= 0:
         depth, i = 1, start + len(opening)
@@ -230,7 +232,7 @@ def _unwrap(text: str, macro: str, keep: bool) -> str:
 
 
 def plain(text: str) -> str:
-    """A table cell without its LaTeX markup, as ``0.600 ±.063``."""
+    """A table cell without its LaTeX markup, as `0.600 ±.063`."""
     text = _unwrap(text, "hphantom", keep=False)
     for macro in ("textbf", "underline", "emph", "shortstack"):
         text = _unwrap(text, macro, keep=True)
@@ -241,7 +243,7 @@ def plain(text: str) -> str:
 
 def printed_frame(printed: list, columns: list[str],
                   index_name: str = "Model") -> pd.DataFrame:
-    """The printed cells of a table as plain text, one row per ``(label, cells)``."""
+    """The printed cells of a table as plain text, one row per `(label, cells)`."""
     frame = pd.DataFrame([[plain(c) for c in cells] for _, cells in printed],
                          columns=columns,
                          index=pd.Index([plain(label) for label, _ in printed],

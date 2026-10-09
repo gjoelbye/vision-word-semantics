@@ -1,10 +1,10 @@
 """Validate, lay out and render the two-clue items.
 
-Reads ``lexicon/two_clue_pilot.tsv`` and ``lexicon/two_clue_confirmatory.tsv``,
-records the layout and manifest under ``composition/``, and renders the six
-conditions of every item on the 96 slots into ``composition/renders/``.
-Rendering resumes where it stopped. ``scripts/features/embed.py --manifest
-two_clue`` embeds the renders.
+Reads `lexicon/two_clue_pilot.tsv` and `lexicon/two_clue_confirmatory.tsv`,
+records the layout and manifest under `data/composition/`, and renders the
+six conditions of every item on the 96 slots into `data/composition/renders/`.
+Rendering resumes where it stopped. `scripts/features/embed.py --manifest
+two_clue` embeds the renders.
 """
 from __future__ import annotations
 

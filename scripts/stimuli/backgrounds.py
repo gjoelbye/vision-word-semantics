@@ -8,8 +8,8 @@ score against prompts for good and for poor photographs, and the best of each
 class, up to 200, are checked for text by OCR. OCR reads the full-size
 photograph upscaled to at least 1,200 pixels on the long edge, and three
 high-pass versions of it, each also rotated 30 degrees either way. The first 96
-with no text are written as ``backgrounds/bg_000.png`` to ``bg_095.png`` with
-``backgrounds/backgrounds.parquet``. The candidate pools live in a temporary
+with no text are written as `data/backgrounds/bg_000.png` to `bg_095.png` with
+`data/backgrounds/backgrounds.parquet`. The candidate pools live in a temporary
 directory.
 """
 from __future__ import annotations
@@ -32,13 +32,13 @@ from src.text_detector import LINK_THRESHOLD, LOW_TEXT, TEXT_THRESHOLD
 
 CLIP_REPO = "openai/clip-vit-base-patch16"
 
-#: Validation photographs sampled, spread evenly over the shards.
+# Validation photographs sampled, spread evenly over the shards.
 N_SCAN = 9000
 
-#: Candidates, at most one per class, passed to the OCR screen.
+# Candidates, at most one per class, passed to the OCR screen.
 SHORTLIST = 200
 
-#: A candidate is rejected on any OCR confidence at or above this.
+# A candidate is rejected on any OCR confidence at or above this.
 OCR_THRESHOLD = 0.01
 
 AESTHETIC_POSITIVE = [
@@ -81,7 +81,7 @@ def describe(img: Image.Image) -> dict:
 
 
 def load_candidates(n_scan: int, pool: Path) -> pd.DataFrame:
-    """Save sampled validation photographs into ``pool``, square and full size; return their statistics."""
+    """Save sampled validation photographs into `pool`, square and full size; return their statistics."""
     import pyarrow.parquet as pq
 
     shards = sorted((IMAGENET / "data").glob("validation-*.parquet"))
@@ -116,12 +116,12 @@ def load_candidates(n_scan: int, pool: Path) -> pd.DataFrame:
     return pd.DataFrame(rows).drop_duplicates("key").reset_index(drop=True)
 
 
-#: High-pass radii as a fraction of the long edge, one per watermark scale.
+# High-pass radii as a fraction of the long edge, one per watermark scale.
 HP_RADII = (0.008, 0.02, 0.04)
 
 
 def _watermark_variants(path: str, upscale: int = 1200) -> dict[str, "np.ndarray"]:
-    """The photograph upscaled, and its high-pass versions at the ``HP_RADII`` scales.
+    """The photograph upscaled, and its high-pass versions at the `HP_RADII` scales.
 
     Subtracting a heavy blur removes the scene's tones and leaves a faint
     overlay, such as a stock watermark, on flat gray.

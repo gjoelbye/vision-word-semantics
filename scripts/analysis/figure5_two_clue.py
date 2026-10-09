@@ -1,11 +1,11 @@
 """Clue gains, bootstrap intervals and sign-flip tests for the two-clue items.
 
-Reads the two-clue manifest of ``scripts/stimuli/two_clue.py`` and
+Reads the two-clue manifest of `scripts/stimuli/two_clue.py` and
 the final-layer class-token caches of the 14 image models written by
-``scripts/features/embed.py --manifest two_clue``, and scores the 12
+`scripts/features/embed.py --manifest two_clue`, and scores the 12
 confirmatory and the 6 pilot clue grids as separate analysis sets, with Holm
 correction across the 13 pretrained models within each set. Writes
-``results/two_clue_summary.parquet``.
+`results/two_clue_summary.parquet`.
 """
 from __future__ import annotations
 
@@ -36,10 +36,10 @@ BOOTSTRAP_SEED = 20260828
 N_BOOTSTRAP = 20_000
 OUT = RESULTS / "two_clue_summary.parquet"
 
-#: The analysis sets, each scored on its own clue grids.
+# The analysis sets, each scored on its own clue grids.
 ANALYSIS_SETS = ("confirmatory", "pilot")
 
-#: Grid-level metrics carried into the summary.
+# Grid-level metrics carried into the summary.
 METRICS = (
     "joint_margin",
     "interaction_margin",
@@ -47,14 +47,14 @@ METRICS = (
     "base_axis_gain_over_feature",
 )
 
-#: Metrics reported with a percentile bootstrap interval.
+# Metrics reported with a percentile bootstrap interval.
 INTERVAL_METRICS = (
     "interaction_margin",
     "feature_axis_gain_over_base",
     "base_axis_gain_over_feature",
 )
 
-#: The model excluded from the Holm family.
+# The model excluded from the Holm family.
 UNTRAINED = "vit-random-b"
 
 

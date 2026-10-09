@@ -7,10 +7,10 @@ from src.stimuli.vocabulary import letter_overlap
 
 
 def _blocked(n_per=25, n_class=4, d=32, seed=0, sep=3.0):
-    """Points drawn around ``n_class`` random centers, and their labels.
+    """Points drawn around `n_class` random centers, and their labels.
 
-    At the default ``sep`` of 3.0 purity is exactly 1.0 for every seed, so any
-    interval is [1.0, 1.0]. Tests of an interval pass a smaller ``sep``.
+    At the default `sep` of 3.0 purity is exactly 1.0 for every seed, so any
+    interval is [1.0, 1.0]. Tests of an interval pass a smaller `sep`.
     """
     rng = np.random.default_rng(seed)
     labels = np.repeat(np.arange(n_class), n_per)
@@ -50,7 +50,7 @@ def test_a_tie_counts_for_the_partner_not_against_it():
 
 
 def test_a_within_item_tie_counts_for_neither_competitor():
-    """The comparison within an item and ``partner_rank`` treat a tie the same
+    """The comparison within an item and `partner_rank` treat a tie the same
     way, so the win count and the top-10 count agree about the same item. Four
     words lie in a plane, with the anchor exactly between its synonym and its
     look-alike. The difference of cosines is zero, and an exact sign test drops
@@ -81,8 +81,8 @@ def test_partner_rank_counts_only_strictly_better_words():
 
 def test_within_ten_admits_nine_words_ahead_and_not_ten():
     """A partner beaten by exactly nine words is among the ten nearest and
-    one beaten by ten is not, so the boundary is ``rank < 10`` on the
-    zero-based rank and not ``rank <= 10``. A tie at tenth place counts for
+    one beaten by ten is not, so the boundary is `rank < 10` on the
+    zero-based rank and not `rank <= 10`. A tie at tenth place counts for
     the partner, as every tie here does."""
     n = 12
     S = np.zeros((n, n))

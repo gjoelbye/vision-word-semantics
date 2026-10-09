@@ -23,9 +23,9 @@ SPECIFIC = {"alpha": np.array([0, 0, 0, 1.0, 0, 0], np.float32),
 
 def _install(monkeypatch, control: str | None):
     """Install a synthetic manifest and cache whose word rows carry the shared
-    and the word-specific part. ``control`` sets what the scrambled rows carry
-    on top of the background: ``"background"`` nothing, ``"shared"`` the shared
-    part, ``None`` no scrambled rows at all."""
+    and the word-specific part. `control` sets what the scrambled rows carry
+    on top of the background: `"background"` nothing, `"shared"` the shared
+    part, `None` no scrambled rows at all."""
     rows = [dict(word=CLEAN, slot=s, condition="clean", image_path=f"/bg/{s}")
             for s in range(N_SLOTS)]
     for w in WORDS:

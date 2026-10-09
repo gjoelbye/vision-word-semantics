@@ -1,9 +1,10 @@
-"""Readers of the word lists and guarded readers of the result tables.
+"""Readers of the generated word tables and guarded readers of the result tables.
 
-A result table records the fingerprints of the manifests it was computed from.
-:func:`read` and :func:`two_clue_summary` refuse a table whose fingerprints
-are not those of the current manifests, so no notebook or table shows a number
-from stale inputs.
+The notebooks and the table builders read `results/` through this module. A
+result table records the fingerprints of the manifests it was computed from,
+and `read` and `two_clue_summary` refuse a table whose fingerprints are not
+those of the current manifests, so no figure or table shows a number from
+stale inputs.
 """
 from __future__ import annotations
 
@@ -16,37 +17,37 @@ from ..stimuli.render import fingerprint
 from ..stimuli.two_clue_render import MANIFEST_PATH, load_curated_items, manifest_fingerprint
 from ..analysis.directions import CLASS_IMAGES, CLASS_NAMES, MAIN, manifest, word_order
 
-#: The fingerprint columns a result table can carry, and the image set each names.
+# The fingerprint columns a result table can carry, and the image set each names.
 _MANIFESTS = {"manifest_sha": MAIN, "word_manifest_sha": CLASS_NAMES,
               "image_manifest_sha": CLASS_IMAGES}
 
 
 def words() -> pd.DataFrame:
-    """``lexicon/words.parquet``: one row per word of the vocabulary, with its role and form."""
+    """`data/lexicon/words.parquet`: one row per word of the vocabulary, with its role and form."""
     return pd.read_parquet(LEXICON / "words.parquet")
 
 
 def pairs() -> pd.DataFrame:
-    """``lexicon/pairs.parquet``: the word pairs of each relation."""
+    """`data/lexicon/pairs.parquet`: the word pairs of each relation."""
     return pd.read_parquet(LEXICON / "pairs.parquet")
 
 
 def audit() -> pd.DataFrame:
-    """``lexicon/audit.parquet``: the checks run on the vocabulary before rendering."""
+    """`data/lexicon/audit.parquet`: the checks run on the vocabulary before rendering."""
     return pd.read_parquet(LEXICON / "audit.parquet")
 
 
 def class_names() -> pd.DataFrame:
-    """``lexicon/concepts.parquet``: the 200 class names, as the class-name stage writes them."""
+    """`data/lexicon/concepts.parquet`: the 200 class names, as the class-name stage writes them."""
     return pd.read_parquet(LEXICON / "concepts.parquet")
 
 
 def read(name: str) -> pd.DataFrame:
-    """``results/<name>.parquet``, refused unless its fingerprints match the current manifests.
+    """`results/<name>.parquet`, refused unless its fingerprints match the current manifests.
 
-    ``manifest_sha`` is checked against the main manifest, ``word_manifest_sha``
-    and ``image_manifest_sha`` against the class-name and class-image
-    manifests, and ``word_sha`` against the current word order. A table with
+    `manifest_sha` is checked against the main manifest, `word_manifest_sha`
+    and `image_manifest_sha` against the class-name and class-image
+    manifests, and `word_sha` against the current word order. A table with
     none of the manifest columns is refused.
     """
     path = RESULTS / f"{name}.parquet"
@@ -68,10 +69,10 @@ def read(name: str) -> pd.DataFrame:
 
 
 def two_clue_summary() -> pd.DataFrame:
-    """``results/two_clue_summary.parquet``, refused unless it matches the two-clue inputs.
+    """`results/two_clue_summary.parquet`, refused unless it matches the two-clue inputs.
 
-    ``dataset_sha`` is checked against the committed two-clue item tables and
-    ``manifest_sha`` against the two-clue manifest.
+    `dataset_sha` is checked against the committed two-clue item tables and
+    `manifest_sha` against the two-clue manifest.
     """
     path = RESULTS / "two_clue_summary.parquet"
     if not path.exists():
@@ -87,7 +88,7 @@ def two_clue_summary() -> pd.DataFrame:
 
 
 def sweep_rows(frame: pd.DataFrame, column: str = "model") -> pd.DataFrame:
-    """The rows of the 14 image models in the paper's order, with their names in ``label``."""
+    """The rows of the 14 image models in the paper's order, with their names in `label`."""
     order = {key: i for i, key in enumerate(DEFAULT_SWEEP)}
     rows = frame[frame[column].isin(order)]
     return (rows.sort_values(column, key=lambda keys: keys.map(order), kind="stable")

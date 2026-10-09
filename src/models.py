@@ -1,10 +1,12 @@
-"""Registry of the image backbones and frozen encoders, and how each backbone is loaded.
+"""The registry of image models and frozen encoders, and the loader every stage uses.
 
-The sweep holds fourteen pretrained image backbones: the DINOv3, DINOv2 and MAE
-ladders, Web-DINO-1B, CLIP-B and SigLIP2-B, and an untrained ViT-B. Each of ten
-of them is also finetuned twice on SPEECH-COCO, against a frozen text encoder
-and against a frozen speech encoder. ``ENCODERS`` lists those two encoders and
-the other text encoders the word set is read with.
+The paper measures fourteen pretrained image models: the DINOv3, DINOv2 and MAE
+series, Web-DINO-1B, CLIP-B, SigLIP2-B and an untrained ViT-B. Ten of them are
+also finetuned twice on SPEECH-COCO, once against a frozen text encoder and
+once against a frozen speech encoder, and each finetune is registered under its
+own key. `ENCODERS` lists those two encoders and the other text encoders the
+vocabulary is read with. `load` gives the feature, finetuning and analysis code
+the same backbone, processor and depth for a key.
 """
 from __future__ import annotations
 
@@ -46,16 +48,16 @@ _SPECS = [
     ModelSpec("vit-random-b", "google/vit-base-patch16-224", "random", "Untrained", 86),
 ]
 
-#: The fourteen pretrained backbones, in the row order of the tables.
+# The fourteen pretrained backbones, in the row order of the tables.
 DEFAULT_SWEEP = ("dinov3-b", "dinov3-l", "dinov3-h", "dinov3-7b",
                  "webssl-dino-1b",
                  "dinov2-b", "dinov2-l", "dinov2-g",
                  "mae-b", "mae-l", "mae-h",
                  "clip-b", "siglip2-b", "vit-random-b")
 
-#: Frozen encoders as ``key: (repository, output width, kind)``. The three
-#: Qwen3 models read the word set as text; Qwen3-0.6B and w2v-BERT 2.0 are also
-#: the targets the finetunes are trained against.
+# Frozen encoders as `key: (repository, output width, kind)`. The three
+# Qwen3 models read the word set as text; Qwen3-0.6B and w2v-BERT 2.0 are also
+# the targets the finetunes are trained against.
 ENCODERS: dict[str, tuple[str, int, str]] = {
     "qwen3-0p6b-frozen": ("Qwen/Qwen3-Embedding-0.6B", 1024, "qwen3"),
     "qwen3-4b-frozen": ("Qwen/Qwen3-Embedding-4B", 2560, "qwen3"),
@@ -63,8 +65,8 @@ ENCODERS: dict[str, tuple[str, int, str]] = {
     "w2v-bert-2.0-frozen": ("facebook/w2v-bert-2.0", 1024, "speech"),
 }
 
-#: The encoders a finetune can be trained against, and the suffix each adds to
-#: the finetuned model's key.
+# The encoders a finetune can be trained against, and the suffix each adds to
+# the finetuned model's key.
 _TOWER_SUFFIX = {"qwen3-0p6b-frozen": "", "w2v-bert-2.0-frozen": "-w2vbert"}
 
 
@@ -76,9 +78,9 @@ def finetune_key(backbone: str, tower: str) -> str:
     return f"{backbone}-scocoft{_TOWER_SUFFIX[tower]}"
 
 
-#: The SPEECH-COCO finetunes as ``(backbone, tower, step)``. The step is the
-#: training step the checkpoint records, and loading refuses a checkpoint whose
-#: record differs.
+# The SPEECH-COCO finetunes as `(backbone, tower, step)`. The step is the
+# training step the checkpoint records, and loading refuses a checkpoint whose
+# record differs.
 _FINETUNES = [
     ("dinov3-b", "qwen3-0p6b-frozen", 1199),
     ("dinov3-b", "w2v-bert-2.0-frozen", 1308),
@@ -112,11 +114,11 @@ for _backbone, _tower, _step in _FINETUNES:
 
 MODELS: dict[str, ModelSpec] = {s.key: s for s in _SPECS}
 
-#: The twenty SPEECH-COCO finetunes, in the sweep order of their backbones,
-#: the text run before the speech run.
+# The twenty SPEECH-COCO finetunes, in the sweep order of their backbones,
+# the text run before the speech run.
 FINETUNES = tuple(finetune_key(b, t) for b, t, _ in _FINETUNES)
 
-#: Pretrained backbone of each finetune.
+# Pretrained backbone of each finetune.
 TWIN_OF: dict[str, str] = {k: MODELS[k].extra["base"] for k in FINETUNES}
 
 PRETTY = {"dinov2-b": "DINOv2-B", "dinov2-l": "DINOv2-L", "dinov2-g": "DINOv2-G",
@@ -130,15 +132,15 @@ PRETTY |= {k: f"{PRETTY[TWIN_OF[k]]} + SPEECH-COCO "
               f"{'speech' if ENCODERS[MODELS[k].extra['tower']][2] == 'speech' else 'text'}"
            for k in FINETUNES}
 
-#: Family and parameter count of each registered key, for grouping and sorting.
+# Family and parameter count of each registered key, for grouping and sorting.
 FAMILY_OF: dict[str, str] = {k: s.family for k, s in MODELS.items()}
 PARAMS_M: dict[str, int] = {k: s.params_m for k, s in MODELS.items()}
 
 
 def layers_and_width(key: str) -> tuple[int, int]:
-    """``(transformer blocks, hidden width)`` from the model's cached Hugging Face config.
+    """`(transformer blocks, hidden width)` from the model's cached Hugging Face config.
 
-    ``key`` is a registered model or an encoder. For a model whose config nests
+    `key` is a registered model or an encoder. For a model whose config nests
     a vision config, the vision config is read.
     """
     from transformers import AutoConfig
@@ -156,11 +158,11 @@ def layers_and_width(key: str) -> tuple[int, int]:
 
 
 def select_layer_indices(n_layers: int, k: int = 10) -> list[int]:
-    """``k`` evenly spaced hidden-state indices, 0 through ``n_layers``.
+    """`k` evenly spaced hidden-state indices, 0 through `n_layers`.
 
-    Index 0 is the embedding output and index ``n_layers`` the final block, as
-    in the tuple ``output_hidden_states=True`` returns. Depths differ across
-    models, so comparisons use relative depth, ``index / n_layers``.
+    Index 0 is the embedding output and index `n_layers` the final block, as
+    in the tuple `output_hidden_states=True` returns. Depths differ across
+    models, so comparisons use relative depth, `index / n_layers`.
     """
     return sorted(set(np.linspace(0, n_layers, k).round().astype(int).tolist()))
 
@@ -168,8 +170,8 @@ def select_layer_indices(n_layers: int, k: int = 10) -> list[int]:
 def has_class_token(model) -> bool:
     """Whether the backbone prepends a class token to its patch sequence.
 
-    Decided from the parameters: SigLIP2 has no ``cls_token`` or
-    ``class_embedding`` and outputs patches only.
+    Decided from the parameters: SigLIP2 has no `cls_token` or
+    `class_embedding` and outputs patches only.
     """
     return any("cls_token" in n or "class_embedding" in n
                for n, _ in model.named_parameters())
@@ -185,7 +187,7 @@ def hidden_size(model) -> int:
 
 
 def load(key: str, device: str = "cuda"):
-    """Return ``(model, processor, n_layers, spec)``, in eval mode with gradients off.
+    """Return `(model, processor, n_layers, spec)`, in eval mode with gradients off.
 
     The untrained ViT-B is built from its config with a fixed seed, MAE runs
     with its mask ratio at zero, and a finetune is its backbone's architecture

@@ -2,8 +2,8 @@
 
 An image model contributes its word directions at the final layer, centered
 over words, and an encoder its text or speech vectors, centered the same way.
-Writes ``similarity/<model>.npy`` under the data root and the index
-``similarity/index.parquet``, which is rewritten as each matrix is saved. The
+Writes `data/similarity/<model>.npy` and the index
+`data/similarity/index.parquet`, which is rewritten as each matrix is saved. The
 index records the word fingerprint of every matrix and the manifest
 fingerprint of every image model's matrix.
 """
@@ -23,8 +23,8 @@ from src.features import speech, text
 from src.models import DEFAULT_SWEEP
 from src.stimuli.render import fingerprint
 
-#: Every matrix, in index order: the image models, the text encoders, the
-#: speech encoder.
+# Every matrix, in index order: the image models, the text encoders, the
+# speech encoder.
 MODELS = DEFAULT_SWEEP + text.TEXT_MODELS + speech.SPEECH_MODELS
 
 INDEX = SIMILARITY / "index.parquet"

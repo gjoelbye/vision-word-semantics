@@ -7,7 +7,7 @@ all photographs and on those with no detected text. It is also read for the
 change when a name's own background is left out, and for the coherence and
 nearest other class of each class. Across depth it is read for the matched
 cosine similarity and word-to-class top-10 accuracy. Writes the five
-``results/class_*.parquet`` tables: alignment, retrieval, checks, diagnostics
+`results/class_*.parquet` tables: alignment, retrieval, checks, diagnostics
 and depth.
 """
 from __future__ import annotations

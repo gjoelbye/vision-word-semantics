@@ -1,10 +1,10 @@
 """Finetune a backbone contrastively on SPEECH-COCO against a frozen caption tower.
 
-``--backbone B --tower T`` runs one finetune; ``--all`` runs the twenty, smallest
+`--backbone B --tower T` runs one finetune; `--all` runs the twenty, smallest
 backbone first, each in its own process, skipping any whose provenance exists.
-A run resumes from ``latest.pt`` when one exists. It writes
-``checkpoints/<key>/best.slim.pt`` (the weights at the lowest validation loss)
-and ``provenance.json``, then deletes ``latest.pt``. The schedule follows from
+A run resumes from `latest.pt` when one exists. It writes
+`data/checkpoints/<key>/best.slim.pt` (the weights at the lowest validation loss)
+and `provenance.json`, then deletes `latest.pt`. The schedule follows from
 the corpus size: at most three epochs and 10,000 steps, warmup a tenth of the
 run, validation every twelfth and a checkpoint every sixth (each between 10 and
 500 steps), and an early stop after three validations without improvement.

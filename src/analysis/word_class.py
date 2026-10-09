@@ -1,6 +1,11 @@
-"""Readouts that compare word directions with the visual directions of the classes they name.
+"""The word-class readouts of Section 5: class-name word directions against visual directions.
 
-The visual directions are built in ``directions``, and each cache is checked
+`scripts/analysis/table2_class_names.py` runs them for every model. Matched
+cosine similarity averages the cosine between each name's word direction and
+its class's visual direction, word-to-class retrieval ranks all retained visual
+directions for each name, and class-to-word retrieval ranks the 200 word
+directions for each named class. No mapping between the two kinds of direction
+is fitted. Both kinds are built in `directions`, and each cache is checked
 against its own manifest there.
 """
 from __future__ import annotations
@@ -18,8 +23,8 @@ def class_coherence(key: str, layer: int = -1) -> np.ndarray:
     """Mean cosine between two photographs of a class, one number per retained class.
 
     Every photograph counts, text or not. Photographs are centered on the mean
-    over all photographs and scaled to unit length. For unit ``v_i`` the mean
-    off-diagonal cosine is ``(||sum v_i||^2 - n) / (n (n - 1))``.
+    over all photographs and scaled to unit length. For unit `v_i` the mean
+    off-diagonal cosine is `(||sum v_i||^2 - n) / (n (n - 1))`.
     """
     x, _, _ = load_cache(key, ds=CLASS_IMAGES)
     man = manifest(CLASS_IMAGES)
@@ -62,7 +67,7 @@ def cross_rank(query: np.ndarray, candidates: np.ndarray,
     """Rank of each query's own target among the candidates, by cosine; 0 is nearest.
 
     Both arrays are unit rows. Ties count for the target, as in
-    ``lexical.partner_rank``, and no candidate is excluded.
+    `lexical.partner_rank`, and no candidate is excluded.
     """
     sim = query @ candidates.T
     own = sim[np.arange(len(target)), target]
@@ -71,7 +76,7 @@ def cross_rank(query: np.ndarray, candidates: np.ndarray,
 
 def word_class_rows(words: pd.Series, wnids: pd.Series,
                     subset: str = "all") -> tuple[np.ndarray, np.ndarray]:
-    """Positions of the words whose class is retained, and their rows in ``retained(subset)``."""
+    """Positions of the words whose class is retained, and their rows in `retained(subset)`."""
     classes = retained(subset)
     index = {c: i for i, c in enumerate(classes)}
     keep = np.array([w in index for w in wnids], bool)
@@ -83,10 +88,10 @@ def class_alignment(T: np.ndarray, N: np.ndarray, rows: np.ndarray,
                     target: np.ndarray, seed: int = 0) -> dict:
     """Mean cosine between each word direction and its class direction.
 
-    ``T`` and ``N`` are unit rows; ``rows`` picks the words and ``target`` their
+    `T` and `N` are unit rows; `rows` picks the words and `target` their
     classes. The null permutes which class goes with which word, the p-value is
-    ``(count + 1) / (n + 1)``, and the standard error comes from subsamples of
-    words without replacement (see ``stats.subsample_summary``).
+    `(count + 1) / (n + 1)`, and the standard error comes from subsamples of
+    words without replacement (see `stats.subsample_summary`).
     """
     per_word = (T[rows] * N[target]).sum(1)
     observed = float(per_word.mean())
@@ -108,9 +113,9 @@ def class_retrieval(T: np.ndarray, N: np.ndarray, rows: np.ndarray,
                     target: np.ndarray) -> list[dict]:
     """Word-to-class and class-to-word retrieval, one row per direction.
 
-    Each row carries the queries whose target ranks first (``hits``) and among
-    the K nearest (``hits10``), the binomial standard error of ``rate10``, the
-    chance level ``K / n_candidates`` and the 1-based median rank of the target.
+    Each row carries the queries whose target ranks first (`hits`) and among
+    the K nearest (`hits10`), the binomial standard error of `rate10`, the
+    chance level `K / n_candidates` and the 1-based median rank of the target.
     """
     out = []
     for name, query, candidates, want, n_cand in (

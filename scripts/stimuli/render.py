@@ -1,10 +1,10 @@
 """Render every word of the vocabulary on the 96 slots, with its scrambled control.
 
-Writes the images under ``renders/`` and ``lexicon/manifest.parquet``, which
-lists every image in a fixed order with the 96 bare backgrounds first. The
-first run also writes ``lexicon/centres.parquet``, the text center of each
-slot. Existing images are kept. Stops if a blocking gate of
-``lexicon/audit.parquet`` fails.
+Writes the images under `data/renders/` and `data/lexicon/manifest.parquet`,
+which lists every image in a fixed order with the 96 bare backgrounds first.
+The first run also writes `data/lexicon/centres.parquet`, the text center of
+each slot. Existing images are kept. Stops if a blocking gate of
+`data/lexicon/audit.parquet` fails.
 """
 from __future__ import annotations
 

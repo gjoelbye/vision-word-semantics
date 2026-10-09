@@ -1,4 +1,4 @@
-"""Standard errors, subsampling intervals, permutation and sign tests, and p-value corrections.
+"""Statistics shared by the analysis code: standard errors, intervals, tests and corrections.
 
 Words are subsampled without replacement, because a duplicated word is its own
 nearest neighbor and inflates purity. A share over pairs or items takes the
@@ -11,15 +11,15 @@ import itertools
 
 import numpy as np
 
-#: Permutation draws of the purity, category-accuracy and word-class nulls.
+# Permutation draws of the purity, category-accuracy and word-class nulls.
 N_PERM = 2000
-#: Subsamples behind the purity interval, and the share of words each keeps.
+# Subsamples behind the purity interval, and the share of words each keeps.
 N_SUBSAMPLE = 1000
 SUBSAMPLE_FRAC = 0.8
 
 
 def binomial_se(k: int, n: int) -> float:
-    """Standard error of the proportion ``k / n``, ``sqrt(p (1 - p) / n)``."""
+    """Standard error of the proportion `k / n`, `sqrt(p (1 - p) / n)`."""
     if n == 0:
         return float("nan")
     p = k / n
@@ -28,11 +28,11 @@ def binomial_se(k: int, n: int) -> float:
 
 def subsample_summary(point: float, draws: np.ndarray, n: int,
                       m: int) -> tuple[float, float, float]:
-    """95% interval and standard error from subsamples of ``m`` of ``n`` words.
+    """95% interval and standard error from subsamples of `m` of `n` words.
 
     Both rescale the spread of the draws by the finite-population factor
-    ``sqrt(m (n - 1) / (n (n - m)))``: the interval rescales their percentiles
-    about their mean and centers them on ``point``, and the standard error
+    `sqrt(m (n - 1) / (n (n - m)))`: the interval rescales their percentiles
+    about their mean and centers them on `point`, and the standard error
     rescales their standard deviation. The draws keep their own dtype.
     """
     draws = np.asarray(draws)
@@ -43,7 +43,7 @@ def subsample_summary(point: float, draws: np.ndarray, n: int,
 
 def subsample_indices(n: int, frac: float = 0.8, draws: int = 1000,
                       seed: int = 0):
-    """Row indices for ``draws`` subsamples of ``max(2, int(frac * n))`` rows, without replacement."""
+    """Row indices for `draws` subsamples of `max(2, int(frac * n))` rows, without replacement."""
     rng = np.random.default_rng(seed)
     m = max(2, int(frac * n))
     for _ in range(draws):
@@ -51,7 +51,7 @@ def subsample_indices(n: int, frac: float = 0.8, draws: int = 1000,
 
 
 def permutation_p(observed: float, null: np.ndarray) -> float:
-    """Permutation p-value ``(count + 1) / (n + 1)``, where count is the null draws at or above ``observed``."""
+    """Permutation p-value `(count + 1) / (n + 1)`, where count is the null draws at or above `observed`."""
     null = np.asarray(null, float)
     return float((int((null >= observed).sum()) + 1) / (len(null) + 1))
 
@@ -59,7 +59,7 @@ def permutation_p(observed: float, null: np.ndarray) -> float:
 def holm(pvalues) -> np.ndarray:
     """Holm-Bonferroni adjusted p-values, in the order given.
 
-    The r-th smallest of n values is multiplied by ``n - r`` (r from 0), the
+    The r-th smallest of n values is multiplied by `n - r` (r from 0), the
     running maximum over the ascending order keeps the sequence monotone, and
     the result is capped at 1. Needs finite one-dimensional input.
     """
@@ -112,15 +112,15 @@ def vocabulary_spread(cosine: np.ndarray) -> tuple[float, float]:
 
 @functools.lru_cache(maxsize=8)
 def _sign_patterns(n: int) -> np.ndarray:
-    """Every sign vector of length ``n``."""
+    """Every sign vector of length `n`."""
     return np.asarray(list(itertools.product((-1.0, 1.0), repeat=n)))
 
 
 def exact_sign_flip_p(values: np.ndarray, alternative: str = "greater") -> float:
     """Exact sign-flip p-value over every sign pattern of the grid means.
 
-    The null is symmetric about zero. ``alternative`` is ``greater`` or
-    ``two-sided``.
+    The null is symmetric about zero. `alternative` is `greater` or
+    `two-sided`.
     """
     values = np.asarray(values, dtype=float)
     if values.ndim != 1 or not len(values) or not np.isfinite(values).all():
@@ -139,7 +139,7 @@ def exact_sign_flip_p(values: np.ndarray, alternative: str = "greater") -> float
 
 def bootstrap_mean_ci(values: np.ndarray, draws: np.ndarray,
                       confidence: float = 0.95) -> tuple[float, float]:
-    """Percentile interval of the mean, one resample per row of ``draws``."""
+    """Percentile interval of the mean, one resample per row of `draws`."""
     values = np.asarray(values, dtype=float)
     draws = np.asarray(draws, dtype=int)
     if draws.ndim != 2 or draws.shape[1] != len(values):

@@ -1,8 +1,9 @@
 """The SPEECH-COCO training corpus: shards, split, text filter and caption cache.
 
-The shards are separated into train and validation by photograph, every sample
-whose photograph the text scan found writing in is excluded, and the caption
-targets are read from a precomputed cache.
+`scripts/finetune/speech_coco.py` writes the shards and the text scan,
+`caption_targets.py` the caption cache, and `train.py` reads all three through
+this module. The shards are separated into train and validation by photograph,
+and every sample whose photograph the text scan found writing in is excluded.
 """
 from __future__ import annotations
 
@@ -15,25 +16,25 @@ import torch
 
 from ..config import CAPTIONS, CORPUS, DATA_ROOT
 
-#: The SPEECH-COCO parquet export, which holds the photographs, captions and recordings.
+# The SPEECH-COCO parquet export, which holds the photographs, captions and recordings.
 SOURCE = DATA_ROOT / "spokencoco_hf" / "data"
 
-#: The webdataset shards. The directory and shard names are part of
-#: :func:`fingerprint`, which every checkpoint provenance records.
+# The webdataset shards. The directory and shard names are part of
+# `fingerprint`, which every checkpoint provenance records.
 SHARDS = DATA_ROOT / "spokencoco-wds-288"
 
-#: The records the shard and scan stages write under ``CORPUS``.
+# The records the shard and scan stages write under `CORPUS`.
 SPEECH_COCO_MANIFEST = CORPUS / "speech-coco_manifest.parquet"
 SPEECH_COCO_PROVENANCE = CORPUS / "speech-coco_provenance.json"
 SPEECH_COCO_SCAN = CORPUS / "speech-coco_text_scan.jsonl"
 SPEECH_COCO_EXCLUDED = CORPUS / "speech-coco_excluded_keys.txt"
 
-#: ImageNet channel statistics, which the processor of every finetuned backbone uses.
+# ImageNet channel statistics, which the processor of every finetuned backbone uses.
 MEAN = (0.485, 0.456, 0.406)
 STD = (0.229, 0.224, 0.225)
 
 
-#: What a provenance record calls the corpus and its filter.
+# What a provenance record calls the corpus and its filter.
 DESCRIBED = "SPEECH-COCO, text-filtered"
 
 
@@ -46,7 +47,7 @@ def shards() -> list[str]:
 
 
 def split() -> tuple[list[str], list[str]]:
-    """``(train, validation)`` shard paths, told apart by name."""
+    """`(train, validation)` shard paths, told apart by name."""
     found = shards()
     train = [s for s in found if "-train-" in Path(s).name]
     val = [s for s in found if "-val-" in Path(s).name]
@@ -125,13 +126,13 @@ class CaptionCache:
             np.asarray(self.vectors[self.index[key]], dtype=np.float32))
 
 
-#: Samples held in the training shuffle buffer.
+# Samples held in the training shuffle buffer.
 SHUFFLE_BUFFER = 5000
 
 
 def pipeline(recipe, *, train: bool, cache: CaptionCache, exclude: set[str],
              workers: int):
-    """A loader of ``(images, caption vectors)`` micro-batches.
+    """A loader of `(images, caption vectors)` micro-batches.
 
     Infinite, shuffled and resampled for training; finite and ordered for
     validation, so every validation scores the same samples.

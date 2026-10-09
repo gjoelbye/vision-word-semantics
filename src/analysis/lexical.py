@@ -1,14 +1,17 @@
-"""Lexical readouts on word directions.
+"""The lexical readouts of Section 4 and Appendix C, computed on word-by-word cosines.
 
-Partner retrieval and neighbor purity count the ``K`` nearest words. A
-partner's rank counts the words strictly nearer than it, so a tie counts for
-the partner. Intervals subsample words without replacement, because a
-resampled duplicate is its own nearest neighbor.
+`scripts/analysis/table1_models.py` runs them for every model and encoder, and
+`figure1_neighbours.py` and `figure6_finetune.py` reuse them. Partner retrieval
+and neighbor purity count the `K` nearest words. A partner's rank counts the
+words strictly nearer than it, so a tie counts for the partner. Intervals
+subsample words without replacement, because a resampled duplicate is its own
+nearest neighbor.
 
-Each item of the three blocks holds an anchor and two competitors, and is
-scored by which competitor is nearer to the anchor. Category accuracy assigns
-held-out nouns and brands to the nearest centroid on a fixed half split of
-every category-by-spelling-cluster cell. Both depend on the lexicon alone, so
+The comparisons within an item use the three triplet lists, here called blocks:
+each item holds an anchor and two competitors, and is scored by which
+competitor is nearer to the anchor. Category accuracy assigns held-out nouns
+and brands to the nearest centroid on a fixed half split of every
+category-by-spelling-cluster cell. Both depend on the vocabulary alone, so
 vision models and encoders are scored on the same items and the same held-out
 words.
 """
@@ -21,12 +24,12 @@ from ..stats import (N_PERM, N_SUBSAMPLE, SUBSAMPLE_FRAC, binomial_se,
                      subsample_summary)
 from .directions import rownorm
 
-#: Nearest words counted by both readouts: top-10 accuracy and neighbor purity.
+# Nearest words counted by both readouts: top-10 accuracy and neighbor purity.
 K = 10
 
 
 def similarity(T: np.ndarray) -> np.ndarray:
-    """Word-by-word cosine similarity with the diagonal set to ``-inf``.
+    """Word-by-word cosine similarity with the diagonal set to `-inf`.
 
     A word would otherwise be its own nearest neighbor and fill a place in
     every query's top k.
@@ -37,10 +40,10 @@ def similarity(T: np.ndarray) -> np.ndarray:
     return S
 
 
-# --- partner retrieval -------------------------------------------------------
+# Partner retrieval.
 
 def partner_rank(S: np.ndarray, i: int, j: int) -> int:
-    """How many words are strictly nearer to ``i`` than ``j`` is; 0 means ``j`` is nearest."""
+    """How many words are strictly nearer to `i` than `j` is; 0 means `j` is nearest."""
     row = S[i]
     return int((row > row[j]).sum())
 
@@ -48,7 +51,7 @@ def partner_rank(S: np.ndarray, i: int, j: int) -> int:
 def partner_ranks(S: np.ndarray, index: dict[str, int],
                   pairs: list[tuple[str, str]], reverse: bool = False
                   ) -> np.ndarray:
-    """Partner rank for every pair in one direction; a pair with a word outside ``index`` is skipped."""
+    """Partner rank for every pair in one direction; a pair with a word outside `index` is skipped."""
     out = []
     for a, b in pairs:
         if reverse:
@@ -62,9 +65,9 @@ def retrieval(S: np.ndarray, index: dict[str, int],
               pairs: list[tuple[str, str]], relation: str) -> list[dict]:
     """One row per direction of a relation, each with its own denominator.
 
-    ``hits`` counts partners ranked first and ``hits10`` partners among the K
-    nearest (zero-based rank below K). ``rate10_se`` is the binomial standard
-    error of ``rate10``, and ``chance10`` is ``K / (N - 1)``.
+    `hits` counts partners ranked first and `hits10` partners among the K
+    nearest (zero-based rank below K). `rate10_se` is the binomial standard
+    error of `rate10`, and `chance10` is `K / (N - 1)`.
     """
     chance10 = K / (len(index) - 1)
     rows = []
@@ -80,13 +83,13 @@ def retrieval(S: np.ndarray, index: dict[str, int],
     return rows
 
 
-# --- neighbor purity ---------------------------------------------------------
+# Neighbor purity.
 
 def knn_purity(S: np.ndarray, labels: np.ndarray, k: int = K,
                restrict: np.ndarray | None = None) -> float:
-    """Share of each word's ``k`` nearest neighbors that carry its own label.
+    """Share of each word's `k` nearest neighbors that carry its own label.
 
-    ``restrict`` limits each word's neighbors to words sharing its value.
+    `restrict` limits each word's neighbors to words sharing its value.
     """
     nn = neighbour_indices(S, k, restrict)
     return float((labels[nn] == labels[:, None]).mean())
@@ -94,10 +97,10 @@ def knn_purity(S: np.ndarray, labels: np.ndarray, k: int = K,
 
 def neighbour_indices(S: np.ndarray, k: int = K,
                       restrict: np.ndarray | None = None) -> np.ndarray:
-    """``(n, k)`` row indices of each word's ``k`` nearest neighbors.
+    """`(n, k)` row indices of each word's `k` nearest neighbors.
 
-    The diagonal is excluded, and ``restrict`` excludes words that do not share
-    its value. A word with fewer than ``k`` admissible neighbors raises
+    The diagonal is excluded, and `restrict` excludes words that do not share
+    its value. A word with fewer than `k` admissible neighbors raises
     ValueError.
     """
     work = np.array(S, dtype=np.float32, copy=True)
@@ -113,7 +116,7 @@ def neighbour_indices(S: np.ndarray, k: int = K,
 
 
 def chance_purity(labels: np.ndarray) -> float:
-    """``sum_c n_c(n_c - 1) / (n(n - 1))``: the purity of randomly assigned labels."""
+    """`sum_c n_c(n_c - 1) / (n(n - 1))`: the purity of randomly assigned labels."""
     labels = np.asarray(labels)
     n = len(labels)
     _, counts = np.unique(labels, return_counts=True)
@@ -122,7 +125,7 @@ def chance_purity(labels: np.ndarray) -> float:
 
 def restricted_chance_purity(labels: np.ndarray,
                              restrict: np.ndarray) -> float:
-    """Chance purity when every neighbor must share ``restrict`` with its query.
+    """Chance purity when every neighbor must share `restrict` with its query.
 
     For each query, the share of the other words in its restriction group that
     carry its label, averaged over queries.
@@ -147,8 +150,8 @@ def purity_permutation(S: np.ndarray, labels: np.ndarray, k: int = K,
                        strata: np.ndarray | None = None) -> dict:
     """Observed purity against a null that shuffles the labels with the geometry fixed.
 
-    Labels are shuffled within each value of ``strata``, or over all words
-    without it. The p-value is ``(count + 1) / (n_perm + 1)``.
+    Labels are shuffled within each value of `strata`, or over all words
+    without it. The p-value is `(count + 1) / (n_perm + 1)`.
     """
     labels = np.asarray(labels)
     rng = np.random.default_rng(seed)
@@ -182,10 +185,10 @@ def purity_subsample(S: np.ndarray, labels: np.ndarray, k: int = K,
                      seed: int = 0) -> dict:
     """Purity with a 95% interval and standard error from subsamples of words.
 
-    Each draw keeps ``frac`` of the words without replacement and recomputes
+    Each draw keeps `frac` of the words without replacement and recomputes
     purity on the reduced similarity matrix. The spread is rescaled by the
     finite-population factor and the interval is centered on the point estimate
-    (see ``stats.subsample_summary``).
+    (see `stats.subsample_summary`).
     """
     labels = np.asarray(labels)
     rng = np.random.default_rng(seed)
@@ -199,7 +202,7 @@ def purity_subsample(S: np.ndarray, labels: np.ndarray, k: int = K,
     return dict(purity=float(point), ci_lo=lo, ci_hi=hi, se=se, n=N, m=m)
 
 
-# --- comparisons within an item ----------------------------------------------
+# Comparisons within an item.
 
 BLOCKS = (
     # name, the relation giving the kept competitor, the relation giving the
@@ -212,10 +215,10 @@ BLOCKS = (
 
 
 def build_items(pairs: pd.DataFrame, words: pd.DataFrame) -> dict:
-    """The three blocks as frames with ``anchor``, ``kept`` and ``other``.
+    """The three blocks as frames with `anchor`, `kept` and `other`.
 
-    ``class`` holds the anchor's picturability from the word table. Built from
-    ``pairs.parquet`` by joining two relations on their shared anchor. Raises
+    `class` holds the anchor's picturability from the word table. Built from
+    `pairs.parquet` by joining two relations on their shared anchor. Raises
     SystemExit unless every block has its number of items and block 1 holds 75
     concrete and 75 abstract anchors.
     """
@@ -244,17 +247,16 @@ def build_items(pairs: pd.DataFrame, words: pd.DataFrame) -> dict:
     return out
 
 
-# --- category accuracy -------------------------------------------------------
+# Category accuracy.
 
-#: The two grids, by the ``role`` each takes in ``words.parquet``.
+# The two grids, by the `role` each takes in `words.parquet`.
 DATASETS = {"common_noun": "category", "brand": "brand"}
 
-#: The seed of the half split.
 SPLIT_SEED = 0
 
 
 def balanced_split(frame: pd.DataFrame, seed: int) -> np.ndarray:
-    """A ``train`` or ``test`` label per row, halving every category-by-spelling-cluster cell."""
+    """A `train` or `test` label per row, halving every category-by-spelling-cluster cell."""
     rng = np.random.default_rng(seed)
     split = np.full(len(frame), "", dtype=object)
     for label in sorted(frame.label.unique()):
@@ -320,7 +322,7 @@ def nearest_centroid_accuracy(
 ) -> tuple[float, int, int]:
     """Held-out accuracy, the number correct, and the number held out.
 
-    ``X`` holds one unit-length row per word of ``frame``, in its row order.
+    `X` holds one unit-length row per word of `frame`, in its row order.
     """
     train = frame.split.eq("train").to_numpy()
     test = frame.split.eq("test").to_numpy()

@@ -1,8 +1,10 @@
 """Render a word set on the 96 slots, and record what was drawn.
 
-The manifest has one row per image, clean backgrounds first, in a canonical
-order. Row *i* of an embedding cache is the embedding of manifest row *i*, and
-:func:`fingerprint` lets a cache refuse a manifest it was not built from.
+`scripts/stimuli/render.py` renders the lexical vocabulary with it, and
+`scripts/stimuli/class_images.py` the class names. The manifest has one row
+per image, clean backgrounds first, in a canonical order. Row i of an
+embedding cache is the embedding of manifest row i, and `fingerprint` lets a
+cache refuse a manifest it was not built from.
 """
 from __future__ import annotations
 
@@ -24,7 +26,7 @@ CLEAN = "__clean__"
 
 
 def fingerprint(manifest: pd.DataFrame) -> str:
-    """sha256 of the recorded ``image_path`` strings, in row order."""
+    """sha256 of the recorded `image_path` strings, in row order."""
     return line_fingerprint(manifest["image_path"])
 
 
@@ -32,8 +34,8 @@ def _background_path(index: int) -> Path:
     return BACKGROUNDS / f"bg_{index:03d}.png"
 
 
-#: The text center of each slot, written by the first render and read by every
-#: later one.
+# The text center of each slot, written by the first render and read by every
+# later one.
 CENTRES_PATH = LEXICON / "centres.parquet"
 
 
@@ -42,7 +44,7 @@ def slot_centres(words: tuple[str, ...], path: Path | None = None
     """One text center per slot, shared by every word drawn in it.
 
     The centers depend on the widest word of the vocabulary, so they are
-    computed once from ``words`` and recorded at ``path``. A recorded table is
+    computed once from `words` and recorded at `path`. A recorded table is
     reused for any vocabulary whose widest word fits at its centers.
     """
     path = CENTRES_PATH if path is None else path
@@ -69,7 +71,7 @@ def slot_centres(words: tuple[str, ...], path: Path | None = None
     return out
 
 
-#: Rounding slack: a box of odd width cannot be centered on an integer grid.
+# Rounding slack: a box of odd width cannot be centered on an integer grid.
 _FIT_SLACK = 1
 
 

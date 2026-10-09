@@ -1,7 +1,8 @@
 """The figure style: page width, type sizes, colors, scales, the bold face, saving and the notebook setup.
 
-Figures are built at their final physical size and saved without a tight
-bounding box.
+Every notebook calls `setup_notebook` first and writes its figures through
+`save`. Figures are built at their final physical size and saved without a
+tight bounding box, so the PDF is the size the paper prints.
 """
 from __future__ import annotations
 
@@ -108,7 +109,7 @@ def use_style() -> None:
 
 def inches(height_pt: float, width_in: float = TEXT_WIDTH_IN
            ) -> tuple[float, float]:
-    """Final physical figure size as ``(width inches, height inches)``."""
+    """Final physical figure size as `(width inches, height inches)`."""
     return float(width_in), float(height_pt) / PT_PER_INCH
 
 
@@ -116,7 +117,7 @@ def inches(height_pt: float, width_in: float = TEXT_WIDTH_IN
 # same OKLCH lightness steps and differ in hue. Chroma tapers toward both ends.
 ALIGNMENT_LIGHTNESS = (0.975, 0.91, 0.83, 0.74, 0.64, 0.54, 0.44)
 ALIGNMENT_CHROMA_TAPER = (0.18, 0.45, 0.75, 0.95, 1.0, 0.95, 0.80)
-#: ``(hue in degrees, peak chroma)`` in OKLCH for each measure's ramp.
+# `(hue in degrees, peak chroma)` in OKLCH for each measure's ramp.
 NEIGHBOR_HUE = (254.7, 0.117)
 CKA_HUE = (68.8, 0.133)
 
@@ -174,7 +175,7 @@ def luminance(colour) -> float:
 
 
 def stroke_text(text, colour: str, linewidth: float) -> None:
-    """Draw ``text`` over a stroke of ``colour``.
+    """Draw `text` over a stroke of `colour`.
 
     A white stroke keeps a label legible over lines. A hairline stroke in the
     text's own color emphasizes small text, since the variable Noto face renders
@@ -192,7 +193,7 @@ def stroke_text(text, colour: str, linewidth: float) -> None:
 
 
 def cut_static_face(weight: int = 700) -> Path:
-    """The installed variable sans, instanced at ``weight`` and cached in `FONTS`."""
+    """The installed variable sans, instanced at `weight` and cached in `FONTS`."""
     from fontTools.ttLib import TTFont
     from fontTools.varLib.instancer import instantiateVariableFont
     from matplotlib import font_manager as fm
@@ -219,7 +220,7 @@ def cut_static_face(weight: int = 700) -> Path:
 def use_real_bold(weight: int = 700) -> None:
     """Register the cut face as the bold of the sans, and raise if bold does not resolve to it.
 
-    Call it after :func:`use_style` and before the first text is drawn. It
+    Call it after `use_style` and before the first text is drawn. It
     changes what bold resolves to for every later figure in the process.
     """
     from matplotlib import font_manager as fm
@@ -234,9 +235,9 @@ def use_real_bold(weight: int = 700) -> None:
 
 
 def save(fig, name: str, *, dpi: float | None = None) -> None:
-    """Save the figure at its exact size as ``figures/<name>.pdf``.
+    """Save the figure at its exact size as `figures/<name>.pdf`.
 
-    ``dpi`` overrides the style's ``savefig.dpi`` for the raster parts.
+    `dpi` overrides the style's `savefig.dpi` for the raster parts.
     """
     FIGURES.mkdir(parents=True, exist_ok=True)
     # Constrained layout can move artists on its first draw; settle it before saving.

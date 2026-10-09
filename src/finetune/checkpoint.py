@@ -1,6 +1,6 @@
 """The checkpoint format: written by training, read back on resume and for analysis.
 
-A checkpoint holds the backbone under an ``image_backbone.`` prefix beside the
+A checkpoint holds the backbone under an `image_backbone.` prefix beside the
 contrastive projection and temperature. Loading a finetuned backbone into its
 pretrained architecture drops the last two. A saved key the model does not
 have is an error, because its weights would otherwise be lost silently.
@@ -11,17 +11,17 @@ from pathlib import Path
 
 import torch
 
-#: Weights belonging to the image backbone. Everything without this prefix
-#: (``image_proj.weight``, ``logit_scale``) is part of the contrastive head.
+# Weights belonging to the image backbone. Everything without this prefix
+# (`image_proj.weight`, `logit_scale`) is part of the contrastive head.
 _PREFIX = "image_backbone."
 
-#: The contrastive head: the projection into the tower's space and the learned
-#: temperature. Both are discarded, and a checkpoint with any other head is refused.
+# The contrastive head: the projection into the tower's space and the learned
+# temperature. Both are discarded, and a checkpoint with any other head is refused.
 _HEAD = {"image_proj.weight", "logit_scale"}
 
 
 def backbone_state(model) -> dict:
-    """The weights of a ``JointModel`` under their checkpoint keys."""
+    """The weights of a `JointModel` under their checkpoint keys."""
     state = {f"{_PREFIX}{k}": v.detach().cpu()
              for k, v in model.backbone.state_dict().items()}
     state["image_proj.weight"] = model.image_proj.weight.detach().cpu()
@@ -30,7 +30,7 @@ def backbone_state(model) -> dict:
 
 
 def _backbone_keys(state: dict) -> dict:
-    """Checkpoint keys back to ``JointModel`` keys, the inverse of ``backbone_state``."""
+    """Checkpoint keys back to `JointModel` keys, the inverse of `backbone_state`."""
     out = {}
     for key, value in state.items():
         if key.startswith(_PREFIX):
@@ -44,10 +44,10 @@ def _backbone_keys(state: dict) -> dict:
 
 def _resolve(key: str, expected: set[str]) -> str:
     """Match one saved key against the live model's keys, as saved or with a
-    leading ``model.`` added or removed.
+    leading `model.` added or removed.
 
     Transformers versions differ in whether the DINOv3 block stack sits under a
-    ``model.`` submodule. A key that matches none of the three is returned
+    `model.` submodule. A key that matches none of the three is returned
     unchanged and surfaces as an unexpected key.
     """
     if key in expected:
@@ -61,11 +61,11 @@ def _resolve(key: str, expected: set[str]) -> str:
 
 def load_backbone_state(ckpt_path: str | Path, model, *, expect_repo: str,
                         expect_step: int) -> dict:
-    """Load the image backbone from ``ckpt_path`` into ``model``, in place.
+    """Load the image backbone from `ckpt_path` into `model`, in place.
 
     Returns the step the weights were saved at and the tensor count. Raises if
-    the checkpoint's backbone repository or step differs from ``expect_repo`` or
-    ``expect_step``.
+    the checkpoint's backbone repository or step differs from `expect_repo` or
+    `expect_step`.
     """
     # Memory-mapped, so each tensor is read once as it is copied into the model.
     ckpt_path = Path(ckpt_path)

@@ -1,9 +1,11 @@
 """The class names and the ImageNet-1k validation photographs of their classes.
 
-Each class name names exactly one ImageNet-1k class. The names are drawn on the
-96 slots at the recorded centers, so a name that is also in the vocabulary is
-the same image file. The photographs are every validation image of every class,
-except the 96 used as backgrounds.
+Each class name names exactly one ImageNet-1k class. `scripts/stimuli/class_names.py`
+checks the names in `lexicon/class_names.tsv`, and `scripts/stimuli/class_images.py`
+draws them on the 96 slots at the recorded centers, so a name that is also in
+the vocabulary is the same image file. The photographs are every validation
+image of every class except the 96 used as backgrounds. Their visual directions
+are computed in `src.analysis.directions`.
 """
 from __future__ import annotations
 
@@ -20,11 +22,11 @@ IMAGES = CONCEPTS / "images"
 RENDER_MANIFEST = CONCEPTS / "manifest.parquet"
 IMAGE_MANIFEST = CONCEPTS / "images.parquet"
 
-#: The ImageNet-1k parquet export: ``data/validation-*.parquet`` and ``classes.py``.
+# The ImageNet-1k parquet export: `data/validation-*.parquet` and `classes.py`.
 IMAGENET = DATA_ROOT / "imagenet-1k"
 
-#: Fewest photographs a class needs in a subset, all or text-free, to be
-#: retained in it.
+# Fewest photographs a class needs in a subset, all or text-free, to be
+# retained in it.
 MIN_IMAGES = 32
 
 
@@ -39,7 +41,7 @@ def square_resize(img: Image.Image, size: int) -> Image.Image:
 
 @functools.lru_cache(maxsize=1)
 def _classes() -> dict[str, str]:
-    """``IMAGENET2012_CLASSES`` from the export's ``classes.py``, in label order."""
+    """`IMAGENET2012_CLASSES` from the export's `classes.py`, in label order."""
     import importlib.util
 
     spec = importlib.util.spec_from_file_location("imagenet_classes",
@@ -50,19 +52,19 @@ def _classes() -> dict[str, str]:
 
 
 def wnids() -> tuple[str, ...]:
-    """The 1,000 class ids in label order, so ``wnids()[label]`` is the class."""
+    """The 1,000 class ids in label order, so `wnids()[label]` is the class."""
     return tuple(_classes())
 
 
 def class_names() -> dict[str, str]:
-    """``wnid`` to the class's full comma-separated name."""
+    """`wnid` to the class's full comma-separated name."""
     return dict(_classes())
 
 
 @functools.lru_cache(maxsize=1)
 def _lemma_index() -> dict[str, frozenset[str]]:
     """The classes each single-word class name refers to, lowercased and with the
-    export's disambiguating trailing digit removed (``crane2`` is ``crane``)."""
+    export's disambiguating trailing digit removed (`crane2` is `crane`)."""
     import re
 
     out: dict[str, set[str]] = {}
@@ -75,13 +77,13 @@ def _lemma_index() -> dict[str, frozenset[str]]:
 
 
 def classes_named(word: str) -> frozenset[str]:
-    """The classes a word is a name of, under the normalization of :func:`_lemma_index`."""
+    """The classes a word is a name of, under the normalization of `_lemma_index`."""
     return _lemma_index().get(word.strip().lower(), frozenset())
 
 
 def image_key(payload: bytes) -> str:
     """First sixteen hex digits of the sha256 of a photograph's encoded bytes,
-    the ``key`` column of ``backgrounds/backgrounds.parquet``."""
+    the `key` column of `backgrounds/backgrounds.parquet`."""
     return hashlib.sha256(payload).hexdigest()[:16]
 
 
@@ -99,12 +101,12 @@ def validation_shards() -> list[Path]:
     if not found:
         raise SystemExit(
             f"no validation shards under {IMAGENET / 'data'}. The ImageNet-1k "
-            f"parquet export is a prerequisite; see README.md.")
+            f"parquet export is a prerequisite; see data/README.md.")
     return found
 
 
 def read_validation(shard: Path):
-    """Yield ``(key, wnid, encoded bytes)`` for one validation shard, undecoded
+    """Yield `(key, wnid, encoded bytes)` for one validation shard, undecoded
     so a resumed run can skip a photograph already written."""
     import pyarrow.parquet as pq
 

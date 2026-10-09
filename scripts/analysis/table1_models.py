@@ -6,9 +6,9 @@ the centering share, the comparisons within an item and nearest-centroid
 accuracy on the held-out half. Across depth it is read for noun purity and
 capital retrieval. The 4 encoders are read for partner retrieval, neighbor
 purity, the comparisons within an item and nearest-centroid accuracy, from
-their similarity matrices and word vectors. Writes
-``results/{retrieval,purity,letter_cluster,centering,items,latent_categories,
-depth,encoder_lexical}.parquet``.
+their similarity matrices and word vectors. Writes `results/retrieval`,
+`purity`, `letter_cluster`, `centering`, `items`, `latent_categories`, `depth`
+and `encoder_lexical`, each as a parquet file.
 """
 from __future__ import annotations
 
@@ -32,13 +32,13 @@ from src.stats import (N_PERM, binomial_se, holm, sign_test,
                        vocabulary_spread)
 from src.stimuli.render import fingerprint
 
-#: The encoders in table order: the three text encoders, then the speech encoder.
+# The encoders in table order: the three text encoders, then the speech encoder.
 ENCODERS = text.TEXT_MODELS + speech.SPEECH_MODELS
-#: The estimator each kind of encoder is indexed under in ``similarity/index.parquet``.
+# The estimator each kind of encoder is indexed under in `data/similarity/index.parquet`.
 ESTIMATOR_OF = {"text": "carrier_mean_96", "speech": "rendition_mean_96"}
-#: Table 1's plural-or-base column pools these relations over their summed pairs.
+# Table 1's plural-or-base column pools these relations over their summed pairs.
 POOLED = ("negation_base", "singular_plural")
-#: Seed of the length-stratified null of nearest-centroid accuracy.
+# Seed of the length-stratified null of nearest-centroid accuracy.
 PERMUTATION_SEED = 0
 
 
@@ -166,7 +166,7 @@ def final_layer(key: str, lex: SimpleNamespace) -> dict[str, list[dict]]:
     out = {name: [] for name in ("retrieval", "purity", "letter_cluster",
                                  "centering", "items", "latent_categories")}
     # The centering share is computed on the uncentered word directions, which
-    # are then centered as ``word_directions(..., center=True)`` centers them.
+    # are then centered as `word_directions(..., center=True)` centers them.
     base = word_directions(key, -1, center=False)
     out["centering"].append(dict(model=key,
                                  shared_mean_share=shared_mean_share(base)))

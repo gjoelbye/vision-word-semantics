@@ -8,7 +8,7 @@ the other folds, and the mean cosine between each held-out offset and that mean
 is tested against a null that re-pairs countries and capitals. For DINOv3-H,
 the six displayed pairs are projected onto the mean offset of the other 54
 pairs and the leading component of their midpoints. Writes
-``results/{neighbours,relation_offsets,figure1b_projection}.parquet``.
+`results/{neighbours,relation_offsets,figure1b_projection}.parquet`.
 """
 from __future__ import annotations
 
@@ -25,21 +25,21 @@ from src.config import LEXICON, RESULTS, ensure_dirs
 from src.models import DEFAULT_SWEEP
 from src.stimuli.render import fingerprint
 
-#: Nearest words kept per query.
+# Nearest words kept per query.
 NEIGHBOURS = 4
 RELATION = "country_capital"
 N_FOLDS = 5
 FOLD_SEED = 0
 PERMUTATION_SEED = 2
 N_PERM = 999
-#: The model and the six pairs of Figure 1b.
+# The model and the six pairs of Figure 1b.
 PROJECTED_MODEL = "dinov3-h"
 DISPLAY = ("colombia", "finland", "nigeria", "poland", "turkey", "vietnam")
 
 
 def neighbour_rows(model: str, S: np.ndarray, frame: pd.DataFrame, pool: str,
                    meaning_pairs: set[tuple[str, str]]) -> pd.DataFrame:
-    """The nearest words of every word of ``frame``, in the row order of ``S``."""
+    """The nearest words of every word of `frame`, in the row order of `S`."""
     nn = lexical.neighbour_indices(S, k=NEIGHBOURS)
     query_i = np.repeat(np.arange(len(frame)), NEIGHBOURS)
     neighbour_i = nn.reshape(-1)
@@ -88,7 +88,7 @@ def ranks(scores: np.ndarray, targets: np.ndarray,
 
 
 def fold_offsets(A: np.ndarray, B: np.ndarray, folds: np.ndarray) -> np.ndarray:
-    """Mean offset ``B - A`` over the pairs outside each fold."""
+    """Mean offset `B - A` over the pairs outside each fold."""
     offsets = B - A
     return np.stack([offsets[folds != fold].mean(0) for fold in range(N_FOLDS)])
 
@@ -130,7 +130,7 @@ def offset_row(model: str, T: np.ndarray, source_rows: np.ndarray,
 
 
 def unit(vector: np.ndarray) -> np.ndarray:
-    """``vector`` in float64, scaled to unit length."""
+    """`vector` in float64, scaled to unit length."""
     vector = np.asarray(vector, dtype=float)
     return vector / np.linalg.norm(vector)
 
@@ -148,7 +148,7 @@ def leading_component(matrix: np.ndarray) -> np.ndarray:
 
 
 def midpoint_axis(axis1: np.ndarray, midpoints: np.ndarray) -> np.ndarray:
-    """Leading component of the midpoints after the ``axis1`` direction is removed."""
+    """Leading component of the midpoints after the `axis1` direction is removed."""
     centred = midpoints - midpoints.mean(axis=0, keepdims=True)
     residual = centred - np.outer(centred @ axis1, axis1)
     axis2 = leading_component(residual)
@@ -157,7 +157,7 @@ def midpoint_axis(axis1: np.ndarray, midpoints: np.ndarray) -> np.ndarray:
 
 
 def mean_pairwise_cosine(differences: np.ndarray) -> float:
-    """Mean cosine over every two rows of ``differences``."""
+    """Mean cosine over every two rows of `differences`."""
     directions = rownorm(np.asarray(differences, dtype=np.float32))
     gram = directions @ directions.T
     return float(gram[np.triu_indices(len(gram), 1)].mean())

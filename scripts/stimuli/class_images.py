@@ -1,9 +1,10 @@
 """Draw the class names on the 96 slots, write the class photographs, and scan them for text.
 
-The names go into the ``renders/`` tree at the text centers recorded for the
-vocabulary, and ``concepts/manifest.parquet`` lists them. The photographs are
-every ImageNet-1k validation image except the 96 backgrounds, center-cropped
-to 256 pixels under ``concepts/images/``. ``concepts/images.parquet`` lists
+The names go into the `data/renders/` tree at the text centers recorded for
+the vocabulary, and `data/concepts/manifest.parquet` lists them. The
+photographs are every ImageNet-1k validation image except the 96 backgrounds,
+center-cropped to 256 pixels under `data/concepts/images/`.
+`data/concepts/images.parquet` lists
 them with the CRAFT box count and text area of each. Existing images are kept,
 and the text scan runs again on every photograph.
 """
@@ -95,7 +96,7 @@ def images() -> pd.DataFrame:
 
 
 def scan(frame: pd.DataFrame) -> pd.DataFrame:
-    """``frame`` with the CRAFT text scan of each photograph appended.
+    """`frame` with the CRAFT text scan of each photograph appended.
 
     An unreadable photograph gets -1 boxes and no text area.
     """
