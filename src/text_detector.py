@@ -41,8 +41,6 @@ def text_density(detector, image) -> dict:
             "width": int(width), "height": int(height)}
 
 
-def is_excluded(record: dict, *, max_boxes: int = 0,
-                max_text_area_ratio: float = 0.0) -> bool:
-    """Whether a scan record fails the filter; by default any detection fails it."""
-    return (record["n_boxes"] > max_boxes
-            or record["text_area_ratio"] > max_text_area_ratio)
+def is_excluded(record: dict) -> bool:
+    """Whether a scan record fails the filter: any detection fails it."""
+    return record["n_boxes"] > 0 or record["text_area_ratio"] > 0.0

@@ -178,11 +178,15 @@ def alignment_score(tokenizer, tts, features, tower, probe, device) -> float:
     return float((rank == 0).mean())
 
 
-def build(words, *, device: str = "cuda", verify: bool = True,
-          probe: int = 24) -> np.ndarray:
+#: Words whose cut-outs are checked against each other before the full run.
+PROBE_WORDS = 24
+
+
+def build(words, *, device: str) -> np.ndarray:
     """Vectors of every rendition, shaped ``(words, 96, BINS * width)``.
 
-    The mean over axis 1 is the word's vector.
+    The mean over axis 1 is the word's vector. The span arithmetic is checked
+    on ``PROBE_WORDS`` words first.
     """
     from transformers import AutoFeatureExtractor, AutoModel, AutoTokenizer, VitsModel
 
@@ -200,18 +204,17 @@ def build(words, *, device: str = "cuda", verify: bool = True,
              for carrier in CARRIERS for word in words}
     print(f"located {len(spans)} target spans, no failures")
 
-    if verify:
-        # Probe words spread across the alphabetical vocabulary.
-        chosen = [words[i] for i in np.linspace(0, len(words) - 1,
-                                                min(probe, len(words))).astype(int)]
-        share = alignment_score(tokenizer, tts, features, tower, chosen, device)
-        print(f"alignment on {len(chosen)} words: a span cut from one carrier "
-              f"identifies its own word against a span cut from another "
-              f"{100 * share:.0f}% of the time")
-        if share < 0.5:
-            raise RuntimeError(
-                "spans cut from two carriers mostly fail to identify each "
-                "other, so the token-to-sample arithmetic is wrong")
+    # Probe words spread across the alphabetical vocabulary.
+    chosen = [words[i] for i in np.linspace(0, len(words) - 1,
+                                            min(PROBE_WORDS, len(words))).astype(int)]
+    share = alignment_score(tokenizer, tts, features, tower, chosen, device)
+    print(f"alignment on {len(chosen)} words: a span cut from one carrier "
+          f"identifies its own word against a span cut from another "
+          f"{100 * share:.0f}% of the time")
+    if share < 0.5:
+        raise RuntimeError(
+            "spans cut from two carriers mostly fail to identify each "
+            "other, so the token-to-sample arithmetic is wrong")
 
     width = BINS * tower.config.hidden_size
     out = np.zeros((len(words), len(cells), width), np.float32)

@@ -33,9 +33,8 @@ MEAN = (0.485, 0.456, 0.406)
 STD = (0.229, 0.224, 0.225)
 
 
-def described() -> str:
-    """What a provenance record calls the corpus and its filter."""
-    return "SPEECH-COCO, text-filtered"
+#: What a provenance record calls the corpus and its filter.
+DESCRIBED = "SPEECH-COCO, text-filtered"
 
 
 def shards() -> list[str]:
@@ -73,9 +72,9 @@ def corpus_size() -> int:
     return int(json.loads(record.read_text())["scan_rows"])
 
 
-def excluded_keys(path: Path | None = None) -> set[str]:
+def excluded_keys() -> set[str]:
     """Sample keys whose photograph the text scan found writing in."""
-    path = path or SPEECH_COCO_EXCLUDED
+    path = SPEECH_COCO_EXCLUDED
     if not path.exists():
         raise SystemExit(f"no exclude list at {path}. Run "
                          f"scripts/finetune/speech_coco.py --scan.")
@@ -103,8 +102,8 @@ def transform(image_size: int, train: bool):
 class CaptionCache:
     """Float16 caption vectors on disk, addressed by sample key."""
 
-    def __init__(self, tower: str, root: Path | None = None) -> None:
-        base = (root or CAPTIONS) / "speech-coco" / tower
+    def __init__(self, tower: str) -> None:
+        base = CAPTIONS / "speech-coco" / tower
         meta_path = base / "meta.json"
         if not meta_path.exists():
             raise SystemExit(f"no caption cache for {tower} at {base}. Run "
@@ -126,8 +125,12 @@ class CaptionCache:
             np.asarray(self.vectors[self.index[key]], dtype=np.float32))
 
 
+#: Samples held in the training shuffle buffer.
+SHUFFLE_BUFFER = 5000
+
+
 def pipeline(recipe, *, train: bool, cache: CaptionCache, exclude: set[str],
-             workers: int = 8, shuffle: int = 5000):
+             workers: int):
     """A loader of ``(images, caption vectors)`` micro-batches.
 
     Infinite, shuffled and resampled for training; finite and ordered for
@@ -158,7 +161,7 @@ def pipeline(recipe, *, train: bool, cache: CaptionCache, exclude: set[str],
         handler=wds.warn_and_continue, resampled=train, seed=recipe.seed,
         empty_check=False)
     if train:
-        dataset = dataset.shuffle(shuffle)
+        dataset = dataset.shuffle(SHUFFLE_BUFFER)
     dataset = (dataset.decode("pil", handler=wds.warn_and_continue)
                .select(keep)
                .map(convert, handler=wds.warn_and_continue)

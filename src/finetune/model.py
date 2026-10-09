@@ -33,25 +33,10 @@ INITIAL_LOGIT_SCALE = math.log(1 / 0.07)
 MAX_LOGIT_SCALE = math.log(100.0)
 
 
-class CachedTower(nn.Module):
-    """Precomputed caption vectors, returned as float32 after a width check. Holds no parameters."""
-
-    def __init__(self, dim: int) -> None:
-        super().__init__()
-        self.dim = dim
-
-    def forward(self, vectors: torch.Tensor) -> torch.Tensor:
-        if vectors.shape[-1] != self.dim:
-            raise RuntimeError(
-                f"cached captions are {vectors.shape[-1]}-dimensional, the "
-                f"tower is {self.dim}. The cache was built for another tower.")
-        return vectors.float()
-
-
 class JointModel(nn.Module):
     """Image backbone and caption tower, compared in the tower's space."""
 
-    def __init__(self, recipe: Recipe, *, device: str = "cuda") -> None:
+    def __init__(self, recipe: Recipe) -> None:
         super().__init__()
         backbone, _, _, spec = load(recipe.backbone, device="cpu")
         # load() returns the model frozen and in eval mode.
@@ -68,8 +53,7 @@ class JointModel(nn.Module):
         nn.init.normal_(self.image_proj.weight, std=hidden ** -0.5)
         self.logit_scale_raw = nn.Parameter(torch.tensor(INITIAL_LOGIT_SCALE))
 
-        self.tower = CachedTower(recipe.width)
-        self.to(device)
+        self.to("cuda")
 
     def encode_image(self, images: torch.Tensor) -> torch.Tensor:
         """Projected, normalized class token, or patch mean where there is no class token."""
@@ -77,8 +61,14 @@ class JointModel(nn.Module):
         summary = out[:, 0] if self.reads_class_token else out.mean(dim=1)
         return F.normalize(self.image_proj(summary.float()), dim=-1)
 
-    def encode_text(self, captions) -> torch.Tensor:
-        return F.normalize(self.tower(captions), dim=-1)
+    def encode_text(self, captions: torch.Tensor) -> torch.Tensor:
+        """The cached caption vectors, normalized, after a check of their width."""
+        if captions.shape[-1] != self.recipe.width:
+            raise RuntimeError(
+                f"cached captions are {captions.shape[-1]}-dimensional, the "
+                f"tower is {self.recipe.width}. The cache was built for another "
+                f"tower.")
+        return F.normalize(captions.float(), dim=-1)
 
     def logit_scale(self) -> torch.Tensor:
         return self.logit_scale_raw.clamp(0.0, MAX_LOGIT_SCALE).exp()
@@ -112,24 +102,20 @@ def infonce(image: torch.Tensor, text: torch.Tensor,
                   + F.cross_entropy(logits.t(), target))
 
 
-def in_batch_accuracy(image: torch.Tensor, text: torch.Tensor) -> tuple[float, float]:
-    """Top-1 retrieval within the batch, image to caption and caption to image."""
+def in_batch_accuracy(image: torch.Tensor, text: torch.Tensor) -> float:
+    """Top-1 retrieval within the batch, image to caption."""
     sim = image @ text.t()
     target = torch.arange(sim.shape[0], device=sim.device)
-    return (float((sim.argmax(dim=1) == target).float().mean()),
-            float((sim.argmax(dim=0) == target).float().mean()))
+    return float((sim.argmax(dim=1) == target).float().mean())
 
 
 @dataclass(frozen=True)
 class StepResult:
     loss: float
     image_accuracy: float
-    text_accuracy: float
-    batch: int
 
 
-def cached_step(model, batches, *, autocast_dtype: torch.dtype | None = None
-                ) -> StepResult:
+def cached_step(model, batches) -> StepResult:
     """One optimizer step's gradients over ``batches`` micro-batches.
 
     The caption vectors come from a frozen cache and carry no gradient, so only
@@ -141,7 +127,7 @@ def cached_step(model, batches, *, autocast_dtype: torch.dtype | None = None
 
     cached_image, cached_text = [], []
     for images, captions in batches:
-        with torch.no_grad(), _autocast(autocast_dtype):
+        with torch.no_grad(), _autocast():
             image = model.encode_image(images)
             text = model.encode_text(captions)
         cached_image.append(image.detach().float().requires_grad_(True))
@@ -154,19 +140,19 @@ def cached_step(model, batches, *, autocast_dtype: torch.dtype | None = None
     accuracy = in_batch_accuracy(image.detach(), text.detach())
 
     for i, (images, _) in enumerate(batches):
-        with _autocast(autocast_dtype):
+        with _autocast():
             surrogate = (model.encode_image(images).float()
                          * cached_image[i].grad).sum()
         surrogate.backward()
 
-    return StepResult(float(loss.detach()), accuracy[0], accuracy[1],
-                      image.shape[0])
+    return StepResult(float(loss.detach()), accuracy)
 
 
-def _autocast(dtype: torch.dtype | None):
-    """Autocast on CUDA with the weight cache off, or nothing on the CPU."""
+def _autocast():
+    """Bfloat16 autocast on CUDA with the weight cache off, or nothing on the CPU."""
     from contextlib import nullcontext
 
-    if dtype is None or not torch.cuda.is_available():
+    if not torch.cuda.is_available():
         return nullcontext()
-    return torch.autocast(device_type="cuda", dtype=dtype, cache_enabled=False)
+    return torch.autocast(device_type="cuda", dtype=torch.bfloat16,
+                          cache_enabled=False)

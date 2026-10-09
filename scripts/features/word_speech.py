@@ -47,7 +47,7 @@ def main() -> None:
             print(f"{key}: cache is for other words or carriers, rebuilding")
 
         started = time.time()
-        renditions = speech.build(words, device=device, verify=True)
+        renditions = speech.build(words, device=device)
         if renditions.shape[2] != speech.BINS * dim:
             raise SystemExit(
                 f"{key} returned {renditions.shape[2]} dimensions, expected "

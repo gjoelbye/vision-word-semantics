@@ -123,7 +123,7 @@ class Qwen3Tower(nn.Module):
         return out[:, -1, :].float()
 
 
-def tokenizer(key: str, context: int = 77):
+def tokenizer(key: str, context: int):
     """Text to left-padded token tensors of length ``context`` for a Qwen3 encoder."""
     repo, _, kind = ENCODERS[key]
     if kind != "qwen3":

@@ -26,7 +26,7 @@ import torch
 from ..config import SEED
 from ..models import ENCODERS, finetune_key
 from .checkpoint import _backbone_keys, backbone_state
-from .model import cached_step
+from .model import cached_step, infonce
 
 #: Images per forward pass for each backbone, the largest that fit a 32 GB card.
 #: The gradient does not depend on it.
@@ -48,6 +48,9 @@ PATIENCE = 3
 
 #: Images per optimizer step.
 BATCH = 1056
+
+#: Validation micro-batches scored at each validation.
+VALIDATE_BATCHES = 32
 
 
 def schedule(kept: int, batch: int = BATCH) -> dict[str, int]:
@@ -161,19 +164,16 @@ def _payload(model, optimizer, recipe, step: int, best_loss: float,
 
 
 @torch.no_grad()
-def validate(model, loader, *, batches: int, device: str,
-             autocast_dtype) -> float:
-    """Mean InfoNCE loss over the first ``batches`` validation micro-batches,
-    each scored against its own negatives only."""
-    from .model import infonce
-
+def validate(model, loader) -> float:
+    """Mean InfoNCE loss over the first ``VALIDATE_BATCHES`` validation
+    micro-batches, each scored against its own negatives only."""
     model.eval()
     total, seen = 0.0, 0
     for images, captions in loader:
-        if seen >= batches:
+        if seen >= VALIDATE_BATCHES:
             break
-        images = images.to(device, non_blocking=True)
-        captions = captions.to(device, non_blocking=True)
+        images = images.to("cuda", non_blocking=True)
+        captions = captions.to("cuda", non_blocking=True)
         image = model.encode_image(images).float()
         text = model.encode_text(captions).float()
         total += float(infonce(image, text, model.logit_scale()))
@@ -183,9 +183,8 @@ def validate(model, loader, *, batches: int, device: str,
 
 
 def run(model, recipe, train_loader, val_loader, *, out: Path,
-        device: str = "cuda", autocast_dtype=torch.bfloat16,
-        checkpoint_every: int = 500, validate_every: int = 500,
-        validate_batches: int = 32, patience: int = 0) -> tuple[Path, str]:
+        checkpoint_every: int, validate_every: int,
+        patience: int) -> tuple[Path, str]:
     """Train ``model`` and return the path of ``best.slim.pt`` and why the run ended.
 
     The run resumes from ``latest.pt`` in ``out`` when one exists, and SIGTERM
@@ -234,11 +233,11 @@ def run(model, recipe, train_loader, val_loader, *, out: Path,
             except StopIteration:
                 batches = iter(train_loader)
                 images, captions = next(batches)
-            micro.append((images.to(device, non_blocking=True),
-                          captions.to(device, non_blocking=True)))
+            micro.append((images.to("cuda", non_blocking=True),
+                          captions.to("cuda", non_blocking=True)))
 
         optimizer.zero_grad(set_to_none=True)
-        result = cached_step(model, micro, autocast_dtype=autocast_dtype)
+        result = cached_step(model, micro)
         if recipe.grad_clip:
             torch.nn.utils.clip_grad_norm_(model.parameters(), recipe.grad_clip)
         optimizer.step()
@@ -252,8 +251,7 @@ def run(model, recipe, train_loader, val_loader, *, out: Path,
                   f"{rate:.2f} step/s", flush=True)
 
         if validate_every and done % validate_every == 0:
-            loss = validate(model, val_loader, batches=validate_batches,
-                            device=device, autocast_dtype=autocast_dtype)
+            loss = validate(model, val_loader)
             print(f"  step {done:>6,} validation {loss:.4f}"
                   f"{'  (best)' if loss < best_loss else ''}", flush=True)
             if loss < best_loss:

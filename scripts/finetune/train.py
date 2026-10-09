@@ -75,7 +75,7 @@ def train(backbone: str, tower: str) -> None:
         "model": recipe.name,
         "base_model": backbone,
         "base_repo": MODELS[backbone].repo,
-        "corpus": data.described(),
+        "corpus": data.DESCRIBED,
         "text_tower": tower,
         "train_step": int(payload["step"]),
         "best_step": int(payload["best_step"]),

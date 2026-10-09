@@ -59,13 +59,11 @@ def _resolve(key: str, expected: set[str]) -> str:
     return key
 
 
-def load_backbone_state(ckpt_path: str | Path, model, *,
-                        expect_repo: str | None = None,
-                        expect_step: int | None = None) -> dict:
+def load_backbone_state(ckpt_path: str | Path, model, *, expect_repo: str,
+                        expect_step: int) -> dict:
     """Load the image backbone from ``ckpt_path`` into ``model``, in place.
 
-    Returns the checkpoint's record: the step the weights were saved at, the
-    step and value of the best validation loss, and the tensor count. Raises if
+    Returns the step the weights were saved at and the tensor count. Raises if
     the checkpoint's backbone repository or step differs from ``expect_repo`` or
     ``expect_step``.
     """
@@ -77,11 +75,11 @@ def load_backbone_state(ckpt_path: str | Path, model, *,
         raise RuntimeError(f"{ckpt_path} has no 'model' entry")
 
     cfg = payload.get("cfg", {})
-    if expect_repo is not None and cfg.get("backbone_repo") != expect_repo:
+    if cfg.get("backbone_repo") != expect_repo:
         raise RuntimeError(
             f"{ckpt_path} was trained on {cfg.get('backbone_repo')!r}, but the "
             f"registry pairs it with {expect_repo!r}")
-    if expect_step is not None and int(payload["step"]) != expect_step:
+    if int(payload["step"]) != expect_step:
         raise RuntimeError(
             f"{ckpt_path} records step {payload['step']}, the registry says "
             f"{expect_step}")
@@ -105,7 +103,4 @@ def load_backbone_state(ckpt_path: str | Path, model, *,
         print(f"  {len(missing)} keys kept at pretrained values: "
               f"{sorted(missing)[:5]}")
 
-    return {"train_step": int(payload["step"]),
-            "best_step": int(payload["best_step"]),
-            "best_val_loss": float(payload["best_val_loss"]),
-            "n_tensors": len(state)}
+    return {"train_step": int(payload["step"]), "n_tensors": len(state)}
