@@ -3,7 +3,8 @@
 `scripts/analysis/figure5_two_clue.py` reads the two-clue caches and scores
 them here; the tests are in `src.stats`. The unit of inference is the clue grid
 of eight items. Embedding differences are averaged over the 96 slots before
-any cosine is taken.
+any cosine is taken. The manifest records an item as an equation
+(`equation_id`) and a clue grid as a family (`family_id`).
 """
 from __future__ import annotations
 

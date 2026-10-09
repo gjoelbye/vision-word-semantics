@@ -2,7 +2,8 @@
 
 A slot is one background with one typography setting. Every word is drawn on
 the same slots, so background and typography cancel in a comparison between
-two words. `build_appearance_design` builds the settings so that the factors
+two words. The code calls a setting an appearance tuple, numbered in the
+`appearance` column. `build_appearance_design` builds the settings so that the factors
 are balanced against each other, and `balance_report` says which factor pairs
 are exactly balanced. The word renderer, the class-name renderer and the
 two-clue renderer all draw through this module, and the analysis takes its
@@ -68,6 +69,7 @@ BOX_STYLES: tuple[str, ...] = ("panel", "bare")
 
 FACTORS: tuple[str, ...] = ("font", "size", "color", "placement", "box")
 
+
 @functools.lru_cache(maxsize=None)
 def font_path_for(family: str) -> str:
     """Absolute path to a TrueType file for `family`.
@@ -96,7 +98,8 @@ def font_px(size_band: str, image_size: int = IMAGE_SIZE) -> int:
     """Pixel size for a band. Depends on the slot only, never on the word."""
     return max(10, int(round(SIZE_BAND_TO_FRAC[size_band] * image_size)))
 
-def _cramers_v(a: pd.Series, b: pd.Series) -> float:
+
+def cramers_v(a: pd.Series, b: pd.Series) -> float:
     """Association between two categorical columns, 0 (independent) to 1."""
     ct = pd.crosstab(a, b).to_numpy(dtype=float)
     n = ct.sum()
@@ -120,7 +123,7 @@ def balance_report(design: pd.DataFrame) -> pd.DataFrame:
             rows.append(dict(pair=f"{x} x {y}", cells=ct.size,
                              lo=int(ct.min()), hi=int(ct.max()),
                              exact=bool(ct.min() == ct.max()),
-                             cramers_v=round(_cramers_v(design[x], design[y]), 3)))
+                             cramers_v=round(cramers_v(design[x], design[y]), 3)))
     return pd.DataFrame(rows).sort_values(["exact", "pair"], ascending=[False, True])
 
 
@@ -225,6 +228,7 @@ def build_appearance_design(reps: int = 1, seed: int = 0,
     out["monospace"] = out.font.isin(MONOSPACE_FAMILIES)
     return out
 
+
 def crop_safe_window(size: int = IMAGE_SIZE,
                      frac: float = CROP_SAFE_FRAC) -> tuple[int, int, int]:
     """`(x0, y0, side)` of the centered square that survives a center crop."""
@@ -308,6 +312,7 @@ class Box:
     w: int
     h: int
 
+
 def _draw_panel(draw: ImageDraw.ImageDraw, box: Box, pad: int | None = None,
                 fill: tuple[int, int, int, int] = (255, 255, 255, 140)) -> None:
     """Translucent panel behind the text, padded by a sixth of the box height (at least 3 px)."""
@@ -381,15 +386,10 @@ def render_scramble(background: Image.Image, text: str, box: Box, family: str,
     rgba[..., 3] = (ink * 255).round().astype(np.uint8)
     layer.alpha_composite(Image.fromarray(rgba, "RGBA"), (box.x, box.y))
     return Image.alpha_composite(base, layer).convert("RGB")
-# A slot is one background paired with one typography setting. Every word is
-# drawn on all of them, so background and typography cancel in any comparison
-# between words. Each typography setting is used on `REPLICATES` different
-# backgrounds, and `split_halves` puts half of the replicates on each side, so
-# the two halves carry the same typography and differ only in the photographs.
+
 
 # Backgrounds each appearance tuple is drawn on. Four gives 96 slots from 24
-# tuples and two replicates per half of the matched-appearance split. The
-# background count is n_slots().
+# tuples, and `split_halves` puts two replicates on each side.
 REPLICATES = 4
 
 

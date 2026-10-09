@@ -252,8 +252,8 @@ def _count_layers(model) -> int:
     raise RuntimeError(f"cannot determine depth of {type(model).__name__}")
 
 
-def free(model) -> None:
-    del model
+def free() -> None:
+    """Collect dropped models and release cached GPU memory."""
     gc.collect()
     if torch.cuda.is_available():
         torch.cuda.empty_cache()

@@ -16,8 +16,8 @@ import numpy as np
 import torch
 
 from src.analysis.directions import word_order
-from src.config import ensure_dirs
-from src.features import speech, text
+from src.config import ensure_dirs, line_fingerprint
+from src.features import speech
 from src.models import ENCODERS
 
 
@@ -27,7 +27,7 @@ def main() -> None:
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     words = list(word_order())
-    word_sha = text.fingerprint(words)
+    word_sha = line_fingerprint(words)
     cells = speech.grid()
     print(f"{len(words):,} words x {len(cells)} renditions "
           f"({len(speech.SPEAKERS)} voices, {len(speech.RATES)} rates, "

@@ -4,9 +4,9 @@ The names go into the `data/renders/` tree at the text centers recorded for
 the vocabulary, and `data/concepts/manifest.parquet` lists them. The
 photographs are every ImageNet-1k validation image except the 96 backgrounds,
 center-cropped to 256 pixels under `data/concepts/images/`.
-`data/concepts/images.parquet` lists
-them with the CRAFT box count and text area of each. Existing images are kept,
-and the text scan runs again on every photograph.
+`data/concepts/images.parquet` lists them with the CRAFT box count and text
+area of each. Existing images are kept, and the text scan runs again on every
+photograph.
 """
 from __future__ import annotations
 

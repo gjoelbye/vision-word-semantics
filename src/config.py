@@ -74,9 +74,8 @@ _ALL_DIRS = (BACKGROUNDS, LEXICON, RENDERS, EMBEDDINGS, SIMILARITY, RESULTS,
 # The directory names that sit directly under a data root, where
 # `data_relative` splits a recorded path.
 _DATA_SUBDIRS = frozenset({
-    "backgrounds", "lexicon", "renders", "embeddings", "results", "figures",
-    "checkpoints", "corpus", "captions", "composition", "concepts",
-    "word_text", "word_speech",
+    "backgrounds", "lexicon", "renders", "embeddings", "checkpoints", "corpus",
+    "captions", "composition", "concepts", "word_text", "word_speech",
 })
 
 

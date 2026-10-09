@@ -201,7 +201,7 @@ def test_a_restriction_too_tight_for_k_is_an_error_not_a_wrong_number():
 
 
 def test_retrieval_reports_each_direction_with_its_own_denominator():
-    """The two directions of one pair are correlated, so they are never pooled."""
+    """`retrieval` returns one row per query direction, each counted over its own pairs."""
     T, labels = _blocked(n_per=10, n_class=2)
     words = [f"w{i}" for i in range(len(labels))]
     index = {w: i for i, w in enumerate(words)}

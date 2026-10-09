@@ -22,12 +22,15 @@ from ..models import ENCODERS
 # that a pad token survives, so no carrier is truncated.
 CONTEXT = 48
 
+# Carriers per batch.
+BATCH_SIZE = 64
+
 # The text encoders, by size.
 TEXT_MODELS = ("qwen3-0p6b-frozen", "qwen3-4b-frozen", "qwen3-8b-frozen")
 
 # The 96 shared carriers, as 24 frames crossed with 4 surface variants.
-# Every target slot is a quoted, named or otherwise permissive position, so
-# each carrier is grammatical for every word in the vocabulary.
+# The word's position in every carrier is quoted, named or otherwise
+# permissive, so each carrier is grammatical for every word in the vocabulary.
 TEMPLATE_FRAMES = (
     ("bare", ("{w}", "{w}.", "{w}!", "{w}?")),
     ("bare", ('"{w}"', "'{w}'", "({w})", "[{w}]")),
@@ -91,10 +94,6 @@ CARRIER_FRAME = np.array([i for i, _ in enumerate(TEMPLATE_FRAMES)
 assert len(CARRIERS) == len(set(CARRIERS)) == 96, "carriers must be 96 distinct"
 
 
-# sha256 of the word list in order, recorded with every text and speech cache.
-fingerprint = line_fingerprint
-
-
 def cache_dir(key: str) -> Path:
     return WORD_TEXT / key
 
@@ -141,12 +140,11 @@ def tokenizer(key: str, context: int):
         max_length=context, return_tensors="pt"))
 
 
-def embed(key: str, words, *, device: str = "auto", batch_size: int = 64
-          ) -> tuple[np.ndarray, str]:
+def embed(key: str, words) -> tuple[np.ndarray, str]:
     """`(per-carrier vectors, device used)`, shaped `(words, 96, width)`.
 
-    The mean over axis 1 is the word's vector. `device` of `auto` uses the
-    GPU and falls back to the CPU when the weights do not fit.
+    The mean over axis 1 is the word's vector. The GPU is used when the weights
+    fit, the CPU otherwise.
     """
     words = list(words)
     tokenize = tokenizer(key, CONTEXT)
@@ -161,8 +159,8 @@ def embed(key: str, words, *, device: str = "auto", batch_size: int = 64
         tower = tower.to(where).eval()
         out = []
         try:
-            for start in range(0, len(texts), batch_size):
-                batch = tokenize(texts[start:start + batch_size])
+            for start in range(0, len(texts), BATCH_SIZE):
+                batch = tokenize(texts[start:start + BATCH_SIZE])
                 if not (batch["attention_mask"][:, 0] == 0).all():
                     raise ValueError(
                         f"a carrier filled the {CONTEXT}-token context and may "
@@ -178,15 +176,13 @@ def embed(key: str, words, *, device: str = "auto", batch_size: int = 64
         stacked = np.concatenate(out).astype(np.float32)
         return stacked.reshape(len(words), len(CARRIERS), -1)
 
-    if device != "auto":
-        return run(device), device
     if not torch.cuda.is_available():
         return run("cpu"), "cpu"
     try:
         return run("cuda"), "cuda"
     except torch.OutOfMemoryError:
         torch.cuda.empty_cache()
-        print(f"{key} does not fit in the free GPU memory; using the processor")
+        print(f"{key} does not fit in the free GPU memory; running on the CPU")
         return run("cpu"), "cpu"
 
 
@@ -218,7 +214,7 @@ def load(key: str, words) -> np.ndarray:
         raise FileNotFoundError(
             f"no text cache for {key}; run scripts/features/word_text.py")
     meta = json.loads(meta_file.read_text())
-    want = fingerprint(words)
+    want = line_fingerprint(words)
     if meta.get("word_sha") != want:
         raise RuntimeError(
             f"{key} was embedded for a different word set "

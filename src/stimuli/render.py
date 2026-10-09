@@ -157,10 +157,12 @@ def build_manifest(words: list[str], workers: int = 12) -> pd.DataFrame:
                 rows.append(dict(word=word, slot=int(s["slot"]),
                                  condition="scramble", image_path=pp))
 
-    man = pd.DataFrame(rows)
-    # Clean rows first by slot, then words alphabetically, then condition, then slot.
-    man["_clean"] = (man.word == CLEAN).astype(int)
-    man = (man.sort_values(["_clean", "word", "condition", "slot"],
-                           ascending=[False, True, True, True], kind="mergesort")
-              .drop(columns="_clean").reset_index(drop=True))
-    return man
+    return canonical_order(pd.DataFrame(rows))
+
+
+def canonical_order(man: pd.DataFrame) -> pd.DataFrame:
+    """Clean rows first by slot, then words alphabetically, then condition, then slot."""
+    man = man.assign(_clean=(man.word == CLEAN).astype(int))
+    return (man.sort_values(["_clean", "word", "condition", "slot"],
+                            ascending=[False, True, True, True], kind="mergesort")
+               .drop(columns="_clean").reset_index(drop=True))

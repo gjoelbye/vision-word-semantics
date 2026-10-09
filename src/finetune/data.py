@@ -109,8 +109,6 @@ class CaptionCache:
         if not meta_path.exists():
             raise SystemExit(f"no caption cache for {tower} at {base}. Run "
                              f"scripts/finetune/caption_targets.py.")
-        self.meta = json.loads(meta_path.read_text())
-        self.dim = int(self.meta["dim"])
         self.vectors = np.load(base / "vectors.npy", mmap_mode="r")
         self.index = {k: i for i, k in enumerate(
             (base / "keys.txt").read_text().split("\n")) if k}

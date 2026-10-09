@@ -18,7 +18,7 @@ import pandas as pd
 
 from src.analysis.directions import (HEADLINE, manifest, rownorm,
                                      word_directions, word_order)
-from src.config import SIMILARITY, ensure_dirs
+from src.config import SIMILARITY, ensure_dirs, line_fingerprint
 from src.features import speech, text
 from src.models import DEFAULT_SWEEP
 from src.stimuli.render import fingerprint
@@ -53,7 +53,7 @@ def main() -> None:
     ensure_dirs()
 
     words = list(word_order())
-    word_sha = text.fingerprint(words)
+    word_sha = line_fingerprint(words)
     manifest_sha = fingerprint(manifest())
     print(f"{len(words):,} words | word set {word_sha[:12]} | "
           f"manifest {manifest_sha[:12]}")

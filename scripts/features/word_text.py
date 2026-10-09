@@ -15,7 +15,7 @@ import time
 import numpy as np
 
 from src.analysis.directions import word_order
-from src.config import ensure_dirs
+from src.config import ensure_dirs, line_fingerprint
 from src.features import text
 from src.models import ENCODERS
 
@@ -25,7 +25,7 @@ def main() -> None:
     ensure_dirs()
 
     words = list(word_order())
-    word_sha = text.fingerprint(words)
+    word_sha = line_fingerprint(words)
     print(f"{len(words):,} words x {len(text.CARRIERS)} carriers "
           f"({len(text.TEMPLATE_FRAMES)} frames x {text.VARIANTS} "
           f"variants) | fingerprint {word_sha[:12]}")

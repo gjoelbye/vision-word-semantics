@@ -15,10 +15,11 @@ import pandas as pd
 from threadpoolctl import threadpool_limits
 
 from src.analysis.directions import manifest, word_order
-from src.config import LEXICON, RESULTS, SEED, SIMILARITY, ensure_dirs
+from src.config import (LEXICON, RESULTS, SEED, SIMILARITY, ensure_dirs,
+                        line_fingerprint)
 from src.features import speech, text
 from src.models import DEFAULT_SWEEP
-from src.stats import benjamini_hochberg
+from src.stats import benjamini_hochberg, permutation_p
 from src.stimuli.render import fingerprint
 
 INDEX = SIMILARITY / "index.parquet"
@@ -134,8 +135,7 @@ def measure(strata: np.ndarray) -> pd.DataFrame:
                     "value": float(value[column]),
                     "chance": float(chance[name][column]),
                     "length_null_mean": float(null[:, column].mean()),
-                    "p": float((1 + (null[:, column] >= value[column]).sum())
-                               / (N_PERM + 1)),
+                    "p": permutation_p(value[column], null[:, column]),
                 })
         print(f"  measured {reference}", flush=True)
     frame = pd.DataFrame(records)
@@ -154,7 +154,7 @@ def main() -> None:
     words = (pd.DataFrame({"word": word_order()})
                .merge(pd.read_parquet(LEXICON / "words.parquet"),
                       on="word", how="left"))
-    word_sha = text.fingerprint(words.word)
+    word_sha = line_fingerprint(words.word)
     manifest_sha = fingerprint(manifest())
     for model in COLUMNS + ROWS:
         if model not in index.index or index.word_sha[model] != word_sha:

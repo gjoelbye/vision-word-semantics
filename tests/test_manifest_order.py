@@ -4,18 +4,15 @@ text centers of the slots and the resolution of recorded paths are checked
 here too."""
 import pandas as pd
 
-from src.stimuli.render import CLEAN, fingerprint
+from src.stimuli.render import CLEAN, canonical_order, fingerprint
 
 
 def _manifest(words, slots):
-    rows = [dict(word=CLEAN, slot=s, image_path=f"/bg/{s}.png") for s in slots]
-    rows += [dict(word=w, slot=s, image_path=f"/r/{w}/{s}.jpg")
-             for w in words for s in slots]
-    man = pd.DataFrame(rows)
-    man["_clean"] = (man.word == CLEAN).astype(int)
-    return (man.sort_values(["_clean", "word", "slot"],
-                            ascending=[False, True, True], kind="mergesort")
-               .drop(columns="_clean").reset_index(drop=True))
+    rows = [dict(word=CLEAN, slot=s, condition="clean", image_path=f"/bg/{s}.png")
+            for s in slots]
+    rows += [dict(word=w, slot=s, condition=c, image_path=f"/r/{w}/{c}/{s}.jpg")
+             for w in words for s in slots for c in ("word", "scramble")]
+    return canonical_order(pd.DataFrame(rows))
 
 
 def test_order_is_canonical_regardless_of_arrival_order():
@@ -40,7 +37,7 @@ def test_fingerprint_is_stable():
     assert fingerprint(m) == fingerprint(m.copy())
 
 
-def test_the_centre_table_is_recorded_and_reused(tmp_path, monkeypatch):
+def test_the_centre_table_is_recorded_and_reused(tmp_path):
     """The text centers depend on the widest word, so they are recorded once and
     a wider vocabulary that still fits reuses them."""
     from src.stimuli import render as R
@@ -81,8 +78,8 @@ def test_the_split_takes_the_leftmost_data_directory():
     """A word directory named after a data directory is a word directory."""
     from src.config import data_relative
 
-    got = data_relative("/any/root/renders/results/095.png")
-    assert str(got) == "renders/results/095.png"
+    got = data_relative("/any/root/renders/lexicon/095.png")
+    assert str(got) == "renders/lexicon/095.png"
 
 
 def test_a_path_below_no_data_directory_is_refused():

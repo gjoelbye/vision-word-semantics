@@ -46,17 +46,13 @@ CONDITIONS = (
     "target_scrambled",
 )
 
-PILOT_PATH = TWO_CLUE_PILOT_TSV
-CONFIRMATORY_PATH = TWO_CLUE_CONFIRMATORY_TSV
-
-
 def load_curated_items() -> tuple[pd.DataFrame, pd.DataFrame, str]:
     """The pilot and confirmatory items, their check report and the dataset fingerprint.
 
     Raises when any check fails.
     """
-    pilot = read_table(PILOT_PATH, "pilot")
-    confirmatory = read_table(CONFIRMATORY_PATH, "confirmatory")
+    pilot = read_table(TWO_CLUE_PILOT_TSV, "pilot")
+    confirmatory = read_table(TWO_CLUE_CONFIRMATORY_TSV, "confirmatory")
     items, report = validate_datasets(pilot, confirmatory)
     require_valid(report)
     return items, report, dataset_fingerprint(items)
@@ -165,7 +161,7 @@ def load_or_create_layout(items: pd.DataFrame,
                 or meta.get("render_schema") != RENDER_SCHEMA_VERSION):
             raise RuntimeError(
                 "two-clue layout belongs to a different dataset or render "
-                "schema; delete composition/ to rebuild it")
+                "schema")
         layout = pd.read_parquet(LAYOUT_PATH)
         got = _layout_fingerprint(layout, dataset_sha)
         if got != meta.get("layout_sha"):
@@ -353,7 +349,7 @@ def render_dataset(items: pd.DataFrame, layout: pd.DataFrame, dataset_sha: str,
         if any(previous.get(key) != value for key, value in expected.items()):
             raise RuntimeError(
                 "two-clue manifest belongs to a different dataset, layout, "
-                "or render schema; delete composition/ to rebuild it")
+                "or render schema")
     manifest.to_parquet(MANIFEST_PATH, index=False)
 
     def write_meta(complete: bool) -> None:

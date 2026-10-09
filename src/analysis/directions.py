@@ -1,8 +1,9 @@
 """Word directions and visual directions, as Section 3.3 of the paper defines them.
 
 `f` is a model's class token at one depth. For a word `w` rendered on the 96
-slots `s`, the uncentered word direction is the mean over slots of
-`f(x_s + w) - f(x_s + scrambled w)`. The control keeps the background,
+slots `s` (a slot is one background with its typography setting, see
+`src.stimuli.typography`), the uncentered word direction is the mean over slots
+of `f(x_s + w) - f(x_s + scrambled w)`. The control keeps the background,
 position, color and backing of the word image and replaces the letters with a
 phase-scrambled patch, so the difference is the response to intact lettering.
 The word direction `tau_w` subtracts the mean of the uncentered directions over
@@ -175,7 +176,7 @@ def word_directions(key: str, layer: int = -1,
     out /= count[:, None]
     if not np.abs(out).any():
         raise DegenerateTau(
-            f"{key} layer {layer}: every residual direction is exactly zero")
+            f"{key} layer {layer}: every word direction is exactly zero")
     if center:
         out = out - out.mean(0, keepdims=True)
     return out

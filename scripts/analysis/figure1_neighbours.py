@@ -23,6 +23,7 @@ from src.analysis.directions import (load_cache, manifest, rownorm,
                                      word_directions, word_order)
 from src.config import LEXICON, RESULTS, ensure_dirs
 from src.models import DEFAULT_SWEEP
+from src.stats import permutation_p
 from src.stimuli.render import fingerprint
 
 # Nearest words kept per query.
@@ -124,8 +125,7 @@ def offset_row(model: str, T: np.ndarray, source_rows: np.ndarray,
                 first_with_offset=int((with_offset == 1).sum()),
                 alignment_mean=observed,
                 alignment_mean_null_mean=float(null.mean()),
-                alignment_mean_null_p=float(
-                    (np.sum(null >= observed) + 1) / (len(null) + 1)),
+                alignment_mean_null_p=permutation_p(observed, null),
                 n_folds=N_FOLDS, n_perm=N_PERM)
 
 

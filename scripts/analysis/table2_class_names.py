@@ -50,7 +50,7 @@ def referent_check(key: str, T_full: np.ndarray, words: pd.DataFrame,
                    index: dict[str, int], own_slot: dict[str, list[int]]) -> dict:
     """Mean matched cosine of the names drawn on a background of their own class, with and without that slot."""
     N = rownorm(class_mean(key, -1, "all"))
-    rows, target = word_class.word_class_rows(words.word, words.wnid, "all")
+    rows, target = word_class.word_class_rows(words.wnid, "all")
     words_kept = list(words.word.iloc[rows])
     r_all = np.array([index[w] for w in words_kept])
     by_slot = {}
@@ -91,7 +91,7 @@ def class_rows(key: str, words: pd.DataFrame) -> pd.DataFrame:
 def depth_rows(key: str, words: pd.DataFrame,
                index: dict[str, int]) -> list[dict]:
     """Matched cosine and word-to-class top-10 accuracy at cached depths 1 to 9."""
-    rows, target = word_class.word_class_rows(words.word, words.wnid, "all")
+    rows, target = word_class.word_class_rows(words.wnid, "all")
     rows = np.array([index[w] for w in words.word.iloc[rows]])
     _, layers, n_layers = load_cache(key, ds=CLASS_NAMES)
     out = []
@@ -135,8 +135,7 @@ def main() -> None:
                                          ds=CLASS_NAMES))
         for subset in SUBSETS:
             N = rownorm(class_mean(key, -1, subset))
-            rows, target = word_class.word_class_rows(
-                words.word, words.wnid, subset)
+            rows, target = word_class.word_class_rows(words.wnid, subset)
             rows = np.array([index[w] for w in words.word.iloc[rows]])
             tables["class_alignment"].append(dict(
                 model=key, subset=subset, n_classes=len(N),

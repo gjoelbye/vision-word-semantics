@@ -74,9 +74,12 @@ def cross_rank(query: np.ndarray, candidates: np.ndarray,
     return (sim > own[:, None]).sum(1)
 
 
-def word_class_rows(words: pd.Series, wnids: pd.Series,
+def word_class_rows(wnids: pd.Series,
                     subset: str = "all") -> tuple[np.ndarray, np.ndarray]:
-    """Positions of the words whose class is retained, and their rows in `retained(subset)`."""
+    """Positions of the words whose class is retained, and their rows in `retained(subset)`.
+
+    `wnids` holds each word's class, in word order.
+    """
     classes = retained(subset)
     index = {c: i for i, c in enumerate(classes)}
     keep = np.array([w in index for w in wnids], bool)
@@ -102,7 +105,7 @@ def class_alignment(T: np.ndarray, N: np.ndarray, rows: np.ndarray,
     n = len(per_word)
     m = max(2, int(SUBSAMPLE_FRAC * n))
     draws = np.array([per_word[idx].mean()
-                      for idx in subsample_indices(n, SUBSAMPLE_FRAC)])
+                      for idx in subsample_indices(n)])
     _, _, se = subsample_summary(observed, draws, n, m)
     return dict(n_words=len(rows), alignment=observed, se=se,
                 null_mean=float(null.mean()),
@@ -111,7 +114,7 @@ def class_alignment(T: np.ndarray, N: np.ndarray, rows: np.ndarray,
 
 def class_retrieval(T: np.ndarray, N: np.ndarray, rows: np.ndarray,
                     target: np.ndarray) -> list[dict]:
-    """Word-to-class and class-to-word retrieval, one row per direction.
+    """Word-to-class and class-to-word retrieval, one row per query direction.
 
     Each row carries the queries whose target ranks first (`hits`) and among
     the K nearest (`hits10`), the binomial standard error of `rate10`, the

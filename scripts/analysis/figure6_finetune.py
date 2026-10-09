@@ -1,15 +1,17 @@
 """Measure noun purity, partner retrieval and split-half cosine before and after finetuning.
 
 The models are the ten finetuned backbones, their twenty SPEECH-COCO finetunes
-and CLIP-B. Word directions come from 4 images per word, the four backgrounds
-of one typography setting drawn at random five times, and from all 96. For each
-model and image count, `results/finetune_effect.parquet` holds the mean
-(`value`) and standard deviation (`spread`) over the draws of three
-readouts: noun purity among the 10 nearest nouns (`purity`, `common_noun`);
+and CLIP-B. Word directions come either from 4 images per word, the four
+backgrounds of one typography setting, with the setting drawn at random five
+times, or from all 96. For each model and image count,
+`results/finetune_effect.parquet` holds the mean (`value`) and standard
+deviation (`spread`) over the draws of three measures, keyed by `readout` and
+`task`: noun purity among the 10 nearest nouns (`purity`, `common_noun`);
 top-10 accuracy for country-capital and for synonym pairs, each pair queried in
-both directions (`retrieval`, with the relation as task); and the split-half
-cosine (`reliability`, `tau`, k 0). `results/finetune_draws.parquet`
-lists the typography setting of every draw.
+both directions (`retrieval`, the relation); and the split-half cosine between
+word directions from two halves of the backgrounds (`reliability`, `tau`, with
+`k` 0). `results/finetune_draws.parquet` lists the typography setting of every
+draw.
 """
 from __future__ import annotations
 
@@ -20,6 +22,7 @@ import numpy as np
 import pandas as pd
 
 from src.analysis import directions, lexical
+from src.analysis.lexical import K
 from src.config import LEXICON, RESULTS, ensure_dirs
 from src.models import FINETUNES, TWIN_OF
 from src.stimuli.render import fingerprint
@@ -33,10 +36,7 @@ IMAGE_COUNTS = (4, 96)
 
 # Random draws of the typography settings; the full set needs one.
 DRAWS = 5
-SEED = 0
-
-# Neighbors counted for retrieval and purity.
-K = 10
+DRAW_SEED = 0
 
 # The retrieval relations.
 RELATIONS = ("country_capital", "synonym")
@@ -62,7 +62,7 @@ def measure(models) -> tuple[pd.DataFrame, pd.DataFrame]:
     labels = nouns.category.to_numpy()
     tasks = retrieval_tasks()
     appearances = sorted(slot_table().appearance.unique())
-    rng = random.Random(SEED)
+    rng = random.Random(DRAW_SEED)
     rows, drawn = [], []
     for key in models:
         for images in IMAGE_COUNTS:
@@ -70,7 +70,7 @@ def measure(models) -> tuple[pd.DataFrame, pd.DataFrame]:
             draws = 1 if n_app == len(appearances) else DRAWS
             got = {}
             for draw in range(draws):
-                rng.seed(SEED + draw)
+                rng.seed(DRAW_SEED + draw)
                 chosen = sorted(rng.sample(appearances, n_app))
                 if key == models[0]:
                     drawn += [dict(images=images, draw=draw, appearance=int(a))

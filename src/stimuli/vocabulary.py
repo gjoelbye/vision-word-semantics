@@ -16,8 +16,8 @@ import numpy as np
 import pandas as pd
 
 from ..config import VOCABULARY_TSV
-from .typography import (FONT_FAMILIES, SIZE_BAND_NAMES, crop_safe_window,
-                         font_px, load_font)
+from .typography import (FONT_FAMILIES, SIZE_BAND_NAMES, cramers_v,
+                         crop_safe_window, font_px, load_font)
 
 REFERENCE_PX = 100          # font size at which advance widths are measured
 
@@ -321,12 +321,6 @@ def crossing_report(words: pd.DataFrame) -> dict:
     membership alone cannot predict a category and Cramer's V is zero.
     """
     table = pd.crosstab(words.category, words.ortho).to_numpy(float)
-    n = table.sum()
-    expected = table.sum(1, keepdims=True) * table.sum(0, keepdims=True) / n
-    chi2 = float(((table - expected) ** 2
-                  / np.where(expected == 0, 1, expected)).sum())
-    v = (float(np.sqrt(chi2 / (n * (min(table.shape) - 1))))
-         if min(table.shape) > 1 else 0.0)
     return dict(
         cells_equal=bool(len(np.unique(table)) == 1),
         smallest_cell=int(table.min()),
@@ -335,15 +329,15 @@ def crossing_report(words: pd.DataFrame) -> dict:
         n_clusters=int(table.shape[1]),
         category_counts_equal=bool(len(set(table.sum(1))) == 1),
         cluster_counts_equal=bool(len(set(table.sum(0))) == 1),
-        cramers_v=round(v, 6),
+        cramers_v=round(cramers_v(words.category, words.ortho), 6),
     )
 
 
-def crossing_passes(report: dict, max_cramers_v: float = 0.01) -> bool:
+def crossing_passes(report: dict) -> bool:
     return bool(report["cells_equal"]
                 and report["category_counts_equal"]
                 and report["cluster_counts_equal"]
-                and report["cramers_v"] <= max_cramers_v)
+                and report["cramers_v"] <= GATE_MAX_CRAMERS_V)
 
 
 # Checks on single words and on meaning pairs.

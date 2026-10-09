@@ -174,7 +174,8 @@ def embed_manifest(key: str, manifest: pd.DataFrame, *, batch_size: int = 128,
     decoder.shutdown(wait=False)
     cls_all.flush()
     save_meta(len(all_paths), done=True)
-    free(model)
+    del model
+    free()
 
     gb = paths["cls"].stat().st_size / 1e9
     print(f"{key}: {len(all_paths)}x{len(layers)}x{d_hidden} in "

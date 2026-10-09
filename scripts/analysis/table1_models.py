@@ -25,10 +25,11 @@ from src.analysis.directions import (DegenerateTau, load_cache, manifest,
                                      rownorm, shared_mean_share,
                                      word_directions, word_order)
 from src.analysis.lexical import K
-from src.config import LEXICON, RESULTS, SIMILARITY, ensure_dirs
+from src.config import (LEXICON, RESULTS, SIMILARITY, ensure_dirs,
+                        line_fingerprint)
 from src.features import speech, text
 from src.models import DEFAULT_SWEEP
-from src.stats import (N_PERM, binomial_se, holm, sign_test,
+from src.stats import (N_PERM, binomial_se, holm, permutation_p, sign_test,
                        vocabulary_spread)
 from src.stimuli.render import fingerprint
 
@@ -74,6 +75,18 @@ def lexicon() -> SimpleNamespace:
                           [["a", "b"]].values.T)))
 
 
+def synonym_found(S: np.ndarray, block1: pd.DataFrame,
+                  index: dict[str, int]) -> np.ndarray:
+    """Whether each item's synonym is among the K nearest to its anchor, in either direction."""
+    records = block1.to_dict("records")
+    found = np.zeros(len(records), bool)
+    for left, right in (("anchor", "kept"), ("kept", "anchor")):
+        found |= np.array([
+            lexical.partner_rank(S, index[row[left]], index[row[right]]) < K
+            for row in records])
+    return found
+
+
 def items_rows(key: str, cosine: np.ndarray, S: np.ndarray,
                lex: SimpleNamespace) -> list[dict]:
     """Wins and z-scored cosines per block, and the concrete-abstract contrast."""
@@ -99,12 +112,7 @@ def items_rows(key: str, cosine: np.ndarray, S: np.ndarray,
 
     # Synonyms within the ten nearest in either direction, by the anchor's class.
     block1 = lex.blocks["synonym_vs_twin"]
-    records = block1.to_dict("records")
-    found = np.zeros(len(records), bool)
-    for left, right in (("anchor", "kept"), ("kept", "anchor")):
-        found |= np.array([
-            lexical.partner_rank(S, index[row[left]], index[row[right]]) < K
-            for row in records])
+    found = synonym_found(S, block1, index)
     concrete = (block1["class"] == "concrete").to_numpy()
     table = [[int((found & concrete).sum()), int((~found & concrete).sum())],
              [int((found & ~concrete).sum()), int((~found & ~concrete).sum())]]
@@ -127,15 +135,12 @@ def latent_rows(key: str, T: np.ndarray, lex: SimpleNamespace) -> list[dict]:
         label_order = np.array(sorted(frame.label.unique()))
         vocab_rows = np.array([lex.index[w] for w in frame.word])
         X = np.asarray(T[vocab_rows], dtype=np.float32)
-        train = frame.split.eq("train").to_numpy()
+        accuracy, correct, held, prediction = lexical.nearest_centroid_accuracy(
+            X, frame, label_order)
         test = frame.split.eq("test").to_numpy()
-        y_train = frame.loc[train, "label"].to_numpy()
         y_test = frame.loc[test, "label"].to_numpy()
         ortho_test = frame.loc[test, "ortho"].to_numpy()
         band_test = frame.loc[test, "length_band"].to_numpy()
-        prediction = lexical.nearest_centroid_prediction(
-            X[train], y_train, X[test], label_order)
-        accuracy = float(np.mean(prediction == y_test))
         strata = np.unique(np.stack([ortho_test, band_test], axis=1), axis=0)
         rng = np.random.default_rng([PERMUTATION_SEED, 1])
         null = np.empty(N_PERM, dtype=float)
@@ -145,14 +150,13 @@ def latent_rows(key: str, T: np.ndarray, lex: SimpleNamespace) -> list[dict]:
                 group = (ortho_test == ortho) & (band_test == band)
                 shuffled[group] = rng.permutation(shuffled[group])
             null[repeat] = float(np.mean(prediction == shuffled))
-        correct, held = int((prediction == y_test).sum()), int(test.sum())
         rows.append(dict(
             model=key, dataset=dataset, n_test=held, n_correct=correct,
             full_classification_accuracy=accuracy,
             full_classification_accuracy_se=binomial_se(correct, held),
             classification_chance=float(1 / len(label_order)),
-            length_stratified_full_classification_accuracy_p=(
-                (int((null >= accuracy).sum()) + 1) / (N_PERM + 1)),
+            length_stratified_full_classification_accuracy_p=permutation_p(
+                accuracy, null),
             n_perm=N_PERM))
     return rows
 
@@ -302,12 +306,7 @@ def encoder_rows(key: str, index_row: pd.Series,
                 method="items"))
 
     block1 = lex.blocks["synonym_vs_twin"]
-    item_rows = block1.to_dict("records")
-    found = np.zeros(len(item_rows), bool)
-    for left, right in (("anchor", "kept"), ("kept", "anchor")):
-        found |= np.array([
-            lexical.partner_rank(S, index[row[left]], index[row[right]]) < K
-            for row in item_rows])
+    found = synonym_found(S, block1, index)
     for cls in ("concrete", "abstract"):
         take = (block1["class"] == cls).to_numpy()
         records.append(common | dict(
@@ -325,7 +324,7 @@ def encoder_rows(key: str, index_row: pd.Series,
     for dataset, frame in lex.splits.items():
         label_order = np.array(sorted(frame.label.unique()))
         X = unit[np.array([index[w] for w in frame.word])]
-        accuracy, correct, held = lexical.nearest_centroid_accuracy(
+        accuracy, correct, held, _ = lexical.nearest_centroid_accuracy(
             X, frame, label_order)
         records.append(common | dict(
             readout="classification", group=dataset, direction="",
@@ -364,7 +363,7 @@ def main() -> None:
             group.sign_p.fillna(1.0).to_numpy(float))
     tables["items"] = items
 
-    word_sha = text.fingerprint(lex.vocab)
+    word_sha = line_fingerprint(lex.vocab)
     index = pd.read_parquet(SIMILARITY / "index.parquet").set_index("model")
     encoders = []
     for key in ENCODERS:

@@ -90,7 +90,7 @@ def gates(kept: pd.DataFrame) -> list[dict]:
 
     # The names are drawn at the text centers recorded for the vocabulary.
     _, _, side = crop_safe_window()
-    widest = int(kept.max_px.max()) if "max_px" in kept else 0
+    widest = int(kept.max_px.max())
     fits = True
     detail = f"widest word {widest}px against a {side}px window"
     if CENTRES_PATH.exists():
@@ -107,8 +107,8 @@ def gates(kept: pd.DataFrame) -> list[dict]:
     return rows
 
 
-def composition(kept: pd.DataFrame, table: pd.DataFrame) -> list[dict]:
-    """Non-blocking audit rows for the counts that describe the set."""
+def counts(kept: pd.DataFrame, table: pd.DataFrame) -> list[dict]:
+    """Non-blocking audit rows that count the set."""
     rows = []
     g = vocabulary.gate
     n = len(kept)
@@ -119,23 +119,19 @@ def composition(kept: pd.DataFrame, table: pd.DataFrame) -> list[dict]:
 
     count("candidates", "rows in the committed file", len(table))
     count("kept", "words in the set", n)
-    if "sense_rank" in kept:
-        first = int((kept.sense_rank == 0).sum())
-        count("kept_first_sense",
-              "kept where the class is the word's first WordNet sense", first)
-        count("kept_adjudicated",
-              "kept where it is not, so rule 4 decided it", n - first)
+    first = int((kept.sense_rank == 0).sum())
+    count("kept_first_sense",
+          "kept where the class is the word's first WordNet sense", first)
+    count("kept_adjudicated", "kept where it is not, so rule 4 decided it",
+          n - first)
     dropped = table[table.decision != "keep"]
     for reason, group in dropped.groupby(dropped.reason.str.slice(0, 46)):
         count(f"dropped/{reason[:38]}", f"dropped: {reason}", len(group))
-    if "in_vocab" in kept:
-        count("in_main_vocabulary",
-              "kept words also in the 1,561-word vocabulary",
-              int(kept.in_vocab.astype(bool).sum()))
-    if "category" in kept:
-        for cat, group in kept.groupby("category"):
-            count(f"category/{cat}", f"kept words whose class is a {cat}",
-                  len(group))
+    count("in_main_vocabulary", "kept words also in the 1,561-word vocabulary",
+          int(kept.in_vocab.astype(bool).sum()))
+    for cat, group in kept.groupby("category"):
+        count(f"category/{cat}", f"kept words whose class is a {cat}",
+              len(group))
     return rows
 
 
@@ -148,7 +144,7 @@ def main() -> None:
     print(f"{CLASS_NAMES_TSV.name}: {len(table)} candidates, "
           f"{len(kept)} kept")
 
-    rows = gates(kept) + composition(kept, table)
+    rows = gates(kept) + counts(kept, table)
     report = vocabulary.report(rows)
     verdict = vocabulary.summarise(report)
     shown = report[report.gate.str.startswith("concepts/")]
@@ -156,9 +152,9 @@ def main() -> None:
           .to_string(index=False))
     print(f"\n{verdict}")
 
-    counts = report[report.gate.str.startswith("count/")]
-    print("\ncomposition")
-    print(counts[["gate", "value"]].to_string(index=False))
+    counted = report[report.gate.str.startswith("count/")]
+    print("\ncounts")
+    print(counted[["gate", "value"]].to_string(index=False))
 
     if ((report.status == "FAIL") & report.blocking).any():
         raise SystemExit("blocking gates are failing; fix lexicon/class_names.tsv")

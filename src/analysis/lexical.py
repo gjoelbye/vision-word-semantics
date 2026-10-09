@@ -8,8 +8,9 @@ subsample words without replacement, because a resampled duplicate is its own
 nearest neighbor.
 
 The comparisons within an item use the three triplet lists, here called blocks:
-each item holds an anchor and two competitors, and is scored by which
-competitor is nearer to the anchor. Category accuracy assigns held-out nouns
+each item holds an anchor, its synonym (`kept`) and a competitor (`other`), the
+one-edit word, the antonym or the base, and is scored by which of the two is
+nearer to the anchor. Nearest-centroid accuracy assigns held-out nouns
 and brands to the nearest centroid on a fixed half split of every
 category-by-spelling-cluster cell. Both depend on the vocabulary alone, so
 vision models and encoders are scored on the same items and the same held-out
@@ -21,7 +22,7 @@ import numpy as np
 import pandas as pd
 
 from ..stats import (N_PERM, N_SUBSAMPLE, SUBSAMPLE_FRAC, binomial_se,
-                     subsample_summary)
+                     permutation_p, subsample_summary)
 from .directions import rownorm
 
 # Nearest words counted by both readouts: top-10 accuracy and neighbor purity.
@@ -63,7 +64,7 @@ def partner_ranks(S: np.ndarray, index: dict[str, int],
 
 def retrieval(S: np.ndarray, index: dict[str, int],
               pairs: list[tuple[str, str]], relation: str) -> list[dict]:
-    """One row per direction of a relation, each with its own denominator.
+    """One row per query direction of a relation, each with its own denominator.
 
     `hits` counts partners ranked first and `hits10` partners among the K
     nearest (zero-based rank below K). `rate10_se` is the binomial standard
@@ -174,8 +175,7 @@ def purity_permutation(S: np.ndarray, labels: np.ndarray, k: int = K,
         return out
 
     null = np.array([score(shuffle()) for _ in range(n_perm)])
-    p = (int((null >= observed).sum()) + 1) / (n_perm + 1)
-    return dict(purity=observed, p=float(p), null_mean=float(null.mean()),
+    return dict(purity=observed, p=permutation_p(observed, null), null_mean=float(null.mean()),
                 null_sd=float(null.std()), chance=chance_purity(labels), k=k,
                 n_perm=n_perm)
 
@@ -205,9 +205,8 @@ def purity_subsample(S: np.ndarray, labels: np.ndarray, k: int = K,
 # Comparisons within an item.
 
 BLOCKS = (
-    # name, the relation giving the kept competitor, the relation giving the
-    # competitor it is measured against, the two column names, and the number
-    # of items.
+    # name, the relation giving the synonym, the relation giving the
+    # competitor, the two column names, and the number of items.
     ("synonym_vs_twin", "synonym", "spelling_twin", "synonym", "twin", 150),
     ("synonym_vs_antonym", "antonym_synonym", "antonym", "synonym", "antonym", 50),
     ("synonym_vs_base", "negation", "negation_base", "synonym", "base", 35),
@@ -215,7 +214,7 @@ BLOCKS = (
 
 
 def build_items(pairs: pd.DataFrame, words: pd.DataFrame) -> dict:
-    """The three blocks as frames with `anchor`, `kept` and `other`.
+    """The three blocks as frames with `anchor`, `kept` (the synonym) and `other` (the competitor).
 
     `class` holds the anchor's picturability from the word table. Built from
     `pairs.parquet` by joining two relations on their shared anchor. Raises
@@ -247,9 +246,9 @@ def build_items(pairs: pd.DataFrame, words: pd.DataFrame) -> dict:
     return out
 
 
-# Category accuracy.
+# Nearest-centroid accuracy.
 
-# The two grids, by the `role` each takes in `words.parquet`.
+# The noun and brand lists, by the `role` their words take in `words.parquet`.
 DATASETS = {"common_noun": "category", "brand": "brand"}
 
 SPLIT_SEED = 0
@@ -319,8 +318,8 @@ def nearest_centroid_prediction(
 
 def nearest_centroid_accuracy(
     X: np.ndarray, frame: pd.DataFrame, label_order: np.ndarray,
-) -> tuple[float, int, int]:
-    """Held-out accuracy, the number correct, and the number held out.
+) -> tuple[float, int, int, np.ndarray]:
+    """Held-out accuracy, the number correct, the number held out, and the predictions.
 
     `X` holds one unit-length row per word of `frame`, in its row order.
     """
@@ -330,4 +329,4 @@ def nearest_centroid_accuracy(
         X[train], frame.loc[train, "label"].to_numpy(), X[test], label_order)
     correct = int((prediction == frame.loc[test, "label"].to_numpy()).sum())
     held = int(test.sum())
-    return correct / held, correct, held
+    return correct / held, correct, held, prediction

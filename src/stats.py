@@ -41,8 +41,8 @@ def subsample_summary(point: float, draws: np.ndarray, n: int,
     return float(lo), float(hi), float(scale * draws.std(ddof=1))
 
 
-def subsample_indices(n: int, frac: float = 0.8, draws: int = 1000,
-                      seed: int = 0):
+def subsample_indices(n: int, frac: float = SUBSAMPLE_FRAC,
+                      draws: int = N_SUBSAMPLE, seed: int = 0):
     """Row indices for `draws` subsamples of `max(2, int(frac * n))` rows, without replacement."""
     rng = np.random.default_rng(seed)
     m = max(2, int(frac * n))
@@ -86,7 +86,7 @@ def benjamini_hochberg(p: np.ndarray) -> np.ndarray:
 
 
 def sign_test(differences: np.ndarray) -> dict:
-    """Items won by the kept competitor, and the two-sided exact sign test.
+    """Items the synonym wins, and the two-sided exact sign test.
 
     A tie counts for neither side and leaves the denominator.
     """
