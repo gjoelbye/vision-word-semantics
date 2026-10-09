@@ -86,9 +86,9 @@ def two_clue_summary() -> pd.DataFrame:
     return frame
 
 
-def sweep_rows(frame: pd.DataFrame, column: str = "model") -> pd.DataFrame:
+def sweep_rows(frame: pd.DataFrame) -> pd.DataFrame:
     """The rows of the 14 image models in the paper's order, with their names in `label`."""
     order = {key: i for i, key in enumerate(DEFAULT_SWEEP)}
-    rows = frame[frame[column].isin(order)]
-    return (rows.sort_values(column, key=lambda keys: keys.map(order), kind="stable")
-            .assign(label=lambda f: f[column].map(PRETTY)))
+    rows = frame[frame.model.isin(order)]
+    return (rows.sort_values("model", key=lambda keys: keys.map(order), kind="stable")
+            .assign(label=lambda f: f.model.map(PRETTY)))

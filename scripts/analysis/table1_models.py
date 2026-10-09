@@ -1,4 +1,4 @@
-"""Lexical readouts behind Tables 1, 4, 5, 6 and 7.
+"""Lexical measures behind Tables 1, 4, 5, 6 and 7.
 
 Each of the 14 models is read at the final layer for partner retrieval,
 neighbor purity on the noun and brand lists, purity within spelling clusters,
@@ -25,9 +25,9 @@ from src.analysis.directions import (DegenerateTau, load_cache, manifest,
                                      rownorm, shared_mean_share,
                                      word_directions, word_order)
 from src.analysis.lexical import K
-from src.config import (LEXICON, RESULTS, SIMILARITY, ensure_dirs,
-                        line_fingerprint)
-from src.features import speech, text
+from src.config import (LEXICON, RESULTS, SIMILARITY, SIMILARITY_INDEX,
+                        ensure_dirs, line_fingerprint)
+from src.features import ESTIMATOR, encoder_directions, speech, text
 from src.models import DEFAULT_SWEEP
 from src.stats import (N_PERM, binomial_se, holm, permutation_p, sign_test,
                        vocabulary_spread)
@@ -35,8 +35,6 @@ from src.stimuli.render import fingerprint
 
 # The encoders in table order: the three text encoders, then the speech encoder.
 ENCODERS = text.TEXT_MODELS + speech.SPEECH_MODELS
-# The estimator each kind of encoder is indexed under in `data/similarity/index.parquet`.
-ESTIMATOR_OF = {"text": text.ESTIMATOR, "speech": speech.ESTIMATOR}
 # Table 1's plural-or-base column pools these relations over their summed pairs.
 POOLED = ("negation_base", "singular_plural")
 # Seed of the length-stratified null of nearest-centroid accuracy.
@@ -63,8 +61,7 @@ def lexicon() -> SimpleNamespace:
     if missing:
         raise SystemExit(f"{len(missing)} item words are not rendered: "
                          f"{sorted(missing)[:5]}")
-    splits = {dataset: lexical.dataset_frame(words, dataset, role,
-                                             lexical.SPLIT_SEED)
+    splits = {dataset: lexical.dataset_frame(words, dataset, role)
               for dataset, role in lexical.DATASETS.items()}
     return SimpleNamespace(
         words=words, pairs=pairs, vocab=vocab, index=index, grids=grids,
@@ -242,13 +239,13 @@ def encoder_rows(key: str, index_row: pd.Series,
     """The final-layer readouts of one encoder, from its similarity matrix and word vectors."""
     vocab, index = lex.vocab, lex.index
     kind = str(index_row.kind)
-    if index_row.estimator != ESTIMATOR_OF.get(kind):
+    if index_row.estimator != ESTIMATOR.get(kind):
         raise SystemExit(f"{key} is indexed as {kind} {index_row.estimator}")
     cosine = np.load(SIMILARITY / f"{key}.npy")
     if cosine.shape != (len(vocab), len(vocab)):
         raise SystemExit(f"the {key} matrix is {cosine.shape}, not "
                          f"{len(vocab)} square")
-    common = dict(model=key, estimator=ESTIMATOR_OF[kind])
+    common = dict(model=key, estimator=ESTIMATOR[kind])
     records = []
 
     S = cosine.copy()
@@ -317,10 +314,7 @@ def encoder_rows(key: str, index_row: pd.Series,
 
     # Nearest-centroid accuracy needs the centered, unit-length vectors the
     # matrix was built from.
-    loader = speech if kind == "speech" else text
-    vectors = loader.load(key, vocab)
-    unit = rownorm(np.asarray(vectors - vectors.mean(0, keepdims=True),
-                              np.float32))
+    unit = rownorm(np.asarray(encoder_directions(key, vocab), np.float32))
     for dataset, frame in lex.splits.items():
         label_order = np.array(sorted(frame.label.unique()))
         X = unit[np.array([index[w] for w in frame.word])]
@@ -364,7 +358,7 @@ def main() -> None:
     tables["items"] = items
 
     word_sha = line_fingerprint(lex.vocab)
-    index = pd.read_parquet(SIMILARITY / "index.parquet").set_index("model")
+    index = pd.read_parquet(SIMILARITY_INDEX).set_index("model")
     encoders = []
     for key in ENCODERS:
         if key not in index.index or index.loc[key, "word_sha"] != word_sha:

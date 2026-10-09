@@ -148,7 +148,6 @@ def embed(key: str, words) -> tuple[np.ndarray, str]:
     # Every carrier is applied to every word, so the averaging weights do not
     # depend on the word.
     texts = [carrier.format(w=word) for word in words for carrier in CARRIERS]
-    assert len(texts) == len(words) * len(CARRIERS), "the design is not crossed"
 
     def run(where: str) -> np.ndarray:
         tower = Qwen3Tower(ENCODERS[key][0])

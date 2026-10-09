@@ -1,7 +1,7 @@
 """One finetuning run: its settings, its schedule and the training loop.
 
-A recipe holds everything that distinguishes one run from another and nothing
-about the machine. It is written into the checkpoint and its provenance.
+A recipe holds the settings of one run, including the micro-batch that fits a
+32 GB card. It is written into the checkpoint and its provenance.
 
 The loop resumes from a saved state. `latest.pt` holds the weights, optimizer
 moments and random generator states at a fixed cadence, so an interrupted run
@@ -53,14 +53,14 @@ BATCH = 1056
 VALIDATE_BATCHES = 32
 
 
-def schedule(kept: int, batch: int = BATCH) -> dict[str, int]:
+def schedule(kept: int) -> dict[str, int]:
     """Steps, warmup, validation interval and checkpoint interval for a corpus of `kept` samples.
 
     The run is `MAX_EPOCHS` passes, capped at `STEP_CEILING` steps; warmup
     is a tenth of it, validation every twelfth and a checkpoint every sixth,
     each at most `CADENCE_CEILING` and at least 10 steps.
     """
-    steps = min(STEP_CEILING, max(1, int(MAX_EPOCHS * kept / batch)))
+    steps = min(STEP_CEILING, max(1, int(MAX_EPOCHS * kept / BATCH)))
     return {"steps": steps,
             "warmup": min(CADENCE_CEILING, max(10, steps // 10)),
             "validate_every": min(CADENCE_CEILING, max(10, steps // 12)),

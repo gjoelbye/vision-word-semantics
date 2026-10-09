@@ -9,11 +9,9 @@ two_clue` embeds the renders.
 from __future__ import annotations
 
 import argparse
-import json
 
 from src.stimuli.two_clue_render import (
     CONDITIONS,
-    MANIFEST_META_PATH,
     build_manifest,
     load_curated_items,
     load_or_create_layout,
@@ -41,9 +39,6 @@ def main() -> None:
         raise RuntimeError(f"expected {n_images} manifest rows, got {len(expected)}")
     manifest = render_dataset(items, layout, dataset_sha)
     manifest_sha = manifest_fingerprint(manifest)
-    meta = json.loads(MANIFEST_META_PATH.read_text())
-    if meta.get("manifest_sha") != manifest_sha:
-        raise RuntimeError("written manifest fingerprint does not match metadata")
     print(f"\ncomplete: {len(manifest):,} images")
     print(f"manifest fingerprint: {manifest_sha}")
 

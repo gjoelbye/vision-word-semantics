@@ -271,8 +271,8 @@ def readme_markdown(vocabulary: pd.DataFrame, class_names: pd.DataFrame) -> str:
         "",
         "## The eight lists",
         "",
-        "Words counts distinct words, and Pairs counts pairs before the query "
-        "direction is reversed.",
+        "The Words column counts distinct words, and the Pairs column counts "
+        "pairs before the query direction is reversed.",
         "",
         _markdown_table(("List", *summary.columns),
                         [(name, *row) for name, *row in summary.itertuples()]),
@@ -322,7 +322,7 @@ def crossing(words: pd.DataFrame) -> tuple[float, bool]:
     """
     table = pd.crosstab(words.category, words.ortho).to_numpy(float)
     v = round(cramers_v(words.category, words.ortho), 6)
-    return v, bool(len(np.unique(table)) == 1 and v <= GATE_MAX_CRAMERS_V)
+    return v, bool(len(np.unique(table)) == 1)
 
 
 # Checks on single words and on meaning pairs.
@@ -351,10 +351,10 @@ def is_blocked(word: str, synsets) -> bool:
                for synset in synsets for domain in synset.usage_domains())
 
 
-def is_named_entity(word: str, synsets=None) -> bool:
+def is_named_entity(word: str) -> bool:
     from nltk.corpus import wordnet as wn
 
-    synsets = wn.synsets(word) if synsets is None else synsets
+    synsets = wn.synsets(word)
     if not synsets:
         return False
     return all(all(lemma.name()[0].isupper() for lemma in synset.lemmas()

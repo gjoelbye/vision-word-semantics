@@ -71,7 +71,7 @@ class MissingCondition(FileNotFoundError):
 
 
 class DegenerateTau(ValueError):
-    """Raised when every direction at a layer is exactly zero.
+    """Raised when every word direction or every class mean at a layer is exactly zero.
 
     At hidden-state index 0 the class token has not seen the image, so a word
     image and its control give the same vector.
@@ -201,15 +201,15 @@ def rownorm(x: np.ndarray) -> np.ndarray:
     return x / (np.linalg.norm(x, axis=1, keepdims=True) + 1e-9)
 
 
-def split_half_cosine(key: str, appearances, layer: int = -1) -> float:
-    """Mean over words of the cosine between the two matched-appearance halves.
+def split_half_cosine(key: str, appearances) -> float:
+    """Mean over words of the final-layer cosine between the two matched-appearance halves.
 
     Each half's centered word directions come from that half's slots,
     restricted to `appearances` (`None` keeps every appearance tuple).
     """
     a, b = split_halves(appearances)
-    ta = rownorm(word_directions(key, layer, tuple(a), center=True))
-    tb = rownorm(word_directions(key, layer, tuple(b), center=True))
+    ta = rownorm(word_directions(key, -1, tuple(a), center=True))
+    tb = rownorm(word_directions(key, -1, tuple(b), center=True))
     return float((ta * tb).sum(1).mean())
 
 
@@ -256,20 +256,14 @@ def class_mean(key: str, layer: int = -1, subset: str = "all") -> np.ndarray:
 
     out = np.zeros((len(classes), x.shape[2]), np.float32)
     count = np.zeros(len(classes))
-    # Sum the memory-mapped rows of the one layer in blocks of 4096.
     for start in range(0, len(position), 4096):
         chunk = position[start:start + 4096]
         block = np.asarray(x[chunk, layer, :], np.float32)
         np.add.at(out, target[start:start + 4096], block)
         np.add.at(count, target[start:start + 4096], 1)
-    if not count.all():
-        empty = [classes[i] for i in np.flatnonzero(count == 0)][:5]
-        raise ValueError(f"a retained class received no photograph: {empty}")
     out /= count[:, None]
     if not np.abs(out).any():
         raise DegenerateTau(
-            f"{key} layer {layer}: every class mean is exactly zero. At "
-            f"hidden-state index 0 the class token is still its learned "
-            f"initial value.")
+            f"{key} layer {layer}: every class mean is exactly zero")
     out = out - out.mean(0, keepdims=True)
     return out

@@ -119,9 +119,7 @@ def spoken(device: str) -> None:
     features = AutoFeatureExtractor.from_pretrained(repo)
     tower = AutoModel.from_pretrained(repo, dtype=torch.float32).to(device).eval()
 
-    sources = sorted(data.SOURCE.glob("*.parquet"))
-    if not sources:
-        raise SystemExit(f"no parquet shards under {data.SOURCE}")
+    sources = data.source_shards()
     total = len(pd.read_parquet(data.SPEECH_COCO_MANIFEST, columns=["key"]))
 
     # Resume at the first parquet shard not yet finished.
@@ -159,7 +157,7 @@ def spoken(device: str) -> None:
         start = len(keys)
         room = min(len(ids), vectors.shape[0] - start)
         vectors[start:start + room] = pooled[:room]
-        keys.extend(f"{i:09d}" for i in ids[:room])
+        keys.extend(data.key_of(i) for i in ids[:room])
 
     # Padding makes attention cost grow with the longest recording in a batch,
     # so a batch is capped by the work of SPEECH_BATCH recordings of 3.5 s.

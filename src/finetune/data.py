@@ -38,6 +38,18 @@ STD = (0.229, 0.224, 0.225)
 DESCRIBED = "SPEECH-COCO, text-filtered"
 
 
+def key_of(caption_id: int) -> str:
+    """The sample name: the caption id as nine digits."""
+    return f"{caption_id:09d}"
+
+
+def source_shards() -> list[Path]:
+    found = sorted(SOURCE.glob("*.parquet"))
+    if not found:
+        raise SystemExit(f"no parquet shards under {SOURCE}")
+    return found
+
+
 def shards() -> list[str]:
     found = sorted(str(p) for p in SHARDS.glob("*.tar"))
     if not found:

@@ -15,9 +15,9 @@ from pathlib import Path
 import pandas as pd
 
 from ..config import REPO_ROOT, TABLES
-from ..models import DEFAULT_SWEEP, PRETTY
+from ..models import BASELINE, DEFAULT_SWEEP, PRETTY
 from ..stats import binomial_se
-from .latex import (BAND_NOTE, BASELINE, GROUPS, MARK_SIGMA, above_baseline,
+from .latex import (BAND_NOTE, GROUPS, MARK_SIGMA, above_baseline,
                     band, band_colour, bare, cell, class_header, fit,
                     header, model_rows, pval, rank_text, reference_rows,
                     printed_frame, se_suffix, without_zero, zero)

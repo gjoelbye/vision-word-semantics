@@ -1,4 +1,4 @@
-"""The lexical readouts of Section 4 and Appendix C, computed on word-by-word cosines.
+"""The lexical measures of Section 4 and Appendix C, computed on word-by-word cosines.
 
 `scripts/analysis/table1_models.py` runs them for every model and encoder, and
 `figure1_neighbours.py` and `figure6_finetune.py` reuse them. Partner retrieval
@@ -10,8 +10,8 @@ nearest neighbor.
 The comparisons within an item use the three triplet lists, here called blocks:
 each item holds an anchor, its synonym (`kept`) and a competitor (`other`: the
 one-edit word, the antonym or the base), and is scored by which of the two is
-nearer to the anchor. Nearest-centroid accuracy assigns held-out nouns
-and brands to the nearest centroid on a fixed half split of every
+nearer to the anchor. Nearest-centroid accuracy assigns held-out nouns and
+brands to the nearest centroid on a fixed half split of every
 category-by-spelling-cluster cell. Both depend on the vocabulary alone, so
 vision models and encoders are scored on the same items and the same held-out
 words.
@@ -26,7 +26,7 @@ from ..stats import (N_PERM, N_SUBSAMPLE, SUBSAMPLE_FRAC, binomial_se,
                      subsample_summary)
 from .directions import rownorm
 
-# Nearest words counted by both readouts: top-10 accuracy and neighbor purity.
+# Nearest words counted by both measures: top-10 accuracy and neighbor purity.
 K = 10
 
 
@@ -270,8 +270,6 @@ def balanced_split(frame: pd.DataFrame, seed: int) -> np.ndarray:
             half = len(rows) // 2
             split[rows[:half]] = "train"
             split[rows[half:]] = "test"
-    if (split == "").any():
-        raise AssertionError("a word was not assigned to either split")
     return split
 
 
@@ -290,8 +288,7 @@ def length_bands(n_chars: pd.Series) -> np.ndarray:
     return band
 
 
-def dataset_frame(words: pd.DataFrame, dataset: str, role: str,
-                  split_seed: int) -> pd.DataFrame:
+def dataset_frame(words: pd.DataFrame, dataset: str, role: str) -> pd.DataFrame:
     """The words of one list sorted by word, with label, spelling cluster, length band and split."""
     frame = (words.loc[words.role.eq(role),
                        ["word", "category", "ortho", "n_chars"]]
@@ -301,7 +298,7 @@ def dataset_frame(words: pd.DataFrame, dataset: str, role: str,
     frame["ortho"] = frame.ortho.astype(int)
     frame["n_chars"] = frame.n_chars.astype(int)
     frame["length_band"] = length_bands(frame.n_chars)
-    frame["split"] = balanced_split(frame, split_seed)
+    frame["split"] = balanced_split(frame, SPLIT_SEED)
     return frame
 
 

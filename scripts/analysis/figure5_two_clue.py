@@ -22,7 +22,7 @@ from src.analysis.two_clue import (
     validate_dense_blocks,
 )
 from src.config import RESULTS
-from src.models import DEFAULT_SWEEP
+from src.models import BASELINE, DEFAULT_SWEEP
 from src.stats import bootstrap_mean_ci, exact_sign_flip_p, holm
 from src.stimuli.two_clue_render import (
     EMBEDDINGS_ROOT,
@@ -53,9 +53,6 @@ INTERVAL_METRICS = (
     "feature_axis_gain_over_base",
     "base_axis_gain_over_feature",
 )
-
-# The model excluded from the Holm family.
-UNTRAINED = "vit-random-b"
 
 
 def validate_manifest(manifest: pd.DataFrame, manifest_sha: str) -> pd.DataFrame:
@@ -168,7 +165,8 @@ def summarize(families: pd.DataFrame, models: list[str]) -> pd.DataFrame:
             row["base_axis_gain_over_feature_p_greater"])
         rows.append(row)
     summary = pd.DataFrame(rows)
-    pretrained = ~summary.model.eq(UNTRAINED)
+    # The untrained network is left out of the Holm family.
+    pretrained = ~summary.model.eq(BASELINE)
     for source, destination in (
         ("joint_margin_p_greater", "joint_margin_p_holm"),
         ("structured_iut_p_greater", "structured_iut_p_holm"),

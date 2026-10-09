@@ -43,7 +43,7 @@ The derived tables and the results name each pair relation as follows.
 
 ## The eight lists
 
-Words counts distinct words, and Pairs counts pairs before the query direction is reversed.
+The Words column counts distinct words, and the Pairs column counts pairs before the query direction is reversed.
 
 | List | Items | Words | Pairs | Example and purpose |
 |---|---|---|---|---|

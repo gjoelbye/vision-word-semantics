@@ -29,8 +29,6 @@ GROUPS = (("dinov3-b", "dinov3-l", "dinov3-h", "dinov3-7b"),
 REFERENCE = {key: PRETTY[key].replace(" ", "~")
              for key in TEXT_MODELS + SPEECH_MODELS}
 
-# The untrained network every model is read against.
-BASELINE = "vit-random-b"
 # Standard errors of the difference a value must exceed the baseline by to be underlined.
 MARK_SIGMA = 2
 
@@ -183,8 +181,7 @@ def class_header(notebook: str, sources: list[str], word_sha: str,
 
 
 def reference_rows(lines: list[str], printed: list, render, *,
-                   rule_before_speech: bool = False,
-                   start: int = len(GROUPS)) -> None:
+                   rule_before_speech: bool = False) -> None:
     """Append the encoder rows under a rule, continuing the bands of the model rows.
 
     `render` returns the cells of one encoder. With `rule_before_speech` a
@@ -197,7 +194,7 @@ def reference_rows(lines: list[str], printed: list, render, *,
             lines.append("\\midrule")
         cells = render(model)
         printed.append((label, cells))
-        lines.append(band(start + int(speech)) + f"{label} & "
+        lines.append(band(len(GROUPS) + int(speech)) + f"{label} & "
                      + " & ".join(cells) + " \\\\")
 
 

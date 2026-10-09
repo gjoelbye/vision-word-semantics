@@ -28,7 +28,7 @@ from tqdm import tqdm
 from src.config import DATA_ROOT, ensure_dirs
 from src.finetune.data import (SHARDS, SOURCE, SPEECH_COCO_EXCLUDED,
                                SPEECH_COCO_MANIFEST, SPEECH_COCO_PROVENANCE,
-                               SPEECH_COCO_SCAN, shards)
+                               SPEECH_COCO_SCAN, key_of, shards, source_shards)
 
 # Short side of the written images; training crops 224 from it.
 SHORT_SIDE = 288
@@ -43,18 +43,6 @@ WORKERS = 12
 def val_side(image_id: int) -> bool:
     """Whether a photograph is held out, by a crc32 hash of its COCO id."""
     return zlib.crc32(str(image_id).encode()) % 100 < VAL_PERCENT
-
-
-def key_of(caption_id: int) -> str:
-    """The sample name: the caption id as nine digits."""
-    return f"{caption_id:09d}"
-
-
-def source_shards() -> list[Path]:
-    found = sorted(SOURCE.glob("*.parquet"))
-    if not found:
-        raise SystemExit(f"no parquet shards under {SOURCE}")
-    return found
 
 
 def resize(image: Image.Image) -> Image.Image:

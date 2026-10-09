@@ -18,16 +18,14 @@ import pandas as pd
 
 from src.analysis.directions import (HEADLINE, manifest, rownorm,
                                      word_directions, word_order)
-from src.config import SIMILARITY, ensure_dirs, line_fingerprint
-from src.features import speech, text
+from src.config import SIMILARITY, SIMILARITY_INDEX, ensure_dirs, line_fingerprint
+from src.features import ESTIMATOR, encoder_directions, speech, text
 from src.models import DEFAULT_SWEEP
 from src.stimuli.render import fingerprint
 
 # Every matrix, in index order: the image models, the text encoders, the
 # speech encoder.
 MODELS = DEFAULT_SWEEP + text.TEXT_MODELS + speech.SPEECH_MODELS
-
-INDEX = SIMILARITY / "index.parquet"
 
 
 def kind_of(key: str) -> str:
@@ -43,9 +41,7 @@ def directions(key: str, words: list[str]) -> np.ndarray:
     kind = kind_of(key)
     if kind == "vision":
         return word_directions(key, -1, center=True)
-    loader = speech if kind == "speech" else text
-    vectors = loader.load(key, words)
-    return vectors - vectors.mean(0, keepdims=True)
+    return encoder_directions(key, words)
 
 
 def main() -> None:
@@ -59,7 +55,7 @@ def main() -> None:
           f"manifest {manifest_sha[:12]}")
 
     # The index lists only matrices written by this run.
-    INDEX.unlink(missing_ok=True)
+    SIMILARITY_INDEX.unlink(missing_ok=True)
     rows = []
     for key in MODELS:
         kind = kind_of(key)
@@ -73,12 +69,11 @@ def main() -> None:
         rows.append({
             "model": key,
             "kind": kind,
-            "estimator": {"vision": HEADLINE, "text": text.ESTIMATOR,
-                          "speech": speech.ESTIMATOR}[kind],
+            "estimator": HEADLINE if kind == "vision" else ESTIMATOR[kind],
             "word_sha": word_sha,
             "manifest_sha": manifest_sha if kind == "vision" else pd.NA,
         })
-        pd.DataFrame(rows).to_parquet(INDEX)
+        pd.DataFrame(rows).to_parquet(SIMILARITY_INDEX)
         print(f"{key}: {time.time() - started:.0f}s")
 
     print(f"{len(rows)} matrices indexed in similarity/index.parquet")

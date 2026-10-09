@@ -34,6 +34,7 @@ EMBEDDINGS = DATA_ROOT / "embeddings"
 
 # Word-by-word cosine matrices, one per model and encoder, and their index.
 SIMILARITY = DATA_ROOT / "similarity"
+SIMILARITY_INDEX = SIMILARITY / "index.parquet"
 
 # The bold face cut from the installed variable sans for the figures.
 FONTS = DATA_ROOT / "fonts"

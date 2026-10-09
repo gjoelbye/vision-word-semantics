@@ -143,13 +143,12 @@ def exact_sign_flip_p(values: np.ndarray, alternative: str = "greater") -> float
     raise ValueError("alternative must be greater or two-sided")
 
 
-def bootstrap_mean_ci(values: np.ndarray, draws: np.ndarray,
-                      confidence: float = 0.95) -> tuple[float, float]:
-    """Percentile interval of the mean, one resample per row of `draws`."""
+def bootstrap_mean_ci(values: np.ndarray, draws: np.ndarray) -> tuple[float, float]:
+    """95% percentile interval of the mean, one resample per row of `draws`."""
     values = np.asarray(values, dtype=float)
     draws = np.asarray(draws, dtype=int)
     if draws.ndim != 2 or draws.shape[1] != len(values):
         raise ValueError("bootstrap draws do not match the family vector")
     means = values[draws].mean(axis=1)
-    tail = (1 - confidence) / 2
+    tail = (1 - 0.95) / 2
     return tuple(float(x) for x in np.quantile(means, [tail, 1 - tail]))

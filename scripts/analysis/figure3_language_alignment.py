@@ -15,14 +15,13 @@ import pandas as pd
 from threadpoolctl import threadpool_limits
 
 from src.analysis.directions import manifest, word_order
-from src.config import (LEXICON, RESULTS, SEED, SIMILARITY, ensure_dirs,
-                        line_fingerprint)
+from src.config import (LEXICON, RESULTS, SEED, SIMILARITY, SIMILARITY_INDEX,
+                        ensure_dirs, line_fingerprint)
 from src.features import speech, text
 from src.models import DEFAULT_SWEEP
 from src.stats import benjamini_hochberg, permutation_p
 from src.stimuli.render import fingerprint
 
-INDEX = SIMILARITY / "index.parquet"
 OUT = RESULTS / "language_alignment.parquet"
 
 # Neighbors per word in mutual k-NN alignment.
@@ -150,7 +149,7 @@ def main() -> None:
     # A fixed BLAS thread count keeps the floating-point order of the products.
     threadpool_limits(8)
 
-    index = pd.read_parquet(INDEX).set_index("model")
+    index = pd.read_parquet(SIMILARITY_INDEX).set_index("model")
     words = (pd.DataFrame({"word": word_order()})
                .merge(pd.read_parquet(LEXICON / "words.parquet"),
                       on="word", how="left"))

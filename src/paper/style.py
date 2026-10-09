@@ -190,12 +190,13 @@ def stroke_text(text, colour: str, linewidth: float) -> None:
 # Matplotlib matches a face on the weight in its OS/2 table and does not
 # instance the weight axis of a variable font, so a bold request on the
 # installed variable sans gets the regular outline.
-def cut_static_face(weight: int = 700) -> Path:
-    """The installed variable sans, instanced at `weight` and cached in `FONTS`."""
+def cut_static_face() -> Path:
+    """The installed variable sans, instanced at weight 700 and cached in `FONTS`."""
     from fontTools.ttLib import TTFont
     from fontTools.varLib.instancer import instantiateVariableFont
     from matplotlib import font_manager as fm
 
+    weight = 700
     family = mpl.rcParams["font.sans-serif"][0]
     source = Path(fm.findfont(fm.FontProperties(family=family)))
     out = FONTS / f"{source.stem.partition('[')[0]}-{weight}.ttf"
@@ -215,7 +216,7 @@ def cut_static_face(weight: int = 700) -> Path:
     return out
 
 
-def use_real_bold(weight: int = 700) -> None:
+def use_real_bold() -> None:
     """Register the cut face as the bold of the sans, and raise if bold does not resolve to it.
 
     Call it after `use_style` and before the first text is drawn. It
@@ -223,7 +224,7 @@ def use_real_bold(weight: int = 700) -> None:
     """
     from matplotlib import font_manager as fm
 
-    path = cut_static_face(weight)
+    path = cut_static_face()
     fm.fontManager.addfont(path)
     family = mpl.rcParams["font.sans-serif"][0]
     got = Path(fm.fontManager.findfont(

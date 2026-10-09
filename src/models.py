@@ -56,6 +56,9 @@ DEFAULT_SWEEP = ("dinov3-b", "dinov3-l", "dinov3-h", "dinov3-7b",
                  "mae-b", "mae-l", "mae-h",
                  "clip-b", "siglip2-b", "vit-random-b")
 
+# The untrained network every model is read against.
+BASELINE = "vit-random-b"
+
 # Frozen encoders as `key: (repository, output width, kind)`. The three
 # Qwen3 models read the word set as text; Qwen3-0.6B and w2v-BERT 2.0 are also
 # the targets the finetunes are trained against.
