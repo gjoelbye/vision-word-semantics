@@ -1,10 +1,8 @@
-"""The committed word set: the vocabulary reader, the lists and pairs, form metrics and checks.
+"""The committed word set: the vocabulary reader, the lists and pairs, form measures and checks.
 
-Form metrics come at three levels: gross form (rendered width and ink area),
-character identity (edit distance) and character order (anagram membership).
-Rendered geometry is measured from the fonts and sizes the slot table uses.
-Width is reported in ems so it is comparable across size bands, and in pixels
-for the fit check.
+A word's rendered width is measured from the fonts and sizes the slot table
+uses, in ems so it is comparable across size bands and in pixels for the fit
+check. Two words are compared by edit distance and by letter overlap.
 """
 from __future__ import annotations
 
@@ -14,49 +12,23 @@ import numpy as np
 import pandas as pd
 
 from ..config import VOCABULARY_TSV
-from .typography import (FONT_FAMILIES, MONOSPACE_FAMILIES, crop_safe_window,
-                         font_px, ink_mask, load_font)
+from .typography import (FONT_FAMILIES, SIZE_BAND_NAMES, crop_safe_window,
+                         font_px, load_font)
 
 REFERENCE_PX = 100          # font size at which advance widths are measured
 
-# Letters whose glyphs rise above or fall below the x-height, which set the
-# outline of a word.
-ASCENDERS = set("bdfhklt")
-DESCENDERS = set("gjpqy")
-
 
 @lru_cache(maxsize=None)
-def _char_metrics(family: str) -> tuple[dict[str, float], dict[str, float]]:
-    """Per-character advance width at ``REFERENCE_PX`` and ink area at the largest size band."""
+def _advance_widths(family: str) -> dict[str, float]:
+    """Per-character advance width at ``REFERENCE_PX``."""
     font = load_font(family, REFERENCE_PX)
-    adv = {c: float(font.getlength(c)) for c in "abcdefghijklmnopqrstuvwxyz"}
-    area = {c: float(ink_mask(family, _band_for_reference(), c).sum())
-            for c in "abcdefghijklmnopqrstuvwxyz"}
-    return adv, area
-
-
-def _band_for_reference() -> str:
-    # ink_mask takes a size band; measure at the largest and rescale.
-    from .typography import SIZE_BAND_NAMES
-    return SIZE_BAND_NAMES[-1]
-
-
-@lru_cache(maxsize=None)
-def _ink_scale(family: str) -> float:
-    """Factor from square pixels at the largest size band to square ems."""
-    return 1.0 / (font_px(_band_for_reference()) ** 2)
+    return {c: float(font.getlength(c)) for c in "abcdefghijklmnopqrstuvwxyz"}
 
 
 def rendered_width_em(word: str, family: str) -> float:
     """Advance width of the whole string, in ems. Linear in font size."""
-    adv, _ = _char_metrics(family)
+    adv = _advance_widths(family)
     return sum(adv[c] for c in word) / REFERENCE_PX
-
-
-def rendered_ink_em2(word: str, family: str) -> float:
-    """Total inked area, in ems squared. Independent of size band."""
-    _, area = _char_metrics(family)
-    return sum(area[c] for c in word) * _ink_scale(family)
 
 
 def max_rendered_px(word: str, size_band: str) -> float:
@@ -67,39 +39,18 @@ def max_rendered_px(word: str, size_band: str) -> float:
 
 def fits_everywhere(word: str) -> bool:
     """Whether the word is no wider than the crop-safe window in every font at every size band."""
-    from .typography import SIZE_BAND_NAMES
     _, _, side = crop_safe_window()
     return all(max_rendered_px(word, b) <= side for b in SIZE_BAND_NAMES)
 
 
-def add_form_metrics(df: pd.DataFrame, word_col: str = "word") -> pd.DataFrame:
-    """Attach every form metric to a word table. Returns a new frame."""
-    out = df.copy()
-    words = out[word_col].tolist()
-    prop_fonts = [f for f in FONT_FAMILIES if f not in MONOSPACE_FAMILIES]
-
-    # Averaged over the proportional fonts; a monospace font gives every letter one width.
-    out["width_em"] = [float(np.mean([rendered_width_em(w, f) for f in prop_fonts]))
-                       for w in words]
-    out["ink_em2"] = [float(np.mean([rendered_ink_em2(w, f) for f in prop_fonts]))
-                      for w in words]
-    out["glyph_width_em"] = out.width_em / out[word_col].str.len()
-    out["max_px"] = [max_rendered_px(w, "large") for w in words]
+def add_fit(words: pd.DataFrame) -> pd.DataFrame:
+    """A copy of a word table with ``max_px``, the widest rendering at the
+    largest size band, and ``fits``, whether that is inside the crop-safe window."""
+    out = words.copy()
+    out["max_px"] = [max_rendered_px(w, "large") for w in out.word]
     _, _, side = crop_safe_window()
     out["fits"] = out.max_px <= side
-
-    out["n_ascenders"] = [sum(c in ASCENDERS for c in w) for w in words]
-    out["n_descenders"] = [sum(c in DESCENDERS for c in w) for w in words]
-    out["n_distinct_chars"] = [len(set(w)) for w in words]
-    out["first_char"] = [w[0] for w in words]
-    out["last_char"] = [w[-1] for w in words]
-    out["anagram_key"] = [anagram_key(w) for w in words]
     return out
-
-
-def anagram_key(word: str) -> str:
-    """Words sharing this key use exactly the same characters."""
-    return "".join(sorted(word))
 
 
 def edit_distance(a: str, b: str) -> int:
@@ -505,8 +456,7 @@ def letter_overlap(pairs: list[tuple[str, str]], vocab: list[str],
 
 # --- the audit ---------------------------------------------------------------
 # Deterministic checks on the word set, run before it is rendered. A failed
-# blocking check stops rendering. The share of named entities is reported
-# rather than gated, because the geography pairs contain proper nouns by design.
+# blocking check stops rendering.
 
 #: Largest allowed excess of letter overlap within a meaning relation over
 #: length-matched random word pairs.
@@ -571,24 +521,11 @@ def audit_pairs_orthography(pairs: pd.DataFrame,
     return out
 
 
-def audit_pairs_proper_nouns(pairs: pd.DataFrame) -> list[dict]:
-    """Share of each relation's words that WordNet knows only as a named entity; reported, never blocking."""
-    rows = []
-    for relation, group in pairs.groupby("relation"):
-        words = pd.concat([group.a, group.b])
-        share = float(np.mean([is_named_entity(w) for w in words]))
-        rows.append(gate(f"pairs/proper-nouns/{relation}",
-                         "share of the relation's words WordNet knows only as "
-                         "a named entity",
-                         round(share, 3), "reported, not gated",
-                         True, blocking=False))
-    return rows
-
-
 def report(rows: list[dict]) -> pd.DataFrame:
     df = pd.DataFrame(rows)
     # Thresholds mix numbers and strings, and a parquet column holds one type.
-    df["threshold"] = df["threshold"].astype(str)
+    # Each is written as given, so an integer threshold stays an integer.
+    df["threshold"] = [str(row["threshold"]) for row in rows]
     order = {"FAIL": 0, "warn": 1, "pass": 2}
     return df.sort_values("status", key=lambda s: s.map(order)).reset_index(drop=True)
 

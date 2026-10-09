@@ -394,17 +394,6 @@ def render_scramble(background: Image.Image, text: str, box: Box, family: str,
     return Image.alpha_composite(base, layer).convert("RGB")
 
 
-def ink_mask(family: str, size_band: str, text: str) -> np.ndarray:
-    """Binary mask of the glyphs alone, with no background or placement."""
-    px = font_px(size_band)
-    font = load_font(family, px)
-    bx = font.getbbox(text)
-    w, h = max(1, bx[2] - bx[0]), max(1, bx[3] - bx[1])
-    img = Image.new("L", (w + 4, h + 4), 0)
-    ImageDraw.Draw(img).text((2 - bx[0], 2 - bx[1]), text, font=font, fill=255)
-    return np.asarray(img) > 128
-
-
 # --- the slot table ----------------------------------------------------------
 # A slot is one background paired with one typography setting. Every word is
 # drawn on all of them, so background and typography cancel in any comparison

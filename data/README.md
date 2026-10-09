@@ -44,7 +44,7 @@ writes. Together they come to about 420 GB, and with the downloads to about
 | Folder | Written by | Content | Size |
 |---|---|---|---|
 | `backgrounds/` | `scripts/stimuli/backgrounds.py` | The 96 background photographs and `backgrounds.parquet` | 13 MB |
-| `lexicon/` | `scripts/stimuli/vocabulary.py`, `render.py`, `class_names.py` | The word, pair and audit tables, the vocabulary manifest and text centres, and the class-name tables | 1.7 MB |
+| `lexicon/` | `scripts/stimuli/vocabulary.py`, `render.py`, `class_names.py` | The word, pair and audit tables, the vocabulary manifest and text centres, and the class-name tables | 1.6 MB |
 | `renders/` | `scripts/stimuli/render.py`, `class_images.py` | Each vocabulary word and class name on the 96 slots, and its scrambled control | 46 GB |
 | `concepts/` | `scripts/stimuli/class_images.py` | The class-name manifest, the ImageNet validation photographs cropped to 256 pixels, their list and their text scan | 6.1 GB |
 | `composition/` | `scripts/stimuli/two_clue.py` | The two-clue layout, manifest and renders | 11 GB |
