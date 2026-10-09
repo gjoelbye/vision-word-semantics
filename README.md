@@ -60,7 +60,7 @@ centered mean embedding of its ImageNet-1k validation images, and comparing it
 with the word direction of the class name tests whether a name points to the
 images it names.
 
-Each measure is computed in one place under `src/analysis/`:
+Each measure is computed in one function, under `src/analysis/` unless a path is given:
 
 | Measure | Code |
 |---|---|
@@ -70,7 +70,9 @@ Each measure is computed in one place under `src/analysis/`:
 | Partner retrieval | `lexical.retrieval`, from the ranks in `lexical.partner_rank` |
 | Neighbor purity and its permutation test | `lexical.knn_purity`, `lexical.purity_permutation` |
 | Comparisons within an item | `lexical.build_items`, scored by `items_rows` in `scripts/analysis/table1_models.py` |
-| Category accuracy | `lexical.nearest_centroid_accuracy` |
+| Nearest-centroid accuracy and its length-stratified permutation test | `lexical.nearest_centroid_accuracy`, tested by `latent_rows` in `scripts/analysis/table1_models.py` |
+| Mutual 10-NN alignment and linear CKA | `measure_cells` in `scripts/analysis/figure3_language_alignment.py` |
+| Split-half cosine | `directions.split_half_cosine` |
 | Matched cosine similarity | `word_class.class_alignment` |
 | Word-to-class and class-to-word retrieval | `word_class.class_retrieval` |
 | Two-clue margins | `two_clue.condition_vectors`, `two_clue.target_metrics` |
@@ -147,7 +149,7 @@ into the paper from what their notebook prints.
 | Figure 1a | `figure1_neighbours` | `figure1_neighbours.py` | `neighbours` | `tables/figure1a_neighbours.tex` |
 | Figure 1b | `figure1_neighbours` | `figure1_neighbours.py` | `figure1b_projection` | `figures/figure1b_pairs.pdf` |
 | Figure 2 | `figure2_datasets` | - | - | `figures/figure2_datasets.pdf` |
-| Figure 3 | `figure3_language_alignment` | `figure3_language_alignment.py` | `language_alignment` | `figures/figure3_language_alignment.pdf` |
+| Figure 3 | `figure3_language_alignment` | `figure3_language_alignment.py` | `language_alignment`, `retrieval` | `figures/figure3_language_alignment.pdf` |
 | Figure 4 | `figure4_rendering` | - | - | `figures/figure4_rendering.pdf` |
 | Figure 5 | `figure5_two_clue` | `figure5_two_clue.py` | `two_clue_summary` | `figures/figure5_two_clue.pdf` |
 | Figure 6 | `figure6_finetune` | `figure6_finetune.py` | `finetune_effect`, `finetune_draws` | `figures/figure6_finetune.pdf` |
@@ -196,6 +198,8 @@ table and the other values each notebook prints.
 | `figures/` | The six figures as PDF |
 | `tables/` | The generated LaTeX of Figure 1a and Tables 1, 2 and 4 to 10 |
 | `data/` | Downloads and caches, not tracked; see [data/README.md](data/README.md) |
+| `tests/` | Checks of the manifest row order, the paired difference, the split halves, centering and the readouts; run with `python -m pytest tests/ -q` |
+| `assets/` | The images in this README |
 
 ## Citation
 

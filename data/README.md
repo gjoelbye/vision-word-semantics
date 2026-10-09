@@ -76,8 +76,9 @@ repository root. The committed folder holds the word lists as written; this
 one holds the word, pair and audit tables built from them and the manifest of
 their renders.
 
-The vocabulary and two-clue manifests record absolute paths, such as
-`/data/agjma/vit_semantic/renders/...`, and the fingerprint covers them. The
+The vocabulary and two-clue manifests record the absolute path of every image
+on the rendering machine, such as `<prefix>/renders/...`, and the fingerprint
+covers them. The
 fingerprints are therefore specific to the machine that rendered the images.
 A fresh run of the stimulus stage elsewhere gives different `manifest_sha`
 values in the caches and result tables, even where every number is the same.
