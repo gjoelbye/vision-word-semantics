@@ -147,23 +147,28 @@ TABLE1_COLUMNS = (("category",), ("brand",), ("country_capital",), ("synonym",),
                   ("spelling_twin",), ("negation_base", "singular_plural"))
 
 
+def table1_value(purity: pd.DataFrame, forward: pd.DataFrame, model: str,
+                 relations: tuple[str, ...]) -> tuple[float, float]:
+    """One Table 1 value and its standard error, for a column of `TABLE1_COLUMNS`.
+
+    `forward` holds the forward rows of the retrieval table.
+    """
+    if relations[0] in ("category", "brand"):
+        row = _one(purity, model=model, axis=relations[0])
+        return float(row.purity), float(row.se)
+    rows = forward[forward.model.eq(model) & forward.relation.isin(relations)]
+    assert len(rows) == len(relations), (model, relations, len(rows))
+    hits, n = int(rows.hits10.sum()), int(rows.n.sum())
+    return hits / n, binomial_se(hits, n)
+
+
 def table1_models(purity: pd.DataFrame, retrieval: pd.DataFrame,
                   encoder_lexical: pd.DataFrame) -> Table:
     """Neighbor purity on both lists and forward top-10 accuracy, with the encoders below."""
     _check_groups()
     forward = retrieval[retrieval.direction.eq("forward")]
-
-    def value_and_se(model: str, j: int) -> tuple[float, float]:
-        if j < 2:
-            row = _one(purity, model=model, axis=TABLE1_COLUMNS[j][0])
-            return float(row.purity), float(row.se)
-        rows = forward[forward.model.eq(model)
-                       & forward.relation.isin(TABLE1_COLUMNS[j])]
-        assert len(rows) == len(TABLE1_COLUMNS[j]), (model, j, len(rows))
-        hits, n = int(rows.hits10.sum()), int(rows.n.sum())
-        return float(rows.hits10.sum() / rows.n.sum()), binomial_se(hits, n)
-
-    table = {m: [value_and_se(m, j) for j in range(6)] for m in DEFAULT_SWEEP}
+    table = {m: [table1_value(purity, forward, m, relations)
+                 for relations in TABLE1_COLUMNS] for m in DEFAULT_SWEEP}
     chance = [float(purity[purity.axis.eq(axis)].chance.iloc[0])
               for axis in ("category", "brand")]
     chance += [float(forward.chance10.iloc[0])] * 4

@@ -3,11 +3,11 @@
 A slot is one background with one typography setting. Every word is drawn on
 the same slots, so background and typography cancel in a comparison between
 two words. The code calls a setting an appearance tuple, numbered in the
-`appearance` column. `build_appearance_design` builds the settings so that the factors
-are balanced against each other, and `balance_report` says which factor pairs
-are exactly balanced. The word renderer, the class-name renderer and the
-two-clue renderer all draw through this module, and the analysis takes its
-matched-appearance split halves from `split_halves`.
+`appearance` column. `build_appearance_design` builds the settings so that
+the factors are balanced against each other, and `balance_report` says which
+factor pairs are exactly balanced. The word renderer, the class-name renderer
+and the two-clue renderer all draw through this module, and the analysis takes
+its matched-appearance split halves from `split_halves`.
 """
 from __future__ import annotations
 
@@ -257,7 +257,7 @@ def band_range(band: str, half_h: int, size: int = IMAGE_SIZE) -> tuple[int, int
     return int(round(lo + k * step)), int(round(lo + (k + 1) * step))
 
 
-def legible_centre(background: "Image.Image", color_group: str, size_band: str,
+def legible_centre(background: "Image.Image", color_group: str,
                    half_w: int, half_h: int, band: str, grid: int = 9,
                    clutter_weight: float = 0.6) -> tuple[int, int]:
     """The text center for one slot, shared by every word drawn there.

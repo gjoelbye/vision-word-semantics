@@ -314,30 +314,15 @@ def readme_markdown(vocabulary: pd.DataFrame, class_names: pd.DataFrame) -> str:
     return "\n".join(out) + "\n"
 
 
-def crossing_report(words: pd.DataFrame) -> dict:
-    """How far the category by spelling-cluster counts are from a full crossing.
+def crossing(words: pd.DataFrame) -> tuple[float, bool]:
+    """Cramer's V between category and spelling cluster, and whether they are fully crossed.
 
     The noun and brand lists put equal counts in every cell, so cluster
     membership alone cannot predict a category and Cramer's V is zero.
     """
     table = pd.crosstab(words.category, words.ortho).to_numpy(float)
-    return dict(
-        cells_equal=bool(len(np.unique(table)) == 1),
-        smallest_cell=int(table.min()),
-        largest_cell=int(table.max()),
-        n_categories=int(table.shape[0]),
-        n_clusters=int(table.shape[1]),
-        category_counts_equal=bool(len(set(table.sum(1))) == 1),
-        cluster_counts_equal=bool(len(set(table.sum(0))) == 1),
-        cramers_v=round(cramers_v(words.category, words.ortho), 6),
-    )
-
-
-def crossing_passes(report: dict) -> bool:
-    return bool(report["cells_equal"]
-                and report["category_counts_equal"]
-                and report["cluster_counts_equal"]
-                and report["cramers_v"] <= GATE_MAX_CRAMERS_V)
+    v = round(cramers_v(words.category, words.ortho), 6)
+    return v, bool(len(np.unique(table)) == 1 and v <= GATE_MAX_CRAMERS_V)
 
 
 # Checks on single words and on meaning pairs.
@@ -475,7 +460,7 @@ def gate(name: str, detail: str, value, threshold, ok: bool,
 def audit_words(words: pd.DataFrame) -> list[dict]:
     """One row counting the words wider than the crop-safe window at the largest size band."""
     _, _, side = crop_safe_window()
-    over = words.loc[~words.fits, "word"].tolist() if "fits" in words else []
+    over = words.loc[~words.fits, "word"].tolist()
     return [gate("render/fits",
                  f"widest word {words.max_px.max():.0f}px against a {side}px "
                  f"window" + (f", e.g. {', '.join(over[:5])}" if over else ""),

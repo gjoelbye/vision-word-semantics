@@ -63,8 +63,7 @@ def slot_centres(words: tuple[str, ...], path: Path | None = None
         half_h = max(h for _, h in extents) / 2
         with Image.open(_background_path(s["background_index"])) as bg:
             out[int(s["slot"])] = legible_centre(bg.convert("RGB"), s["color"],
-                                                 s["size"], half_w, half_h,
-                                                 s["placement"])
+                                                 half_w, half_h, s["placement"])
     path.parent.mkdir(parents=True, exist_ok=True)
     pd.DataFrame([dict(slot=k, cx=v[0], cy=v[1]) for k, v in sorted(out.items())]
                  ).to_parquet(path)

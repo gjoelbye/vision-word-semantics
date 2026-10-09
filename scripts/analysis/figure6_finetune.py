@@ -26,7 +26,7 @@ from src.analysis.lexical import K
 from src.config import LEXICON, RESULTS, ensure_dirs
 from src.models import FINETUNES, TWIN_OF
 from src.stimuli.render import fingerprint
-from src.stimuli.typography import FACTORS, REPLICATES, slot_table, slots_for
+from src.stimuli.typography import REPLICATES, slot_table, slots_for
 
 # The ten finetuned backbones, their finetunes, and CLIP-B for reference.
 MODELS = tuple(dict.fromkeys(TWIN_OF[k] for k in FINETUNES)) + FINETUNES + ("clip-b",)
@@ -62,7 +62,6 @@ def measure(models) -> tuple[pd.DataFrame, pd.DataFrame]:
     labels = nouns.category.to_numpy()
     tasks = retrieval_tasks()
     appearances = sorted(slot_table().appearance.unique())
-    rng = random.Random(DRAW_SEED)
     rows, drawn = [], []
     for key in models:
         for images in IMAGE_COUNTS:
@@ -70,7 +69,7 @@ def measure(models) -> tuple[pd.DataFrame, pd.DataFrame]:
             draws = 1 if n_app == len(appearances) else DRAWS
             got = {}
             for draw in range(draws):
-                rng.seed(DRAW_SEED + draw)
+                rng = random.Random(DRAW_SEED + draw)
                 chosen = sorted(rng.sample(appearances, n_app))
                 if key == models[0]:
                     drawn += [dict(images=images, draw=draw, appearance=int(a))
@@ -102,7 +101,6 @@ def measure(models) -> tuple[pd.DataFrame, pd.DataFrame]:
         estimator=directions.HEADLINE, layer_index=-1)
     setting = (slot_table().drop_duplicates("appearance")
                .set_index("appearance")[["font", "placement", "size", "color", "box"]])
-    assert set(setting.columns) == set(FACTORS)
     draws = pd.DataFrame(drawn).join(setting, on="appearance").assign(
         manifest_sha=sha)
     return effect, draws

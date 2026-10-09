@@ -75,7 +75,7 @@ def main() -> None:
             "carriers": list(text.CARRIERS),
             "frames": len(text.TEMPLATE_FRAMES),
             "variants": text.VARIANTS,
-            "estimator": "carrier_mean_96",
+            "estimator": text.ESTIMATOR,
             "context": text.CONTEXT, "device": device,
             "dtype": "float32",
             "input": "the word inside each of 96 shared carriers, averaged",

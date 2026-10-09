@@ -70,10 +70,9 @@ def main() -> None:
              "Cramer's V between category and spelling cluster"),
             ("brands/crossing", brands,
              "Cramer's V between brand industry and spelling cluster")]:
-        v = vocabulary.crossing_report(group)
-        rows.append(vocabulary.gate(name, detail, round(v["cramers_v"], 4),
-                                    vocabulary.GATE_MAX_CRAMERS_V,
-                                    vocabulary.crossing_passes(v)))
+        v, ok = vocabulary.crossing(group)
+        rows.append(vocabulary.gate(name, detail, round(v, 4),
+                                    vocabulary.GATE_MAX_CRAMERS_V, ok))
     report = vocabulary.report(rows)
 
     blocking = [r for r in rows if r["status"] == "FAIL" and r["blocking"]]

@@ -149,10 +149,6 @@ def cached_step(model, batches) -> StepResult:
 
 
 def _autocast():
-    """Bfloat16 autocast on CUDA with the weight cache off, or nothing on the CPU."""
-    from contextlib import nullcontext
-
-    if not torch.cuda.is_available():
-        return nullcontext()
+    """Bfloat16 autocast on CUDA with the weight cache off."""
     return torch.autocast(device_type="cuda", dtype=torch.bfloat16,
                           cache_enabled=False)

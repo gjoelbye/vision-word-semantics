@@ -13,8 +13,8 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from ..stats import (N_PERM, SUBSAMPLE_FRAC, binomial_se, permutation_p,
-                     subsample_indices, subsample_summary)
+from ..stats import (N_PERM, binomial_se, permutation_p, subsample_indices,
+                     subsample_size, subsample_summary)
 from .directions import CLASS_IMAGES, load_cache, manifest, retained
 from .lexical import K
 
@@ -55,7 +55,7 @@ def class_coherence(key: str, layer: int = -1) -> np.ndarray:
 
 
 def nearest_class(N: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    """For each class direction, the index of the nearest other one and its cosine."""
+    """For each visual direction, the index of the nearest other one and its cosine."""
     sim = N @ N.T
     np.fill_diagonal(sim, -np.inf)
     who = sim.argmax(1)
@@ -89,7 +89,7 @@ def word_class_rows(wnids: pd.Series,
 
 def class_alignment(T: np.ndarray, N: np.ndarray, rows: np.ndarray,
                     target: np.ndarray, seed: int = 0) -> dict:
-    """Mean cosine between each word direction and its class direction.
+    """Mean cosine between each word direction and its class's visual direction.
 
     `T` and `N` are unit rows; `rows` picks the words and `target` their
     classes. The null permutes which class goes with which word, the p-value is
@@ -103,7 +103,7 @@ def class_alignment(T: np.ndarray, N: np.ndarray, rows: np.ndarray,
     for i in range(N_PERM):
         null[i] = (T[rows] * N[target[rng.permutation(len(target))]]).sum(1).mean()
     n = len(per_word)
-    m = max(2, int(SUBSAMPLE_FRAC * n))
+    m = subsample_size(n)
     draws = np.array([per_word[idx].mean()
                       for idx in subsample_indices(n)])
     _, _, se = subsample_summary(observed, draws, n, m)

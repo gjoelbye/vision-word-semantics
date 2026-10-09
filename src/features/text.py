@@ -28,6 +28,9 @@ BATCH_SIZE = 64
 # The text encoders, by size.
 TEXT_MODELS = ("qwen3-0p6b-frozen", "qwen3-4b-frozen", "qwen3-8b-frozen")
 
+# The recorded name of the estimate: the mean over the 96 carriers.
+ESTIMATOR = "carrier_mean_96"
+
 # The 96 shared carriers, as 24 frames crossed with 4 surface variants.
 # The word's position in every carrier is quoted, named or otherwise
 # permissive, so each carrier is grammatical for every word in the vocabulary.
@@ -113,12 +116,6 @@ class Qwen3Tower(nn.Module):
             repo, dtype=torch.bfloat16, attn_implementation="sdpa")
         self.requires_grad_(False)
         self.model.eval()
-
-    def train(self, mode: bool = True):
-        # Frozen means eval mode always, so dropout never perturbs the output.
-        super().train(False)
-        self.model.eval()
-        return self
 
     def forward(self, batch: dict) -> torch.Tensor:
         out = self.model(**batch).last_hidden_state

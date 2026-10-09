@@ -49,12 +49,12 @@ def test_a_tie_counts_for_the_partner_not_against_it():
     assert lexical.partner_rank(S, 0, 1) == 0
 
 
-def test_a_within_item_tie_counts_for_neither_competitor():
+def test_a_within_item_tie_counts_for_neither_side():
     """The comparison within an item and `partner_rank` treat a tie the same
     way, so the win count and the top-10 count agree about the same item. Four
     words lie in a plane, with the anchor exactly between its synonym and its
-    look-alike. The difference of cosines is zero, and an exact sign test drops
-    the item rather than award it to either side."""
+    one-edit word. The difference of cosines is zero, and an exact sign test
+    drops the item rather than award it to either side."""
     import numpy as np
 
     anchor = np.array([1.0, 0.0])
@@ -170,7 +170,7 @@ def test_subsampling_never_repeats_a_word():
         assert len(set(idx)) == len(idx)
 
 
-def test_restricting_to_a_cluster_changes_who_the_neighbours_are():
+def test_restricting_to_a_cluster_changes_who_the_neighbors_are():
     """The letter-cluster control. With the restriction on, a word can only be
     scored against words in its own cluster."""
     T, labels = _blocked()
@@ -195,7 +195,7 @@ def test_a_restriction_too_tight_for_k_is_an_error_not_a_wrong_number():
     partly counts words the restriction excludes."""
     T, labels = _blocked(n_per=5, n_class=4)
     clusters = np.arange(len(labels)) % 10        # clusters of two
-    with pytest.raises(ValueError, match="admissible neighbours"):
+    with pytest.raises(ValueError, match="admissible neighbors"):
         lexical.knn_purity(lexical.similarity(T), labels, k=10,
                            restrict=clusters)
 

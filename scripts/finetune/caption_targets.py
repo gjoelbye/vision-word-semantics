@@ -21,7 +21,8 @@ import pyarrow.parquet as pq
 import torch
 from tqdm import tqdm
 
-from src.config import CAPTIONS, ensure_dirs
+from src.config import ensure_dirs
+from src.features.speech import SAMPLE_RATE
 from src.features.text import Qwen3Tower, tokenizer
 from src.finetune import data
 from src.models import ENCODERS
@@ -33,13 +34,8 @@ SPEECH_TOWER = "w2v-bert-2.0-frozen"
 CAPTION_CONTEXT = 77
 TEXT_BATCH = 256
 
-# Recordings per forward pass, and their sampling rate.
+# Recordings per forward pass.
 SPEECH_BATCH = 32
-SAMPLE_RATE = 16000
-
-
-def out_dir(tower: str) -> Path:
-    return CAPTIONS / "speech-coco" / tower
 
 
 def written(device: str) -> None:
@@ -47,7 +43,7 @@ def written(device: str) -> None:
     import webdataset as wds
 
     repo, dim, _ = ENCODERS[TEXT_TOWER]
-    out = out_dir(TEXT_TOWER)
+    out = data.caption_dir(TEXT_TOWER)
     out.mkdir(parents=True, exist_ok=True)
     tower = Qwen3Tower(repo).to(device).eval()
     tokenize = tokenizer(TEXT_TOWER, CAPTION_CONTEXT)
@@ -118,7 +114,7 @@ def spoken(device: str) -> None:
     from transformers import AutoFeatureExtractor, AutoModel
 
     repo, dim, _ = ENCODERS[SPEECH_TOWER]
-    out = out_dir(SPEECH_TOWER)
+    out = data.caption_dir(SPEECH_TOWER)
     out.mkdir(parents=True, exist_ok=True)
     features = AutoFeatureExtractor.from_pretrained(repo)
     tower = AutoModel.from_pretrained(repo, dtype=torch.float32).to(device).eval()
@@ -225,7 +221,7 @@ def main() -> None:
     ensure_dirs()
     device = "cuda"
     for tower, build in ((TEXT_TOWER, written), (SPEECH_TOWER, spoken)):
-        if (out_dir(tower) / "meta.json").exists():
+        if (data.caption_dir(tower) / "meta.json").exists():
             print(f"{tower}: cached")
             continue
         build(device)

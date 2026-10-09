@@ -20,9 +20,9 @@ import pandas as pd
 
 from src.analysis import word_class
 from src.analysis.directions import (CLASS_IMAGES, CLASS_NAMES, SUBSETS,
-                                     DegenerateTau, class_mean, load_cache,
-                                     manifest, retained, rownorm,
-                                     word_directions, word_order)
+                                     class_mean, load_cache, manifest,
+                                     retained, rownorm, word_directions,
+                                     word_order)
 from src.analysis.lexical import K
 from src.config import BACKGROUNDS, LEXICON, RESULTS, ensure_dirs
 from src.models import DEFAULT_SWEEP
@@ -101,14 +101,8 @@ def depth_rows(key: str, words: pd.DataFrame,
         record = dict(model=key, layer=int(layer), layer_index=i,
                       n_layers=int(n_layers),
                       relative_depth=round(float(layer) / n_layers, 4))
-        try:
-            T = rownorm(word_directions(key, i, center=True, ds=CLASS_NAMES))
-            N = rownorm(class_mean(key, i, "all"))
-        except DegenerateTau:
-            out.append(record | dict(alignment=np.nan,
-                                     word_to_class_rate10=np.nan,
-                                     word_to_class_chance10=np.nan))
-            continue
+        T = rownorm(word_directions(key, i, center=True, ds=CLASS_NAMES))
+        N = rownorm(class_mean(key, i, "all"))
         rank = word_class.cross_rank(T[rows], N, target)
         out.append(record | dict(
             alignment=float((T[rows] * N[target]).sum(1).mean()),

@@ -40,8 +40,6 @@ def sha256(path, chunk: int = 1 << 24) -> str:
 
 def train(backbone: str, tower: str) -> None:
     """Run one finetune and write its best checkpoint and provenance."""
-    if backbone not in MICRO_BATCH:
-        raise SystemExit(f"{backbone} is not finetuned; have {sorted(MICRO_BATCH)}")
     kept = data.kept_size()
     plan = schedule(kept)
     recipe = Recipe(backbone=backbone, tower=tower, steps=plan["steps"],

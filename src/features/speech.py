@@ -23,6 +23,9 @@ SAMPLE_RATE = 16000
 
 SPEECH_MODELS = ("w2v-bert-2.0-frozen",)
 
+# The recorded name of the estimate: the mean over the 96 renditions.
+ESTIMATOR = "rendition_mean_96"
+
 # Relative-position bins the target's frames are pooled into, then
 # concatenated, so a cached vector is `BINS` times the encoder's width.
 BINS = 4

@@ -36,7 +36,7 @@ from src.stimuli.render import fingerprint
 # The encoders in table order: the three text encoders, then the speech encoder.
 ENCODERS = text.TEXT_MODELS + speech.SPEECH_MODELS
 # The estimator each kind of encoder is indexed under in `data/similarity/index.parquet`.
-ESTIMATOR_OF = {"text": "carrier_mean_96", "speech": "rendition_mean_96"}
+ESTIMATOR_OF = {"text": text.ESTIMATOR, "speech": speech.ESTIMATOR}
 # Table 1's plural-or-base column pools these relations over their summed pairs.
 POOLED = ("negation_base", "singular_plural")
 # Seed of the length-stratified null of nearest-centroid accuracy.

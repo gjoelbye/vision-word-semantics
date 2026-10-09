@@ -69,7 +69,7 @@ def main() -> None:
             "speakers": list(speech.SPEAKERS),
             "rates": list(speech.RATES),
             "renditions": len(cells),
-            "estimator": "rendition_mean_96",
+            "estimator": speech.ESTIMATOR,
             "device": device, "dtype": "float32",
             "input": "the word inside each of 96 spoken renditions, averaged",
             "recorded": dt.date.today().isoformat(),

@@ -100,11 +100,16 @@ def transform(image_size: int, train: bool):
     return T.Compose(steps + [T.ToTensor(), T.Normalize(MEAN, STD)])
 
 
+def caption_dir(tower: str) -> Path:
+    """The caption cache of one frozen encoder."""
+    return CAPTIONS / "speech-coco" / tower
+
+
 class CaptionCache:
     """Float16 caption vectors on disk, addressed by sample key."""
 
     def __init__(self, tower: str) -> None:
-        base = CAPTIONS / "speech-coco" / tower
+        base = caption_dir(tower)
         meta_path = base / "meta.json"
         if not meta_path.exists():
             raise SystemExit(f"no caption cache for {tower} at {base}. Run "

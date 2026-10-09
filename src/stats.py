@@ -11,7 +11,8 @@ import itertools
 
 import numpy as np
 
-# Permutation draws of the purity, category-accuracy and word-class nulls.
+# Permutation draws of the purity, nearest-centroid accuracy and matched cosine
+# similarity nulls.
 N_PERM = 2000
 # Subsamples behind the purity interval, and the share of words each keeps.
 N_SUBSAMPLE = 1000
@@ -41,11 +42,16 @@ def subsample_summary(point: float, draws: np.ndarray, n: int,
     return float(lo), float(hi), float(scale * draws.std(ddof=1))
 
 
+def subsample_size(n: int, frac: float = SUBSAMPLE_FRAC) -> int:
+    """Rows kept in each subsample of `n` rows."""
+    return max(2, int(frac * n))
+
+
 def subsample_indices(n: int, frac: float = SUBSAMPLE_FRAC,
                       draws: int = N_SUBSAMPLE, seed: int = 0):
-    """Row indices for `draws` subsamples of `max(2, int(frac * n))` rows, without replacement."""
+    """Row indices for `draws` subsamples of `subsample_size(n, frac)` rows, without replacement."""
     rng = np.random.default_rng(seed)
-    m = max(2, int(frac * n))
+    m = subsample_size(n, frac)
     for _ in range(draws):
         yield rng.choice(n, m, replace=False)
 

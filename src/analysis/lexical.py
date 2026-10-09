@@ -8,8 +8,8 @@ subsample words without replacement, because a resampled duplicate is its own
 nearest neighbor.
 
 The comparisons within an item use the three triplet lists, here called blocks:
-each item holds an anchor, its synonym (`kept`) and a competitor (`other`), the
-one-edit word, the antonym or the base, and is scored by which of the two is
+each item holds an anchor, its synonym (`kept`) and a competitor (`other`: the
+one-edit word, the antonym or the base), and is scored by which of the two is
 nearer to the anchor. Nearest-centroid accuracy assigns held-out nouns
 and brands to the nearest centroid on a fixed half split of every
 category-by-spelling-cluster cell. Both depend on the vocabulary alone, so
@@ -22,7 +22,8 @@ import numpy as np
 import pandas as pd
 
 from ..stats import (N_PERM, N_SUBSAMPLE, SUBSAMPLE_FRAC, binomial_se,
-                     permutation_p, subsample_summary)
+                     permutation_p, subsample_indices, subsample_size,
+                     subsample_summary)
 from .directions import rownorm
 
 # Nearest words counted by both readouts: top-10 accuracy and neighbor purity.
@@ -112,7 +113,7 @@ def neighbour_indices(S: np.ndarray, k: int = K,
     if (admissible < k).any():
         raise ValueError(
             f"{int((admissible < k).sum())} words have fewer than k={k} "
-            f"admissible neighbours (fewest {int(admissible.min())})")
+            f"admissible neighbors (fewest {int(admissible.min())})")
     return np.argsort(-work, axis=1)[:, :k]
 
 
@@ -140,7 +141,7 @@ def restricted_chance_purity(labels: np.ndarray,
         in_group = restrict == group
         denominator = int(in_group.sum()) - 1
         if denominator <= 0:
-            raise ValueError("a restriction group has no candidate neighbours")
+            raise ValueError("a restriction group has no candidate neighbors")
         numerator = int((in_group & (labels == label)).sum()) - 1
         probabilities.append(numerator / denominator)
     return float(np.mean(probabilities))
@@ -191,13 +192,11 @@ def purity_subsample(S: np.ndarray, labels: np.ndarray, k: int = K,
     (see `stats.subsample_summary`).
     """
     labels = np.asarray(labels)
-    rng = np.random.default_rng(seed)
     N = len(labels)
-    m = int(frac * N)
+    m = subsample_size(N, frac)
     point = knn_purity(S, labels, k)
     draws = np.array([knn_purity(S[np.ix_(i, i)], labels[i], k)
-                      for i in (rng.choice(N, m, replace=False)
-                                for _ in range(n))])
+                      for i in subsample_indices(N, frac, n, seed)])
     lo, hi, se = subsample_summary(point, draws, N, m)
     return dict(purity=float(point), ci_lo=lo, ci_hi=hi, se=se, n=N, m=m)
 

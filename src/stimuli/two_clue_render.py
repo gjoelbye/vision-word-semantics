@@ -132,7 +132,7 @@ def build_layout(items: pd.DataFrame) -> pd.DataFrame:
                 f"missing background {bg_path}; run scripts/stimuli/backgrounds.py")
         with Image.open(bg_path) as background:
             anchor = legible_centre(
-                background.convert("RGB"), slot.color, slot.size,
+                background.convert("RGB"), slot.color,
                 footprint_half_w, footprint_half_h, slot.placement)
         upper, lower = pair_centres(anchor, height, pad, gap)
         _assert_pair_fits(upper, lower, max_width, height, pad)

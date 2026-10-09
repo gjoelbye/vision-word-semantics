@@ -73,9 +73,8 @@ def main() -> None:
         rows.append({
             "model": key,
             "kind": kind,
-            "estimator": (HEADLINE if kind == "vision"
-                          else "carrier_mean_96" if kind == "text"
-                          else "rendition_mean_96"),
+            "estimator": {"vision": HEADLINE, "text": text.ESTIMATOR,
+                          "speech": speech.ESTIMATOR}[kind],
             "word_sha": word_sha,
             "manifest_sha": manifest_sha if kind == "vision" else pd.NA,
         })
