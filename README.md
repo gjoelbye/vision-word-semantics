@@ -146,7 +146,9 @@ assets/      images for this README
 @misc{gjolbye2026vision,
   title  = {Vision Transformers Learn Word Meaning from Images Alone},
   author = {Gj{\o}lbye, Anders and Mason, Sebastian Ray and Frank, Stella and Hansen, Lars Kai},
-  year   = {2026}
+  year   = {2026},
+  eprint = {2610.13252},
+  archivePrefix = {arXiv}
 }
 ```
 
