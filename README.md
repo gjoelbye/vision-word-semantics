@@ -1,9 +1,5 @@
 # Vision Transformers Learn Word Meaning from Images Alone
 
-**Technical University of Denmark**
-
-Anders Gjølbye\*, Sebastian Ray Mason\*, Stella Frank, Lars Kai Hansen (\*equal contribution)
-
 Code and word lists for the paper.
 
 DINOv3 is trained with no language supervision at all. Yet when we render words
